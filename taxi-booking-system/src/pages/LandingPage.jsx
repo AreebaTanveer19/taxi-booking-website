@@ -1,229 +1,189 @@
 import React from 'react';
-import { Box, Typography, Button, Container, Grid, Paper, Avatar } from '@mui/material';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import SecurityIcon from '@mui/icons-material/Security';
-import StarIcon from '@mui/icons-material/Star';
 import { useNavigate } from 'react-router-dom';
-import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import EventIcon from '@mui/icons-material/Event';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import AirportShuttleIcon from '@mui/icons-material/AirportShuttle';
+import taxiImg from '../assets/taxi.jpeg';
+import '../styles/LandingPage.css';
 
-const heroBg = 'https://images.unsplash.com/photo-1600320254374-ce2d293c324e?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
-const testimonials = [
-  { name: 'Alice', text: 'Super easy to book and the driver was very professional!', rating: 5 },
-  { name: 'Bob', text: 'Clean cars, on time, and great service. Highly recommend!', rating: 5 },
-  { name: 'Priya', text: 'The best taxi experience I have had in the city.', rating: 4 },
-];
 
 const fleet = [
-  { name: 'Luxury Sedan', icon: <DirectionsCarIcon fontSize="large" />, capacity: '1-4', desc: 'Premium comfort for up to 4 passengers.', rating: 5 },
-  { name: 'Mercedes Sprinter', icon: <AirportShuttleIcon fontSize="large" />, capacity: '1-16', desc: 'Spacious van for groups and events.', rating: 4 },
-  { name: 'Audi Q7', icon: <DirectionsCarIcon fontSize="large" />, capacity: '1-7', desc: 'Luxury SUV for up to 7 passengers.', rating: 5 },
-  { name: 'Executive Car', icon: <DirectionsCarIcon fontSize="large" />, capacity: '1-4', desc: 'Executive comfort for business travel.', rating: 5 },
+  {
+    name: 'Luxury Sedan',
+    image: 'https://images.unsplash.com/photo-1652890058094-a3fe8ead30fa?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    capacity: '1-4',
+    desc: 'Premium comfort for up to 4 passengers.',
+    rating: 5
+  },
+  {
+    name: 'Mercedes Sprinter',
+    image: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=400&q=80',
+    capacity: '1-16',
+    desc: 'Spacious van for groups and events.',
+    rating: 4
+  },
+  {
+    name: 'Audi Q7',
+    image: 'https://images.unsplash.com/photo-1655284180060-5c823b34f211?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    capacity: '1-7',
+    desc: 'Luxury SUV for up to 7 passengers.',
+    rating: 5
+  },
+  {
+    name: 'Executive Car',
+    image: 'https://images.unsplash.com/photo-1592891024301-bf7948cee673?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    capacity: '1-4',
+    desc: 'Executive comfort for business travel.',
+    rating: 5
+  },
+  {
+    name: 'BMW 7 Series',
+    image: 'https://images.unsplash.com/photo-1711244961816-4fe38bdafc16?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    capacity: '1-4',
+    desc: 'Experience the ultimate in luxury and performance with our BMW 7 Series. Perfect for business and VIP travel.',
+    rating: 5
+  },
+  {
+    name: 'Premium SUV',
+    image: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=600&q=80',
+    capacity: '1-6',
+    desc: 'Spacious and comfortable premium SUV, ideal for families, groups, and long journeys.',
+    rating: 5
+  },
 ];
 
 const services = [
-  { name: 'Airport Transfers', icon: <FlightTakeoffIcon fontSize="large" />, desc: 'Seamless airport pickups and drop-offs.' },
-  { name: 'Corporate Transfers', icon: <BusinessCenterIcon fontSize="large" />, desc: 'Professional rides for business needs.' },
-  { name: 'Wedding Transfers', icon: <EventIcon fontSize="large" />, desc: 'Arrive in style for your special day.' },
-  { name: 'Special Events', icon: <EmojiEventsIcon fontSize="large" />, desc: 'Make every event memorable with our service.' },
-  { name: 'Executive Transfers', icon: <DirectionsCarIcon fontSize="large" />, desc: 'Prestige and comfort for executives.' },
-  { name: 'Crew Transportation', icon: <AirportShuttleIcon fontSize="large" />, desc: 'Efficient and reliable crew transport.' },
-  { name: 'Parcel Delivery', icon: <LocalShippingIcon fontSize="large" />, desc: 'Fast and secure parcel delivery.' },
+  {
+    name: 'Corporate Car Hire Transfers',
+    image: 'https://images.unsplash.com/photo-1605414262199-63817d195576?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    desc: 'Planning is essential for corporate occasions, and a dependable chauffeur service is necessary. Our highly trained and experienced corporate chauffeurs will see to it that you and your guests arrive in the utmost elegance.'
+  },
+  {
+    name: 'Airport Car Services Transfers',
+    image: 'https://images.unsplash.com/photo-1649559963715-8c34a1c31bf5?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    desc: 'Experience the ultimate in airport chauffeur hire service. Our premium airport transfers are your reliable choice for seamless travel, ready to meet all your domestic and international flights, anytime you need.'
+  },
+  {
+    name: 'Concerts Transfers',
+    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80',
+    desc: 'Turn your special event into an extraordinary experience with our premium event transfer service. Our chauffeurs are ready to make your occasion unforgettable, providing convenient transportation for events.'
+  },
+  {
+    name: 'Wedding Car & Chauffeur Hire',
+    image: 'Wedding Car & Chauffeur Hire',
+    desc: 'Make your special day even more unforgettable with our exquisite wedding transfer service. Our dedicated chauffeurs ensure a seamless and elegant arrival, adding a touch of luxury to your wedding experience.'
+  },
+  {
+    name: 'Parcel Delivery',
+    image: 'https://images.unsplash.com/photo-1632174380104-95808fb87cd1?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    desc: 'Swift and secure parcel delivery with our trusted transport service. We ensure your packages arrive safely and on time, every time.'
+  },
+  {
+    name: 'Special Events',
+    image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=464&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    desc: 'Make every event memorable with our premium event transfer service for concerts, parties, and more. Enjoy reliable, stylish, and comfortable rides for all your special occasions.'
+  },
 ];
 
 const LandingPage = () => {
   const navigate = useNavigate();
   return (
-    <Box>
+    <div className="landing-root">
       {/* Hero Section */}
-      <Box
-        sx={{
-          minHeight: '60vh',
-          backgroundImage: `url(${heroBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          '::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            bgcolor: 'rgba(0,0,0,0.5)',
-            zIndex: 1,
-          },
-        }}
-      >
-        <Container sx={{ position: 'relative', zIndex: 2, textAlign: 'center', color: '#fff', py: 8 }}>
-          <Typography variant="h2" fontWeight={700} gutterBottom>
-            Book Your Ride Instantly
-          </Typography>
-          <Typography variant="h5" mb={4}>
-            Fast, reliable, and comfortable taxi service at your fingertips.
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={() => navigate('/book')}
-            sx={{ fontWeight: 600, fontSize: '1.2rem', px: 4, py: 1.5, borderRadius: 3, boxShadow: 3 }}
-          >
-            Book a Ride
-          </Button>
-        </Container>
-      </Box>
-
-      {/* How it Works */}
-      <Container sx={{ py: 8 }}>
-        <Typography variant="h4" fontWeight={700} align="center" mb={4} color="primary">
-          How it Works
-        </Typography>
-        <Grid container spacing={4} justifyContent="center">
-          <Grid item xs={12} md={4}>
-            <Paper elevation={3} sx={{ p: 4, textAlign: 'center', borderRadius: 4 }}>
-              <DirectionsCarIcon color="primary" sx={{ fontSize: 48, mb: 2 }} />
-              <Typography variant="h6" fontWeight={600}>Book</Typography>
-              <Typography>Enter your ride details and book instantly or schedule ahead.</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={3} sx={{ p: 4, textAlign: 'center', borderRadius: 4 }}>
-              <AccessTimeIcon color="primary" sx={{ fontSize: 48, mb: 2 }} />
-              <Typography variant="h6" fontWeight={600}>Ride</Typography>
-              <Typography>Your driver arrives on time and you enjoy a safe, comfortable journey.</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={3} sx={{ p: 4, textAlign: 'center', borderRadius: 4 }}>
-              <EmojiEventsIcon color="primary" sx={{ fontSize: 48, mb: 2 }} />
-              <Typography variant="h6" fontWeight={600}>Arrive</Typography>
-              <Typography>Reach your destination and pay easily. Rate your experience!</Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Container>
+      <div className="hero-section" style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.5), rgba(24,24,24,0.58)), url(${taxiImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="hero-container">
+          <div className="hero-text">
+            <span className="hero-tagline">Travel securely with us !</span>
+            <h1 className="hero-headline">
+              Book your taxi from<br />anywhere today!
+            </h1>
+            <p className="hero-subtext">
+              Enjoy fast, reliable, and comfortable rides with our professional drivers. Book your taxi in seconds and travel anywhere, anytime—24/7. Your journey, your way, with safety and convenience guaranteed.
+            </p>
+            <div className="hero-btn-group">
+              <button className="hero-btn hero-btn-primary" onClick={() => navigate('/book')}>
+                Book Now
+              </button>
+              <button className="hero-btn hero-btn-secondary" onClick={() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'})}>
+                Get Personalized Quote
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Why Choose Us */}
-      <Container sx={{ py: 8 }}>
-        <Typography variant="h4" fontWeight={700} align="center" mb={4} color="primary">
-          Why Choose Us
-        </Typography>
-        <Grid container spacing={4} justifyContent="center">
-          <Grid item xs={12} md={4}>
-            <Paper elevation={2} sx={{ p: 4, textAlign: 'center', borderRadius: 4 }}>
-              <ThumbUpIcon color="success" sx={{ fontSize: 40, mb: 1 }} />
-              <Typography fontWeight={600}>Trusted & Professional</Typography>
-              <Typography>All drivers are background-checked and highly rated.</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={2} sx={{ p: 4, textAlign: 'center', borderRadius: 4 }}>
-              <SecurityIcon color="info" sx={{ fontSize: 40, mb: 1 }} />
-              <Typography fontWeight={600}>Safe & Secure</Typography>
-              <Typography>We prioritize your safety with real-time tracking and support.</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={2} sx={{ p: 4, textAlign: 'center', borderRadius: 4 }}>
-              <EmojiEventsIcon color="warning" sx={{ fontSize: 40, mb: 1 }} />
-              <Typography fontWeight={600}>Award-Winning Service</Typography>
-              <Typography>Voted best taxi service for 3 years in a row.</Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Container>
+      <section className="why-section">
+        <h2 className="why-title">Why Choose Us</h2>
+        <div className="why-cards">
+          <div className="why-card" data-aos="zoom-in-up">
+            <span className="why-card-icon">👍</span>
+            <div className="why-card-title">Trusted & Professional</div>
+            <div className="why-card-desc">All drivers are background-checked, highly rated, and dedicated to your comfort and safety.</div>
+          </div>
+          <div className="why-card" data-aos="zoom-in-up" data-aos-delay="150">
+            <span className="why-card-icon">🛡️</span>
+            <div className="why-card-title">Safe & Secure</div>
+            <div className="why-card-desc">We prioritize your safety with real-time tracking, 24/7 support, and secure rides every time.</div>
+          </div>
+          <div className="why-card" data-aos="zoom-in-up" data-aos-delay="300">
+            <span className="why-card-icon">🏆</span>
+            <div className="why-card-title">Award-Winning Service</div>
+            <div className="why-card-desc">Voted best taxi service for 3 years in a row. Experience the difference with us.</div>
+          </div>
+        </div>
+      </section>
 
-      {/* Testimonials */}
-      <Container sx={{ py: 8 }}>
-        <Typography variant="h4" fontWeight={700} align="center" mb={4} color="primary">
-          What Our Riders Say
-        </Typography>
-        <Grid container spacing={4} justifyContent="center">
-          {testimonials.map((t, i) => (
-            <Grid item xs={12} md={4} key={i}>
-              <Paper elevation={1} sx={{ p: 4, textAlign: 'center', borderRadius: 4 }}>
-                <Avatar sx={{ bgcolor: 'primary.main', mx: 'auto', mb: 2 }}>{t.name[0]}</Avatar>
-                <Typography fontWeight={600}>{t.name}</Typography>
-                <Typography variant="body2" mb={1}>{t.text}</Typography>
-                <Box>
-                  {[...Array(t.rating)].map((_, idx) => (
-                    <StarIcon key={idx} color="warning" />
-                  ))}
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
 
       {/* Our Fleet */}
-      <Container id="fleet-section" sx={{ py: 8 }}>
-        <Typography variant="h4" fontWeight={700} align="center" mb={4} color="primary">
-          Our Fleet
-        </Typography>
-        <Grid container spacing={4} justifyContent="center">
+      <section className="fleet-section" id="fleet-section">
+        <h2 className="fleet-title">Our Fleet</h2>
+        <div className="fleet-cards">
           {fleet.map((v, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
-              <Paper elevation={3} sx={{ p: 4, textAlign: 'center', borderRadius: 4, transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' } }}>
-                {v.icon}
-                <Typography variant="h6" fontWeight={600} mt={2}>{v.name}</Typography>
-                <Typography color="text.secondary" mb={1}>Capacity: {v.capacity}</Typography>
-                <Typography variant="body2" mb={2}>{v.desc}</Typography>
-                <Box mb={1}>
-                  {[...Array(v.rating)].map((_, idx) => <StarIcon key={idx} color="warning" fontSize="small" />)}
-                </Box>
-                <Button variant="contained" color="primary">Get a Quote</Button>
-              </Paper>
-            </Grid>
+            <div className="fleet-card" key={i}>
+              <img
+                src={v.image}
+                alt={v.name}
+                className="fleet-card-img"
+              />
+              <div className="fleet-card-overlay">
+                <div className="fleet-card-title">{v.name}</div>
+                <div className="fleet-card-capacity">Capacity: {v.capacity}</div>
+                <div className="fleet-card-desc">{v.desc}</div>
+                <div className="fleet-card-stars">{'★'.repeat(v.rating)}{'☆'.repeat(5 - v.rating)}</div>
+                <button className="fleet-card-btn">Get a Quote</button>
+              </div>
+            </div>
           ))}
-        </Grid>
-      </Container>
+        </div>
+      </section>
 
       {/* Our Services */}
-      <Container id="services-section" sx={{ py: 8 }}>
-        <Typography variant="h4" fontWeight={700} align="center" mb={4} color="primary">
-          Our Services
-        </Typography>
-        <Grid container spacing={4} justifyContent="center">
+      <section className="services-section" id="services-section">
+        <h2 className="services-title">Our Services</h2>
+        <div className="services-cards services-cards-img">
           {services.map((s, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
-              <Paper elevation={2} sx={{ p: 4, textAlign: 'center', borderRadius: 4, transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 8 } }}>
-                {s.icon}
-                <Typography variant="h6" fontWeight={600} mt={2}>{s.name}</Typography>
-                <Typography variant="body2" mb={2}>{s.desc}</Typography>
-                <Button variant="outlined" color="primary">Learn More</Button>
-              </Paper>
-            </Grid>
+            <div className="services-card-img" key={i} style={{ backgroundImage: `url(${s.image})` }}>
+              <div className="services-card-img-overlay">
+                <div className="services-card-title-img">{s.name}</div>
+                <div className="services-card-desc-img">{s.desc}</div>
+              </div>
+            </div>
           ))}
-        </Grid>
-      </Container>
+        </div>
+      </section>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: 'grey.900', color: '#fff', py: 4, mt: 8 }}>
-        <Container>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" fontWeight={700}>TaxiBooker</Typography>
-              <Typography variant="body2">&copy; {new Date().getFullYear()} TaxiBooker. All rights reserved.</Typography>
-            </Grid>
-            <Grid item xs={12} md={6} textAlign={{ xs: 'left', md: 'right' }}>
-              <Typography variant="body2">Contact: info@taxibooker.com | +1 234 567 890</Typography>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-    </Box>
+      <footer className="footer">
+        <div className="footer-container">
+          <div>
+            <div className="footer-title">TaxiBooker</div>
+            <div className="footer-copy">&copy; {new Date().getFullYear()} TaxiBooker. All rights reserved.</div>
+          </div>
+          <div className="footer-contact">
+            Contact: info@taxibooker.com | +1 234 567 890
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 };
 
