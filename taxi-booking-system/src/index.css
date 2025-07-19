@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Slab:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
 
 body, html, .landing-root {
-  font-family: 'DM Sans', 'Roboto Slab', Arial, Helvetica, sans-serif;
-  font-style: italic;
+  font-family: 'Inter', 'Open Sans', Arial, Helvetica, sans-serif;
+  font-style: normal;
 }

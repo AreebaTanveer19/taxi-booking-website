@@ -235,7 +235,10 @@ body, .landing-root {
   text-align: center;
   font-size: 2.5rem;
   font-weight: 900;
-  color: #ffb300;
+  background: linear-gradient(90deg, #ffb300 0%, #ff9800 50%, #ff8f00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 40px;
   letter-spacing: 1px;
   position: relative;
@@ -290,10 +293,10 @@ body, .landing-root {
   margin: 0 auto 22px auto;
   width: 56px;
   height: 56px;
-  font-size: 2.3rem;
+  font-size: 2.3rem !important;
   border-radius: 50%;
   background: linear-gradient(135deg, #ffb300 60%, #fff176 100%);
-  color: #fff;
+  color: #fff !important;
   box-shadow: 0 2px 12px #ffb30033;
   border: 2.5px solid #fff;
   transition: box-shadow 0.25s, background 0.25s, color 0.25s, transform 0.25s;
@@ -301,7 +304,7 @@ body, .landing-root {
 .why-card:hover .why-card-icon {
   box-shadow: 0 4px 24px #ffb30077, 0 2px 12px #fff17677;
   background: linear-gradient(135deg, #fff176 80%, #ffb300 100%);
-  color: #fffde7;
+  color: #fffde7 !important;
   transform: scale(1.09) rotate(-4deg);
 }
 .why-card-title {
@@ -380,7 +383,11 @@ body, .landing-root {
   padding: 48px 24px;
 }
 .fleet-title {
-  color: #ffb300;
+  color: transparent;
+  background: linear-gradient(90deg, #ffb300 0%, #ff9800 50%, #ff8f00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-align: center;
   font-size: 2.2rem;
   font-weight: 800;
@@ -540,11 +547,15 @@ body, .landing-root {
   z-index: 2;
 }
 .services-title {
-  color: #ffb300;
+  color: transparent;
+  background: linear-gradient(90deg, #ffb300 0%, #ff9800 50%, #ff8f00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-align: center;
-  font-size: 2.3rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  margin-bottom: 48px;
+  margin-bottom: 32px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -672,38 +683,7 @@ body, .landing-root {
   color: #bbb;
 }
 
-/* Navbar Styles */
-.navbar-hero-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 200;
-  overflow-x: hidden;
-}
-
-.navbar {
-  position: relative;
-  width: 100%;
-  background: transparent;
-  box-shadow: none;
-  z-index: 100;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-.navbar-container {
-  max-width: 1320px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 24px;
-  height: 64px;
-  width: 100%;
-  box-sizing: border-box;
-}
+/* All navbar-related CSS has been moved to Navbar.css. */
 
 body, html, .landing-root {
   overflow-x: hidden;
@@ -721,6 +701,7 @@ body, html, .landing-root {
   user-select: none;
   text-shadow: 0 2px 8px rgba(0,0,0,0.18);
 }
+
 .navbar-links {
   display: flex;
   align-items: center;
@@ -728,9 +709,10 @@ body, html, .landing-root {
   list-style: none;
   margin: 0;
   padding: 0;
-  transition: right 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: none;
 }
+
 .navbar-link {
   background: none;
   border: none;
@@ -745,6 +727,7 @@ body, html, .landing-root {
   outline: none;
   letter-spacing: 0.5px;
 }
+
 .navbar-link::after {
   content: '';
   display: block;
@@ -757,20 +740,24 @@ body, html, .landing-root {
   bottom: 4px;
   transition: width 0.22s cubic-bezier(0.4,0,0.2,1);
 }
+
 .navbar-link:hover::after,
 .navbar-link:focus-visible::after {
   width: calc(100% - 36px);
 }
+
 .navbar-link:hover,
 .navbar-link:focus-visible {
   color: #ffb300;
   background: none;
 }
+
 .navbar-link.active {
   color: #ffb300;
   background: none;
   font-weight: 800;
 }
+
 .navbar-link.active::after {
   width: calc(100% - 36px);
   background: #ffb300;
@@ -782,85 +769,171 @@ body, html, .landing-root {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 38px;
-  height: 38px;
-  background: none;
-  border: none;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 179, 0, 0.1);
+  border: 2px solid rgba(255, 179, 0, 0.3);
+  border-radius: 12px;
   cursor: pointer;
   padding: 0;
   margin-left: 12px;
+  transition: all 0.3s ease;
+  z-index: 300;
 }
+
+.navbar-hamburger:hover {
+  background: rgba(255, 179, 0, 0.2);
+  border-color: rgba(255, 179, 0, 0.5);
+}
+
 .navbar-hamburger-bar {
-  width: 26px;
+  width: 24px;
   height: 3px;
   background: #fff;
   margin: 3px 0;
   border-radius: 2px;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+/* Mobile Menu Styles */
 @media (max-width: 900px) {
   .navbar-container {
-    height: 56px;
-    padding: 0 10px;
+    height: 60px;
+    padding: 0 16px;
     justify-content: flex-end;
   }
+
+  .navbar-hamburger {
+    display: flex;
+  }
+
+  /* Hamburger Animation */
+  .navbar-hamburger.open .navbar-hamburger-bar:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+  }
+
+  .navbar-hamburger.open .navbar-hamburger-bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  .navbar-hamburger.open .navbar-hamburger-bar:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+  }
+
+  /* Mobile Menu Overlay */
   .navbar-links {
     position: fixed;
-    top: 56px;
+    top: 0;
     right: -100vw;
-    width: 70vw;
-    max-width: 320px;
-    height: calc(100vh - 56px);
-    background: #181818;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, rgba(24, 24, 24, 0.98) 0%, rgba(35, 35, 35, 0.98) 100%);
+    backdrop-filter: blur(10px);
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: center;
     gap: 0;
-    box-shadow: -2px 0 16px rgba(0,0,0,0.08);
-    padding: 24px 0 0 0;
-    z-index: 200;
-    transition: right 0.3s;
+    padding: 80px 24px 24px 24px;
+    z-index: 250;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
   .navbar-links.open {
     right: 0;
   }
+
   .navbar-link {
     width: 100%;
-    text-align: left;
-    padding: 14px 32px;
-    font-size: 1.15rem;
+    max-width: 300px;
+    text-align: center;
+    padding: 18px 24px;
+    font-size: 1.2rem;
     border-radius: 0;
-    border-bottom: 1px solid #232323;
-    color: #fff;
-  }
-  .navbar-link::after {
-    left: 32px;
-    width: 0;
-    bottom: 8px;
-  }
-  .navbar-link:hover::after,
-  .navbar-link:focus-visible::after {
-    width: calc(100% - 64px);
-  }
-  .navbar-link.active {
-    color: #ffb300;
+    margin: 4px 0;
     background: none;
+    border: none;
+    transition: color 0.3s ease;
+  }
+
+  .navbar-link:hover {
+    background: none;
+    border: none;
+    transform: none;
+    color: #ffb300;
+  }
+
+  .navbar-link::after {
+    display: none;
+  }
+
+  .navbar-link.active {
+    background: none;
+    border: none;
+    color: #ffb300;
     font-weight: 800;
   }
-  .navbar-link.active::after {
-    width: calc(100% - 64px);
-    background: #ffb300;
-    height: 3.5px;
+}
+
+/* Small Mobile Screens */
+@media (max-width: 480px) {
+  .navbar-container {
+    height: 56px;
+    padding: 0 12px;
   }
-  .how-steps, .why-cards, .testimonials-cards, .fleet-cards, .services-cards, .footer-container {
-    flex-direction: column;
-    gap: 18px;
-    align-items: center;
+
+  .navbar-hamburger {
+    width: 40px;
+    height: 40px;
+    margin-left: 8px;
   }
-  .footer-container {
-    text-align: center;
-    justify-content: center;
+
+  .navbar-hamburger-bar {
+    width: 20px;
+    height: 2.5px;
   }
+
+  .navbar-links {
+    padding: 70px 16px 20px 16px;
+  }
+
+  .navbar-link {
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    margin: 6px 0;
+  }
+}
+
+/* Extra Small Mobile Screens */
+@media (max-width: 360px) {
+  .navbar-container {
+    padding: 0 8px;
+  }
+
+  .navbar-hamburger {
+    width: 36px;
+    height: 36px;
+  }
+
+  .navbar-hamburger-bar {
+    width: 18px;
+    height: 2px;
+  }
+
+  .navbar-links {
+    padding: 60px 12px 16px 12px;
+  }
+
+  .navbar-link {
+    padding: 14px 16px;
+    font-size: 1rem;
+    margin: 4px 0;
+  }
+}
+
+/* Prevent body scroll when menu is open */
+body.menu-open {
+  overflow: hidden;
 } 
 
 .hero-btn-group {
@@ -1025,6 +1098,6 @@ body, html, .landing-root {
 } 
 
 .navbar, .navbar-container, .navbar-link, .navbar-logo {
-  font-family: 'DM Sans', 'Roboto Slab', Arial, Helvetica, sans-serif !important;
-  font-style: italic !important;
+  font-family: 'Inter', 'Open Sans', Arial, Helvetica, sans-serif !important;
+  font-style: normal !important;
 } 

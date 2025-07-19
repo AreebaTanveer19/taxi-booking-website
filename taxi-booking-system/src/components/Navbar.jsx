@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../styles/LandingPage.css';
+import '../styles/Navbar.css';
 
 const navLinks = [
   { label: 'Home', path: '/' },
@@ -9,7 +9,6 @@ const navLinks = [
   { label: 'Services', path: '/services' },
   { label: 'About', path: '/about' },
   { label: 'Contact', path: '/contact' },
-
 ];
 
 const Navbar = () => {
@@ -17,17 +16,39 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('menu-open');
+    };
+  }, [mobileOpen]);
+
   const handleNavClick = (link) => {
     setMobileOpen(false);
     navigate(link.path);
   };
 
+  const toggleMobileMenu = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
   return (
     <div className="navbar-hero-wrapper">
-      <nav className="navbar">
+      <nav className={`navbar ${location.pathname === '/about' ? 'navbar-about' : ''}`}>
         <div className="navbar-container">
-          {/* Logo removed */}
-          <button className="navbar-hamburger" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
+          <button 
+            className={`navbar-hamburger ${mobileOpen ? 'open' : ''}`} 
+            onClick={toggleMobileMenu} 
+            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+          >
             <span className="navbar-hamburger-bar"></span>
             <span className="navbar-hamburger-bar"></span>
             <span className="navbar-hamburger-bar"></span>

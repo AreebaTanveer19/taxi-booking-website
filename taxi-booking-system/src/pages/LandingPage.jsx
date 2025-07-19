@@ -2,7 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import taxiImg from '../assets/taxi.jpeg';
 import '../styles/LandingPage.css';
-
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import SecurityIcon from '@mui/icons-material/Security';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import { motion } from 'framer-motion';
 
 
 const fleet = [
@@ -85,8 +88,43 @@ const services = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const titleVariants = {
+    hidden: { opacity: 0, y: -30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
-    <div className="landing-root">
+    <>
       {/* Hero Section */}
       <div className="hero-section" style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.5), rgba(24,24,24,0.58)), url(${taxiImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="hero-container">
@@ -112,33 +150,60 @@ const LandingPage = () => {
 
       {/* Why Choose Us */}
       <section className="why-section">
-        <h2 className="why-title">Why Choose Us</h2>
-        <div className="why-cards">
-          <div className="why-card" data-aos="zoom-in-up">
-            <span className="why-card-icon">👍</span>
+        <motion.h2 
+          className="why-title"
+          variants={titleVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          Why Choose Us
+        </motion.h2>
+        <motion.div 
+          className="why-cards"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <motion.div className="why-card" variants={itemVariants}>
+            <ThumbUpIcon className="why-card-icon" />
             <div className="why-card-title">Trusted & Professional</div>
             <div className="why-card-desc">All drivers are background-checked, highly rated, and dedicated to your comfort and safety.</div>
-          </div>
-          <div className="why-card" data-aos="zoom-in-up" data-aos-delay="150">
-            <span className="why-card-icon">🛡️</span>
+          </motion.div>
+          <motion.div className="why-card" variants={itemVariants}>
+            <SecurityIcon className="why-card-icon" />
             <div className="why-card-title">Safe & Secure</div>
             <div className="why-card-desc">We prioritize your safety with real-time tracking, 24/7 support, and secure rides every time.</div>
-          </div>
-          <div className="why-card" data-aos="zoom-in-up" data-aos-delay="300">
-            <span className="why-card-icon">🏆</span>
+          </motion.div>
+          <motion.div className="why-card" variants={itemVariants}>
+            <EmojiEventsIcon className="why-card-icon" />
             <div className="why-card-title">Award-Winning Service</div>
             <div className="why-card-desc">Voted best taxi service for 3 years in a row. Experience the difference with us.</div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
-
 
       {/* Our Fleet */}
       <section className="fleet-section" id="fleet-section">
-        <h2 className="fleet-title">Our Fleet</h2>
-        <div className="fleet-cards">
+        <motion.h2 
+          className="fleet-title"
+          variants={titleVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          Our Fleet
+        </motion.h2>
+        <motion.div 
+          className="fleet-cards"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           {fleet.map((v, i) => (
-            <div className="fleet-card" key={i}>
+            <motion.div className="fleet-card" key={i} variants={itemVariants}>
               <img
                 src={v.image}
                 alt={v.name}
@@ -151,25 +216,33 @@ const LandingPage = () => {
                 <div className="fleet-card-stars">{'★'.repeat(v.rating)}{'☆'.repeat(5 - v.rating)}</div>
                 <button className="fleet-card-btn">Get a Quote</button>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* Our Services */}
-      <section className="services-section" id="services-section">
-        <h2 className="services-title">Our Services</h2>
+      <>
+        <motion.h2 
+          className="services-title"
+          variants={titleVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          Our Services
+        </motion.h2>
         <div className="services-cards services-cards-img">
           {services.map((s, i) => (
-            <div className="services-card-img" key={i} style={{ backgroundImage: `url(${s.image})` }}>
+            <motion.div className="services-card-img" key={i} variants={itemVariants} style={{ backgroundImage: `url(${s.image})` }}>
               <div className="services-card-img-overlay">
                 <div className="services-card-title-img">{s.name}</div>
                 <div className="services-card-desc-img">{s.desc}</div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </section>
+      </>
 
       {/* Footer */}
       <footer className="footer">
@@ -183,7 +256,7 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-    </div>
+    </>
   );
 };
 

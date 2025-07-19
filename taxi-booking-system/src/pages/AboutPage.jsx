@@ -1,66 +1,146 @@
-import React from 'react';
-import { Box, Container, Typography, Grid, Paper, Avatar } from '@mui/material';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import SecurityIcon from '@mui/icons-material/Security';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Security, 
+  AccessTime, 
+  Star 
+} from '@mui/icons-material';
+import '../styles/AboutPage.css';
 
-const team = [
-  { name: 'Sam', role: 'Business Manager', icon: <DirectionsCarIcon /> },
-  { name: 'Mahendar Nair', role: 'Managing Director', icon: <SecurityIcon /> },
-  { name: 'Naf', role: 'Admin Manager', icon: <EmojiEventsIcon /> },
-];
+const AboutPage = () => {
+  const [isVisible, setIsVisible] = useState(false);
 
-const AboutPage = () => (
-  <Box minHeight="100vh" sx={{ background: 'linear-gradient(135deg, #f5f7fa 60%, #c3cfe2 100%)', py: 8 }}>
-    <Container>
-      <Paper elevation={6} sx={{ p: { xs: 2, sm: 6 }, borderRadius: 5, mb: 6 }}>
-        <Typography variant="h3" color="primary" fontWeight={700} mb={2} align="center">About Us</Typography>
-        <Typography variant="h6" align="center" mb={4}>
-          TaxiBooker is dedicated to providing safe, reliable, and comfortable rides for everyone. Our mission is to make urban transportation seamless and enjoyable, with a focus on professionalism, punctuality, and customer satisfaction.
-        </Typography>
-        <Typography variant="body1" align="center" mb={2}>
-          Founded in 2024, TaxiBooker was created to bridge the gap between traditional taxi services and modern ride-hailing apps. We believe in combining technology with a personal touch, ensuring every ride is a pleasant experience.
-        </Typography>
-        <Grid container spacing={4} justifyContent="center" mt={2}>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={2} sx={{ p: 3, textAlign: 'center', borderRadius: 4 }}>
-              <EmojiEventsIcon color="warning" sx={{ fontSize: 40, mb: 1 }} />
-              <Typography fontWeight={600}>Excellence</Typography>
-              <Typography variant="body2">We strive for excellence in every ride, every time.</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={2} sx={{ p: 3, textAlign: 'center', borderRadius: 4 }}>
-              <SecurityIcon color="info" sx={{ fontSize: 40, mb: 1 }} />
-              <Typography fontWeight={600}>Safety</Typography>
-              <Typography variant="body2">Your safety is our top priority, with background-checked drivers and real-time tracking.</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={2} sx={{ p: 3, textAlign: 'center', borderRadius: 4 }}>
-              <DirectionsCarIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-              <Typography fontWeight={600}>Innovation</Typography>
-              <Typography variant="body2">We use the latest technology to make your journey smooth and efficient.</Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Paper>
-      <Typography variant="h4" color="primary" fontWeight={700} mb={4} align="center">Meet Our Team</Typography>
-      <Grid container spacing={4} justifyContent="center">
-        {team.map((member, i) => (
-          <Grid item xs={12} sm={4} key={i}>
-            <Paper elevation={2} sx={{ p: 4, textAlign: 'center', borderRadius: 4 }}>
-              <Avatar sx={{ bgcolor: 'primary.main', mx: 'auto', mb: 2, width: 56, height: 56 }}>
-                {member.icon}
-              </Avatar>
-              <Typography fontWeight={600}>{member.name}</Typography>
-              <Typography variant="body2" color="text.secondary">{member.role}</Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-    </Container>
-  </Box>
-);
+  useEffect(() => {
+    const handleScroll = () => {
+      const element = document.querySelector('.about-section');
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight * 0.8;
+        setIsVisible(isVisible);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check on mount
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.8,
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  return (
+    <div className="about-page">
+      <div className="about-wrapper">
+        <motion.section 
+          className="about-section"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isVisible ? "visible" : "hidden"}
+        >
+          <div className="about-container">
+            {/* Header Section */}
+            <motion.div 
+              className="about-header"
+              variants={itemVariants}
+            >
+              <h1 className="about-title">About Us</h1>
+              <p className="about-tagline">Driven by comfort. Powered by reliability.</p>
+              <div className="experience-badge">
+                <span className="years">15+</span>
+                <span className="text">Years of Excellence</span>
+              </div>
+            </motion.div>
+
+            {/* Content Section */}
+            <motion.div 
+              className="about-content"
+              variants={itemVariants}
+            >
+              <div className="about-description">
+                <p>
+                  At TaxiBooker, we've been at the forefront of premium transportation services for over 15 years. 
+                  Our mission is simple yet powerful: to provide seamless, safe, and luxurious travel experiences 
+                  that exceed expectations every time.
+                </p>
+                
+                <p>
+                  With a fleet of meticulously maintained vehicles and a team of professional, background-checked 
+                  drivers, we ensure that every journey is not just a ride, but an experience. From the moment 
+                  you book with us, you can trust that punctuality, safety, and comfort are our top priorities.
+                </p>
+                
+                <p>
+                  We specialize in airport transfers, corporate travel, special events, and luxury transportation 
+                  services. Whether you're a business executive needing reliable airport pickup, a family planning 
+                  a special occasion, or a traveler seeking comfort and convenience, our comprehensive range of 
+                  services is designed to meet your every need.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Features Section */}
+            <motion.div 
+              className="about-features"
+              variants={itemVariants}
+            >
+                          <div className="features-grid">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Security />
+                </div>
+                <div className="feature-text">
+                  <h3>Safety First</h3>
+                  <p>All drivers background-checked and vehicles regularly inspected</p>
+                </div>
+              </div>
+              
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <AccessTime />
+                </div>
+                <div className="feature-text">
+                  <h3>Punctual Service</h3>
+                  <p>We value your time with guaranteed on-time pickups</p>
+                </div>
+              </div>
+              
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Star />
+                </div>
+                <div className="feature-text">
+                  <h3>Premium Quality</h3>
+                  <p>Luxury vehicles and professional service standards</p>
+                </div>
+              </div>
+            </div>
+            </motion.div>
+          </div>
+        </motion.section>
+      </div>
+    </div>
+  );
+};
 
 export default AboutPage; 
