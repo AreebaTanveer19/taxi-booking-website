@@ -1,0 +1,117 @@
+.fleet-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.car-card {
+  border: 1.5px solid #000;
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.2rem 0 1.2rem 0;
+  margin: 0.5rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.car-card:hover {
+  border-color: #000;
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.16);
+  transform: translateY(-4px) scale(1.03);
+}
+
+.car-image-wrapper {
+  width: 90%;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.7rem;
+}
+
+.car-image {
+  max-width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+}
+
+.car-image-placeholder {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f3f3;
+  color: #aaa;
+  font-size: 1.1rem;
+  border-radius: 1rem;
+}
+
+.car-card-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.car-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0.2rem 0 0.1rem 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.car-rating-row {
+  color: #FFD700;
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+  letter-spacing: 2px;
+}
+
+.car-card-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+}
+
+.quote-btn {
+  background: #060bff;
+  color: #fff;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.7rem 2.2rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.2rem;
+}
+
+.quote-btn:hover {
+  background: #0011a8;
+}
+
+.car-specs-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  font-size: 1.15rem;
+  color: #222;
+  margin-top: 0.7rem;
+  gap: 0.5rem;
+  padding-bottom: 0.2rem;
+}
+
+.car-specs-row span {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+} 

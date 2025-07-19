@@ -1,73 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import '../styles/Navbar.css';
+import logoImg from '../assets/logo.png';
 
 const navLinks = [
-  { label: 'Home', path: '/' },
-  { label: 'Book', path: '/book' },
-  { label: 'Fleet', path: '/fleet' },
-  { label: 'Services', path: '/services' },
-  { label: 'About', path: '/about' },
-  { label: 'Contact', path: '/contact' },
+  { label: 'HOME', path: '/' },
+  { label: 'ABOUT', path: '/about' },
+  { label: 'SERVICES', path: '/services' },
+  { label: 'OUR FLEET', path: '/fleet' },
+  { label: 'CONTACT', path: '/contact' },
 ];
 
 const Navbar = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Prevent body scroll when menu is open
-  useEffect(() => {
-    if (mobileOpen) {
-      document.body.classList.add('menu-open');
-    } else {
-      document.body.classList.remove('menu-open');
-    }
+  const handleHamburger = () => setSidebarOpen((open) => !open);
+  const handleSidebarLink = () => setSidebarOpen(false);
 
-    // Cleanup on unmount
-    return () => {
-      document.body.classList.remove('menu-open');
-    };
-  }, [mobileOpen]);
-
-  const handleNavClick = (link) => {
-    setMobileOpen(false);
-    navigate(link.path);
-  };
-
-  const toggleMobileMenu = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  // Height of navbar-main (desktop/mobile): 48px
+  const sidebarStyle = sidebarOpen
+    ? { top: '48px', height: 'auto', width: '100vw' }
+    : { top: '48px', height: 'auto', width: '100vw' };
 
   return (
-    <div className="navbar-hero-wrapper">
-      <nav className={`navbar ${location.pathname === '/about' ? 'navbar-about' : ''}`}>
-        <div className="navbar-container">
-          <button 
-            className={`navbar-hamburger ${mobileOpen ? 'open' : ''}`} 
-            onClick={toggleMobileMenu} 
-            aria-label="Toggle menu"
-            aria-expanded={mobileOpen}
-          >
+    <>
+      {/* Top Black Bar (hidden on mobile) */}
+      <div className="navbar-topbar hide-on-mobile">
+        <div className="navbar-topbar-left navbar-topbar-welcome">
+          <span className="navbar-topbar-welcome-text"><b>Welcome to <span className="navbar-topbar-site">abhi naam ni pta</span></b>, we hope you will enjoy our services and have a good experience.</span>
+        </div>
+        <div className="navbar-topbar-right">
+          <span className="navbar-topbar-item"><span className="navbar-topbar-icon-email">✉️</span>info@abhinaamnipta.au</span>
+          <span className="navbar-topbar-item"><span className="navbar-topbar-icon-phone">📞</span>012345678</span>
+        </div>
+      </div>
+      {/* Main Navbar */}
+      <nav className="navbar-main">
+        <div className="navbar-main-container">
+          <div className="navbar-logo-area">
+            <span className="navbar-logo-img-bg">
+              <img src={logoImg} alt="Logo" className="navbar-logo-img-asset" />
+            </span>
+            <span className="navbar-logo-text">
+              <span className="navbar-logo-title">ABHI NAE PATA</span>
+              <span className="navbar-logo-sub">CHAUFFEURS</span>
+            </span>
+          </div>
+          {/* Hamburger for mobile */}
+          <button className={`navbar-hamburger-btn show-on-mobile${sidebarOpen ? ' open' : ''}`} aria-label="Open menu" onClick={handleHamburger}>
             <span className="navbar-hamburger-bar"></span>
             <span className="navbar-hamburger-bar"></span>
             <span className="navbar-hamburger-bar"></span>
           </button>
-          <ul className={`navbar-links ${mobileOpen ? 'open' : ''}`}>
+          {/* Desktop links */}
+          <ul className="navbar-main-links hide-on-mobile">
             {navLinks.map(link => (
               <li key={link.label}>
-                <button
-                  className={`navbar-link${location.pathname === link.path ? ' active' : ''}`}
-                  onClick={() => handleNavClick(link)}
-                >
-                  {link.label}
-                </button>
+                <a className="navbar-main-link" href={link.path}>{link.label}</a>
               </li>
             ))}
           </ul>
         </div>
+        {/* Sidebar for mobile */}
+        <div className={`navbar-sidebar${sidebarOpen ? ' open' : ''}`} style={sidebarStyle}>
+          <ul className="navbar-sidebar-links modern">
+            {navLinks.map(link => (
+              <li key={link.label}>
+                <a className="navbar-sidebar-link black" href={link.path} onClick={handleSidebarLink}>{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {/* Overlay for sidebar */}
+        {sidebarOpen && <div className="navbar-sidebar-overlay" onClick={handleHamburger}></div>}
       </nav>
-    </div>
+    </>
   );
 };
 
