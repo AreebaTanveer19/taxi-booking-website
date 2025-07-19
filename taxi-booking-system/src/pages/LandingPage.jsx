@@ -149,43 +149,41 @@ const LandingPage = () => {
       </div>
 
       {/* Why Choose Us */}
-      <section className="why-section">
-        <motion.h2 
-          className="why-title"
-          variants={titleVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          Why Choose Us
-        </motion.h2>
-        <motion.div 
-          className="why-cards"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <motion.div className="why-card" variants={itemVariants}>
-            <ThumbUpIcon className="why-card-icon" />
-            <div className="why-card-title">Trusted & Professional</div>
-            <div className="why-card-desc">All drivers are background-checked, highly rated, and dedicated to your comfort and safety.</div>
-          </motion.div>
-          <motion.div className="why-card" variants={itemVariants}>
-            <SecurityIcon className="why-card-icon" />
-            <div className="why-card-title">Safe & Secure</div>
-            <div className="why-card-desc">We prioritize your safety with real-time tracking, 24/7 support, and secure rides every time.</div>
-          </motion.div>
-          <motion.div className="why-card" variants={itemVariants}>
-            <EmojiEventsIcon className="why-card-icon" />
-            <div className="why-card-title">Award-Winning Service</div>
-            <div className="why-card-desc">Voted best taxi service for 3 years in a row. Experience the difference with us.</div>
-          </motion.div>
+      <motion.h2 
+        className="why-title"
+        variants={titleVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
+        Why Choose Us
+      </motion.h2>
+      <motion.div 
+        className="why-cards"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
+        <motion.div className="why-card" variants={itemVariants}>
+          <ThumbUpIcon className="why-card-icon" />
+          <div className="why-card-title">Trusted & Professional</div>
+          <div className="why-card-desc">All drivers are background-checked, highly rated, and dedicated to your comfort and safety.</div>
         </motion.div>
-      </section>
+        <motion.div className="why-card" variants={itemVariants}>
+          <SecurityIcon className="why-card-icon" />
+          <div className="why-card-title">Safe & Secure</div>
+          <div className="why-card-desc">We prioritize your safety with real-time tracking, 24/7 support, and secure rides every time.</div>
+        </motion.div>
+        <motion.div className="why-card" variants={itemVariants}>
+          <EmojiEventsIcon className="why-card-icon" />
+          <div className="why-card-title">Award-Winning Service</div>
+          <div className="why-card-desc">Voted best taxi service for 3 years in a row. Experience the difference with us.</div>
+        </motion.div>
+      </motion.div>
 
       {/* Our Fleet */}
-      <section className="fleet-section" id="fleet-section">
+      <>
         <motion.h2 
           className="fleet-title"
           variants={titleVariants}
@@ -219,30 +217,28 @@ const LandingPage = () => {
             </motion.div>
           ))}
         </motion.div>
-      </section>
+      </>
 
       {/* Our Services */}
-      <>
-        <motion.h2 
-          className="services-title"
-          variants={titleVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          Our Services
-        </motion.h2>
-        <div className="services-cards services-cards-img">
-          {services.map((s, i) => (
-            <motion.div className="services-card-img" key={i} variants={itemVariants} style={{ backgroundImage: `url(${s.image})` }}>
-              <div className="services-card-img-overlay">
-                <div className="services-card-title-img">{s.name}</div>
-                <div className="services-card-desc-img">{s.desc}</div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </>
+      <motion.h2 
+        className="services-title"
+        variants={titleVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
+        Our Services
+      </motion.h2>
+      <div className="services-cards services-cards-img">
+        {services.map((s, i) => (
+          <motion.div className="services-card-img" key={i} variants={itemVariants} style={{ backgroundImage: `url(${s.image})` }}>
+            <div className="services-card-img-overlay">
+              <div className="services-card-title-img">{s.name}</div>
+              <div className="services-card-desc-img">{s.desc}</div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
 
       {/* Footer */}
       <footer className="footer">
