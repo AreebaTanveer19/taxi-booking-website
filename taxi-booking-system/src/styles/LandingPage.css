@@ -62,7 +62,7 @@ body, .landing-root {
   100% { opacity: 1; transform: translateY(0); }
 }
 .hero-tagline {
-  color: #ffb300;
+  color: #ffffff;
   font-weight: 700;
   font-size: 1.1rem;
   margin-bottom: 8px;
@@ -82,7 +82,7 @@ body, .landing-root {
   font-size: 1.1rem;
 }
 .hero-button {
-  background: #ffb300;
+  background: #ffffff;
   color: #181818;
   font-weight: 700;
   font-size: 1.1rem;
@@ -97,7 +97,7 @@ body, .landing-root {
   animation: heroButtonFadeIn 1.2s cubic-bezier(0.4,0,0.2,1) 0.5s both;
 }
 .hero-button:hover {
-  background: #ffa000;
+  background: #ffffff;
   transform: translateY(-2px) scale(1.03);
 }
 @keyframes heroButtonFadeIn {
@@ -957,22 +957,23 @@ body.menu-open {
   letter-spacing: 0.5px;
 }
 .hero-btn-primary {
-  background: #ffb300;
+  background: #ffffff;
   color: #181818;
-  border: 2px solid #ffb300;
+  border: 2px solid #ffffff;
 }
 .hero-btn-primary:hover, .hero-btn-primary:focus-visible {
-  background: #ffa000;
+  background: #fff;
   color: #181818;
+  border: 2px solid #fff;
   transform: translateY(-2px) scale(1.03);
 }
 .hero-btn-secondary {
   background: transparent;
-  color: #ffb300;
-  border: 2px solid #ffb300;
+  color: #fdfcfa;
+  border: 2px solid #ffffff;
 }
 .hero-btn-secondary:hover, .hero-btn-secondary:focus-visible {
-  background: #ffb300;
+  background: #fffffe;
   color: #181818;
   transform: translateY(-2px) scale(1.03);
 }
@@ -1450,8 +1451,8 @@ body.menu-open {
   margin-bottom: 64px;
 }
 .fleet-show-more-btn {
-  background: #060bff;
-  color: #fff;
+  background: #ff0000;
+  color: #181818;
   border: none;
   border-radius: 0.4rem;
   padding: 0.7rem 2.2rem;
@@ -1462,7 +1463,8 @@ body.menu-open {
   transition: background 0.2s;
 }
 .fleet-show-more-btn:hover {
-  background: #0011a8;
+  background: #ffd54f;
+  color: #181818;
 } 
 
 .pro-fleet-card {
@@ -1499,8 +1501,8 @@ body.menu-open {
   margin-bottom: 0.7rem;
 }
 .pro-fleet-btn {
-  background: #060bff;
-  color: #fff;
+  background: #ffb300;
+  color: #181818;
   border: none;
   border-radius: 0.4rem;
   padding: 0.6rem 2rem;
@@ -1510,10 +1512,10 @@ body.menu-open {
   margin-top: 0.5rem;
   margin-bottom: 0.7rem;
   transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(6,11,255,0.08);
+  box-shadow: 0 2px 8px rgba(255,179,0,0.08);
 }
 .pro-fleet-btn:hover {
-  background: #ffb300;
+  background: #ffd54f;
   color: #181818;
 }
 .pro-fleet-specs {
@@ -1574,4 +1576,23 @@ body.menu-open {
     text-shadow: none;
     font-family: 'Poppins', 'Inter', Arial, sans-serif;
   }
+} 
+
+.quote-btn {
+  background: #ffb300;
+  color: #181818;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.6rem 2rem;
+  font-weight: 700;
+  font-size: 1.08rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  margin-bottom: 0.7rem;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(255,179,0,0.08);
+}
+.quote-btn:hover {
+  background: #ffd54f;
+  color: #181818;
 } 

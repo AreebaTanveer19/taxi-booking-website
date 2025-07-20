@@ -1,10 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import taxiImg from '../assets/taxi.jpg';
+import taxiImg from '../assets/taxi.jpeg';
 import '../styles/LandingPage.css';
 import { FaChair, FaSnowflake, FaSuitcase, FaStar } from 'react-icons/fa';
 import { GiCarSeat } from 'react-icons/gi';
-import { motion } from 'framer-motion';
 import carData from '../assets/carData.json';
 import Footer from '../components/Footer/Footer';
 import A7 from '../assets/A7.png';
@@ -99,27 +98,27 @@ const fleetImages = {
 const LandingPage = () => {
   const navigate = useNavigate();
   
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
-    }
-  };
+  // const containerVariants = {
+  //   hidden: { opacity: 0 },
+  //   visible: {
+  //     opacity: 1,
+  //     transition: {
+  //       staggerChildren: 0.2
+  //     }
+  //   }
+  // };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  };
+  // const itemVariants = {
+  //   hidden: { opacity: 0, y: 30 },
+  //   visible: {
+  //     opacity: 1,
+  //     y: 0,
+  //     transition: {
+  //       duration: 0.6,
+  //       ease: "easeOut"
+  //     }
+  //   }
+  // };
 
   const titleVariants = {
     hidden: { opacity: 0, y: -30 },
@@ -302,7 +301,7 @@ const LandingPage = () => {
                 </div>
               </div>
               <div className="car-card-actions">
-                <button className="quote-btn pro-fleet-btn">Get a Free Quote</button>
+                <button className="quote-btn pro-fleet-btn" style={{background:'#ffb300',color:'#181818'}}>Get a Free Quote</button>
               </div>
               <div className="car-specs-row pro-fleet-specs">
                 <span title="Seats"><GiCarSeat color="#181818" size={20} /> <span className="pro-fleet-spec">{car.seat} x</span></span>
