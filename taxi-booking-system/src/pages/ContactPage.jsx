@@ -1,6 +1,7 @@
 import React from 'react';
 import ContactForm from '../components/ContactForm';
 import '../styles/ContactPage.css';
+import Footer from '../components/Footer/Footer';
 
 const CONTACT_INFO = {
   phone: '0123 456 789',
@@ -42,6 +43,7 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
+      
     </div>
   );
 };

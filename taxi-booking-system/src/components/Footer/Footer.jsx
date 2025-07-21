@@ -2,14 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebookF, FaLinkedinIn, FaInstagram, FaYoutube, FaAngleRight } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
-import footImage from '../../assets/A8.png'; // Use a new car image for the footer background
 import './footer.css';
+
+const footImage = 'https://images.unsplash.com/photo-1560863189-524ad3dd6ef6?q=80&w=876&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
 const Footer = () => {
   return (
     <footer
       className="footer"
-      style={{ backgroundImage: `url(${footImage})` }}
+      style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.01), rgba(0,0,0,0.01)), url(${footImage})` }}
     >
       <div className="footer-container">
         <div>

@@ -1,90 +1,36 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
-const initialState = {
-  name: '',
-  email: '',
-  phone: '',
-  message: '',
-};
-
-const initialErrors = {
-  name: '',
-  email: '',
-  message: '',
-};
-
-function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
+const schema = yup.object().shape({
+  name: yup.string().required('Full Name is required.'),
+  email: yup.string().email('Invalid email address.').required('Email is required.'),
+  phone: yup.string().optional(),
+  message: yup.string().required('Message is required.'),
+});
 
 const ContactForm = () => {
-  const [form, setForm] = useState(initialState);
-  const [errors, setErrors] = useState(initialErrors);
-  const [touched, setTouched] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm({
+    resolver: yupResolver(schema)
+  });
+  const [toast, setToast] = useState(null);
 
-  const validate = (field, value) => {
-    switch (field) {
-      case 'name':
-        return value.trim() ? '' : 'Full Name is required.';
-      case 'email':
-        if (!value.trim()) return 'Email is required.';
-        if (!validateEmail(value)) return 'Invalid email address.';
-        return '';
-      case 'message':
-        return value.trim() ? '' : 'Message is required.';
-      default:
-        return '';
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (touched[name]) {
-      setErrors((prev) => ({ ...prev, [name]: validate(name, value) }));
-    }
-  };
-
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    setTouched((prev) => ({ ...prev, [name]: true }));
-    setErrors((prev) => ({ ...prev, [name]: validate(name, value) }));
-  };
-
-  const isFormValid =
-    !validate('name', form.name) &&
-    !validate('email', form.email) &&
-    !validate('message', form.message);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setTouched({ name: true, email: true, message: true });
-    const newErrors = {
-      name: validate('name', form.name),
-      email: validate('email', form.email),
-      message: validate('message', form.message),
-    };
-    setErrors(newErrors);
-    if (Object.values(newErrors).some(Boolean)) return;
-    setSubmitting(true);
+  const onSubmit = async (data) => {
     setToast(null);
     // Mock API call
-    setTimeout(() => {
-      setSubmitting(false);
-      setToast({ type: 'success', message: 'Message sent successfully!' });
-      setForm(initialState);
-      setTouched({});
-      setTimeout(() => setToast(null), 3000);
-    }, 1500);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setToast({ type: 'success', message: 'Message sent successfully!' });
+    setTimeout(() => setToast(null), 3000);
   };
 
   return (
     <motion.form
       className="contact-form"
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -95,67 +41,58 @@ const ContactForm = () => {
         <input
           type="text"
           id="name"
-          name="name"
-          className={`form-input${errors.name && touched.name ? ' error' : ''}`}
-          value={form.name}
-          onChange={handleChange}
-          onBlur={handleBlur}
+          className={`form-input${errors.name ? ' error' : ''}`}
           autoComplete="name"
-          required
           placeholder="Enter your full name"
+          {...register('name')}
         />
-        {errors.name && touched.name && <div className="form-error">{errors.name}</div>}
+        {errors.name && <div className="form-error">{errors.name.message}</div>}
       </div>
       <div className="form-group">
         <label htmlFor="email">Email Address<span className="required">*</span></label>
         <input
           type="email"
           id="email"
-          name="email"
-          className={`form-input${errors.email && touched.email ? ' error' : ''}`}
-          value={form.email}
-          onChange={handleChange}
-          onBlur={handleBlur}
+          className={`form-input${errors.email ? ' error' : ''}`}
           autoComplete="email"
-          required
           placeholder="Enter your email address"
+          {...register('email')}
         />
-        {errors.email && touched.email && <div className="form-error">{errors.email}</div>}
+        {errors.email && <div className="form-error">{errors.email.message}</div>}
       </div>
       <div className="form-group">
         <label htmlFor="phone">Phone Number</label>
-        <input
-          type="tel"
-          id="phone"
+        <Controller
           name="phone"
-          className="form-input"
-          value={form.phone}
-          onChange={handleChange}
-          autoComplete="tel"
-          placeholder="Enter your phone number (optional)"
+          control={control}
+          render={({ field }) => (
+            <PhoneInput
+              {...field}
+              country={'au'}
+              containerClass="contact-phone-input"
+              inputClass={`form-input${errors.phone ? ' error' : ''}`}
+            />
+          )}
         />
+        {errors.phone && <div className="form-error">{errors.phone.message}</div>}
       </div>
       <div className="form-group">
         <label htmlFor="message">Message<span className="required">*</span></label>
         <textarea
           id="message"
-          name="message"
-          className={`form-input${errors.message && touched.message ? ' error' : ''}`}
-          value={form.message}
-          onChange={handleChange}
-          onBlur={handleBlur}
+          className={`form-input${errors.message ? ' error' : ''}`}
           rows={5}
-          required
           placeholder="Type your message here..."
+          {...register('message')}
         />
-        {errors.message && touched.message && <div className="form-error">{errors.message}</div>}
+        {errors.message && <div className="form-error">{errors.message.message}</div>}
       </div>
       <button
         type="submit"
         className="form-submit-btn"
-        disabled={!isFormValid || submitting}
+        disabled={isSubmitting}
       >
-        {submitting ? <span className="spinner" /> : 'Send Message'}
+        {isSubmitting ? <span className="spinner" /> : 'Send Message'}
       </button>
       {toast && (
         <div className={`form-toast ${toast.type}`}>{toast.message}</div>

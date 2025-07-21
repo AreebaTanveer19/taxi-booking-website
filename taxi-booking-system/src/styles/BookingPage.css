@@ -341,21 +341,18 @@
   min-width: 140px;
 }
 .booking-summary-car-img-wrap {
-  width: 200px;
-  height: 140px;
-  background: #fff;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px #e0e0e0;
-  margin-bottom: 10px;
+  width: 100%;
+  max-width: 280px; /* Increased from 180px */
+  margin: 0 auto 1rem auto;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
 }
 .booking-summary-car-img {
-  max-width: 100%;
-  max-height: 120px;
-  border-radius: 10px;
-  object-fit: contain;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 .booking-summary-car-title {
   font-weight: 700;
@@ -455,4 +452,20 @@
   .booking-title {
     font-size: 1.3rem;
   }
+} 
+
+.booking-phone-input .form-input,
+.contact-phone-input .form-input {
+  width: 100% !important;
+  border-radius: 12px !important;
+  border: 1px solid #d0d5dd !important;
+  padding: 12px 16px 12px 58px !important;
+  font-size: 1rem !important;
+}
+
+.booking-phone-input .react-tel-input .flag-dropdown,
+.contact-phone-input .react-tel-input .flag-dropdown {
+  border-radius: 12px 0 0 12px !important;
+  border: 1px solid #d0d5dd !important;
+  background: #f9fafb !important;
 } 

@@ -9,6 +9,7 @@ import Footer from '../components/Footer/Footer';
 import A7 from '../assets/A7.png';
 import A8 from '../assets/A8.png';
 import Q7 from '../assets/Q7.png';
+import { motion } from 'framer-motion';
 
 
 // const fleet = [
