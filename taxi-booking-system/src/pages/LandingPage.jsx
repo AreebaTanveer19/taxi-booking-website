@@ -9,7 +9,7 @@ import Footer from '../components/Footer/Footer';
 import A7 from '../assets/A7.png';
 import A8 from '../assets/A8.png';
 import Q7 from '../assets/Q7.png';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion';
 
 
 // const fleet = [
@@ -59,22 +59,17 @@ import { motion } from 'framer-motion';
 
 const services = [
   {
-    name: 'Corporate Car Hire Transfers',
+    name: 'Corporate Transfers',
     image: 'https://images.unsplash.com/photo-1605414262199-63817d195576?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     desc: 'Planning is essential for corporate occasions, and a dependable chauffeur service is necessary. Our highly trained and experienced corporate chauffeurs will see to it that you and your guests arrive in the utmost elegance.'
   },
   {
-    name: 'Airport Car Services Transfers',
+    name: 'Airport Transfers',
     image: 'https://images.unsplash.com/photo-1649559963715-8c34a1c31bf5?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     desc: 'Experience the ultimate in airport chauffeur hire service. Our premium airport transfers are your reliable choice for seamless travel, ready to meet all your domestic and international flights, anytime you need.'
   },
   {
-    name: 'Concerts Transfer Services',
-    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80',
-    desc: 'Turn your special event into an extraordinary experience with our premium event transfer service. Our chauffeurs are ready to make your occasion unforgettable, providing convenient transportation for events.'
-  },
-  {
-    name: 'Wedding Car & Chauffeur Hire',
+    name: 'Wedding Car ',
     image: 'Wedding Car & Chauffeur Hire',
     desc: 'Make your special day even more unforgettable with our exquisite wedding transfer service. Our dedicated chauffeurs ensure a seamless and elegant arrival, adding a touch of luxury to your wedding experience.'
   },
@@ -121,17 +116,17 @@ const LandingPage = () => {
   //   }
   // };
 
-  const titleVariants = {
-    hidden: { opacity: 0, y: -30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut"
-      }
-    }
-  };
+  // const titleVariants = {
+  //   hidden: { opacity: 0, y: -30 },
+  //   visible: {
+  //     opacity: 1,
+  //     y: 0,
+  //     transition: {
+  //       duration: 0.8,
+  //       ease: "easeOut"
+  //     }
+  //   }
+  // };
 
   return (
     <>
@@ -159,7 +154,7 @@ const LandingPage = () => {
       </div>
 
       {/* Why Choose Us */}
-      <motion.h2 
+      {/* <motion.h2 
         className="why-title"
         variants={titleVariants}
         initial="hidden"
@@ -167,7 +162,7 @@ const LandingPage = () => {
         viewport={{ once: true }}
       >
         Why Choose Us
-      </motion.h2>
+      </motion.h2> */}
       {/* About Us Cards Section */}
       <div className="aboutus-cards-section">
         <div className="aboutus-cards-grid">
@@ -226,12 +221,6 @@ const LandingPage = () => {
           <div className="services-card-img-v2" style={{ backgroundImage: `url(${services[2].image})` }}>
             <div className="services-card-img-overlay-v2">
               <div className="services-card-title-img-v2">{services[2].name}</div>
-              <div className="services-card-desc-img-v2">Make your events extraordinary with our premium chauffeur transfers.</div>
-            </div>
-          </div>
-          <div className="services-card-img-v2" style={{ backgroundImage: `url(${services[3].image})` }}>
-            <div className="services-card-img-overlay-v2">
-              <div className="services-card-title-img-v2">{services[3].name}</div>
               <div className="services-card-desc-img-v2">Elegant wedding car hire for a seamless and stylish arrival.</div>
             </div>
           </div>
@@ -247,15 +236,15 @@ const LandingPage = () => {
               <div className="services-card-desc-img-v2">Prestige executive transfers for business and VIP clients.</div>
             </div>
           </div>
-          <div className="services-card-img-v2" style={{ backgroundImage: `url(${services[4].image})` }}>
+          <div className="services-card-img-v2" style={{ backgroundImage: `url(${services[3].image})` }}>
             <div className="services-card-img-overlay-v2">
-              <div className="services-card-title-img-v2">{services[4].name}</div>
+              <div className="services-card-title-img-v2">{services[3].name}</div>
               <div className="services-card-desc-img-v2">Swift and secure parcel delivery across Sydney and beyond.</div>
             </div>
           </div>
-          <div className="services-card-img-v2 red" style={{ backgroundImage: `url(${services[5].image})` }}>
+          <div className="services-card-img-v2 red" style={{ backgroundImage: `url(${services[4].image})` }}>
             <div className="services-card-img-overlay-v2">
-              <div className="services-card-title-img-v2">{services[5].name}</div>
+              <div className="services-card-title-img-v2">{services[4].name}</div>
               <div className="services-card-desc-img-v2">Personalized chauffeur service for special events and tours.</div>
             </div>
           </div>
@@ -272,7 +261,7 @@ const LandingPage = () => {
       </div>
 
       {/* Our Fleet */}
-        <motion.h2 
+        {/* <motion.h2 
           className="fleet-title"
           variants={titleVariants}
           initial="hidden"
@@ -280,7 +269,7 @@ const LandingPage = () => {
           viewport={{ once: true }}
         >
           Our Fleet
-        </motion.h2>
+        </motion.h2> */}
       <div className="fleet-cards landing-fleet-cards">
         {carData.slice(0, 3).map((car, idx) => {
           const carImage = fleetImages[car.name] || car.pic;

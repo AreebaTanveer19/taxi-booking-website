@@ -1,396 +1,393 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import carData from '../assets/carData.json';
 import '../styles/BookingPage.css';
-import A7 from '../assets/A7.png';
-import A8 from '../assets/A8.png';
-import Q7 from '../assets/Q7.png';
-import Footer from '../components/Footer/Footer';
-
-const SYDNEY_TERMINALS = ['T1 International', 'T2 Domestic', 'T3 Qantas Domestic'];
-const AIRPORT_TOLL_TAX = 15;
-
-const steps = [
-  'Type',
-  'Details',
-  'Vehicle',
-  'Summary',
-  'Confirm',
-];
-
-const carImages = {
-  'AUDI Q7': Q7,
-  'AUDI A8': A8,
-  'AUDI A7': A7,
-};
+import { FaRoute, FaClock } from 'react-icons/fa';
 
 const BookingPage = () => {
   const [step, setStep] = useState(1);
-  const [bookingType, setBookingType] = useState('');
-  const [terminal, setTerminal] = useState('');
   const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    pickup: '',
-    dropoff: '',
-    postcode: '',
+    bookingMethod: '', // 'distance' or 'time'
+    city: 'Sydney',
+    serviceType: '',
+    flightNumber: '',
+    flightTime: '',
+    luggage: '',
+    specialInstructions: '',
+    paymentMethod: 'Card',
+    nameOnCard: '',
+    cardType: 'Visa',
+    expiryMonth: '',
+    expiryYear: '',
+    termsAccepted: false,
+    vehiclePreference: '',
     date: '',
     time: '',
+    passengers: 1,
+    babySeat: false,
+    name: '',
+    email: '',
+    phone: '',
+    pickup: '',
+    dropoff: '',
+    distance: '',
+    pickupPostcode: '',
+    dropoffPostcode: '',
   });
-  const [formErrors, setFormErrors] = useState({});
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const [confirmed, setConfirmed] = useState(false);
-  const [distance, setDistance] = useState(0);
-  const [fare, setFare] = useState(0);
-  const [toll, setToll] = useState(0);
+  const [estimatedCost, setEstimatedCost] = useState(0);
 
-  const calculateFare = (dist) => {
-    if (dist <= 5) {
-      return 70;
-    }
-    const additionalKms = dist - 5;
-    const additionalFare = Math.ceil(additionalKms / 5) * 15;
-    return 70 + additionalFare;
-  };
-
-  const calculateToll = (terminalSelection) => {
-    if (bookingType !== 'Airport Transfer') return 0;
-    switch (terminalSelection) {
-      case 'T1 International':
-        return 15;
-      case 'T2 Domestic':
-        return 6;
-      case 'T3 Qantas Domestic':
-        return 4;
-      default:
-        return 0;
-    }
-  };
-
-  const handleDetailsSubmit = () => {
-    const errors = validateForm();
-    setFormErrors(errors);
-    if (Object.keys(errors).length === 0) {
-      // Simulate distance calculation (replace with actual API call in production)
-      const simulatedDistance = Math.floor(Math.random() * 50) + 1;
-      setDistance(simulatedDistance);
-
-      const calculatedFare = calculateFare(simulatedDistance);
-      setFare(calculatedFare);
-
-      const calculatedToll = calculateToll(terminal);
-      setToll(calculatedToll);
-
-      setStep(4);
-    }
-  };
-
-
-  const handleFormChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handlePhoneChange = (value) => {
-    setForm({ ...form, phone: value });
+    setForm(prev => ({ ...prev, phone: value }));
   };
 
-  // Validation function
-  const validateForm = () => {
-    const errors = {};
-    if (!form.name.trim()) errors.name = 'Name is required.';
-    if (!form.phone.trim() || !/^\d{8,15}$/.test(form.phone.replace(/\s/g, ''))) errors.phone = 'Valid phone number required.';
-    if (!form.email.trim() || !/^\S+@\S+\.\S+$/.test(form.email)) errors.email = 'Valid email required.';
-    if (!form.pickup.trim()) errors.pickup = 'Pickup location is required.';
-    if (!form.dropoff.trim()) errors.dropoff = 'Dropoff location is required.';
-    if (!form.postcode.trim() || !/^\d{4}$/.test(form.postcode)) errors.postcode = 'Valid 4-digit postcode required.';
-    if (!form.date) errors.date = 'Date is required.';
-    else {
-      const today = new Date();
-      const selected = new Date(form.date);
-      today.setHours(0,0,0,0);
-      selected.setHours(0,0,0,0);
-      if (selected < today) errors.date = 'Date cannot be in the past.';
+  const proceedToPayment = () => {
+    let cost = 0;
+
+    if (form.bookingMethod === 'distance') {
+      const distance = parseFloat(form.distance) || 0;
+      if (distance <= 0) {
+        cost = 0;
+      } else if (distance <= 5) {
+        cost = 60;
+      } else if (distance <= 10) {
+        cost = 75; // 60 + 15
+      } else if (distance <= 15) {
+        cost = 90; // 75 + 15
+      } else if (distance <= 20) {
+        cost = 105; // 90 + 15
+      } else if (distance <= 25) {
+        cost = 120; // 105 + 15
+      } else if (distance <= 30) {
+        cost = 135; // 120 + 15
+      } else { // distance > 30
+        const costAt30km = 135;
+        cost = costAt30km + (distance - 30) * 2;
+      }
+    } else { // 'time' based booking
+      cost = 100; // Base fare for hourly
     }
-    if (!form.time) errors.time = 'Time is required.';
-    return errors;
+
+    // Add surcharges
+    let finalCost = cost;
+    if (form.babySeat) {
+      finalCost += 15;
+    }
+    if (form.serviceType === 'Airport Transfer') {
+      finalCost += 15;
+    }
+    setEstimatedCost(finalCost.toFixed(2));
+    setStep(3); // Move to payment page
   };
 
-  const handleVehicleSelect = (car) => {
-    setSelectedVehicle(car);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Final submission to backend API
+    console.log('Final Booking Data:', { ...form, estimatedCost });
+    // Here you would make the API call to your backend
   };
 
-  // Stepper UI
-  const Stepper = () => {
-    let currentVisualStep = step;
-    if (step === 3) {
-        currentVisualStep = 2; // Both step 2 and 3 map to visual step "Details"
-    } else if (step > 3) {
-        currentVisualStep = step - 1; // Adjust subsequent steps
-    }
-    if (confirmed) {
-        currentVisualStep = 5; // The "Confirm" step
-    }
-
-    return (
-        <div className="booking-stepper">
-            {steps.map((label, idx) => {
-                const visualStepIndex = idx + 1;
-                const isActive = currentVisualStep === visualStepIndex;
-                const isCompleted = currentVisualStep > visualStepIndex;
-
-                return (
-                    <div key={label} className={`stepper-step${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}>
-                        <div className="stepper-circle">{visualStepIndex}</div>
-                        <div className="stepper-label">{label}</div>
-                        {idx < steps.length - 1 && <div className="stepper-line" />}
-                    </div>
-                );
-            })}
+  const renderStep1 = () => (
+    <div className="step-container">
+      <h2 className="step-title">How Would You Like to Book?</h2>
+      <p className="step-subtitle">Choose the option that best fits your travel needs.</p>
+      <div className="booking-method-options">
+        <div className="booking-method-card" onClick={() => { setForm({ ...form, bookingMethod: 'distance' }); setStep(2); }}>
+          <FaRoute className="method-icon" />
+          <h3>Distance-Based</h3>
+          <p>Ideal for single trips from point A to point B.</p>
         </div>
-    );
-  };
-
-  // Step 1: Choose booking type
-  if (step === 1) {
-    return (
-      <div className="booking-page-root">
-        <div className="booking-main-card">
-          <Stepper />
-          <h2 className="booking-title">Choose Booking Type</h2>
-          <div className="booking-type-btns">
-            <button className={`hero-btn${bookingType === 'Airport Transfer' ? ' active' : ''}`} onClick={() => setBookingType('Airport Transfer')}>Airport Transfer</button>
-            <button className={`hero-btn${bookingType === 'Point to Point' ? ' active' : ''}`} onClick={() => setBookingType('Point to Point')}>Point to Point</button>
-          </div>
-          <button className="booking-next-btn" disabled={!bookingType} onClick={() => {
-            setStep(bookingType === 'Airport Transfer' ? 2 : 3);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}>Next</button>
+        <div className="booking-method-card" onClick={() => { setForm({ ...form, bookingMethod: 'time' }); setStep(2); }}>
+          <FaClock className="method-icon" />
+          <h3>Time-Based</h3>
+          <p>Perfect for multiple stops, events, or hourly hire.</p>
         </div>
-        <Footer />
       </div>
-    );
-  }
+    </div>
+  );
 
-  // Step 2: Choose terminal (if airport transfer)
-  if (step === 2 && bookingType === 'Airport Transfer') {
-    return (
-      <div className="booking-page-root">
-        <div className="booking-main-card">
-          <Stepper />
-          <h2 className="booking-title">Select Sydney Airport Terminal</h2>
-          <form className="booking-form" onSubmit={e => { e.preventDefault(); setStep(3); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-            <label htmlFor="terminal-select" className="booking-label">Terminal</label>
-            <select
-              id="terminal-select"
-              className="booking-input"
-              value={terminal}
-              onChange={e => setTerminal(e.target.value)}
-              required
-            >
-              <option value="" disabled>Select a terminal</option>
-              {SYDNEY_TERMINALS.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
+  const renderStep2 = () => (
+    <div className="step-container">
+      <h2 className="step-title">Step 01: Booking Details</h2>
+      <form className="omni-form">
+        <div className="form-grid">
+          {/* Service Details */}
+          <div className="form-group">
+            <label>City</label>
+            <select name="city" value={form.city} onChange={handleInputChange}>
+              <option value="Sydney">Sydney</option>
+              <option value="Melbourne">Melbourne</option>
             </select>
-            <div className="booking-btn-row">
-              <button className="booking-back-btn" type="button" onClick={() => setStep(1)}>Back</button>
-              <button className="booking-next-btn" type="submit" disabled={!terminal}>Next</button>
-            </div>
-          </form>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+          </div>
+          <div className="form-group">
+            <label>Type of Service</label>
+            <select name="serviceType" value={form.serviceType} onChange={handleInputChange} required>
+              <option value="">-- Select a Service --</option>
+              <option value="Corporate Transfers">Corporate Transfers</option>
+              <option value="Airport Transfers">Airport Transfers</option>
+              <option value="Wedding Car">Wedding Car</option>
+              <option value="Parcel Delivery">Parcel Delivery</option>
+              <option value="Special Events">Special Events</option>
+            </select>
+          </div>
 
-  // Step 3: Enter booking details
-  if (step === 3) {
-    return (
-      <div className="booking-page-root">
-        <div className="booking-main-card">
-          <Stepper />
-          <h2 className="booking-title">Your Details</h2>
-          <div className="booking-form">
-            <div className="booking-form-grid">
-              {/* Form fields here */}
-              <label className="booking-label">Name
-                <input className="booking-input" name="name" value={form.name} onChange={handleFormChange} required />
-                {formErrors.name && <div className="form-error">{formErrors.name}</div>}
-              </label>
-             <div className="booking-form-group">
-               <label htmlFor="phone">Phone Number</label>
-               <PhoneInput
-                 country={'au'}
-                 value={form.phone}
-                 onChange={handlePhoneChange}
-                 inputProps={{
-                   name: 'phone',
-                   required: true,
-                   autoFocus: false
-                 }}
-                 containerClass="booking-phone-input"
-                 inputClass="form-input"
-               />
-                {formErrors.phone && <div className="form-error">{formErrors.phone}</div>}
-             </div>
-              <label className="booking-label">Email
-                <input className="booking-input" name="email" value={form.email} onChange={handleFormChange} required />
-                {formErrors.email && <div className="form-error">{formErrors.email}</div>}
-              </label>
-              <label className="booking-label">Pickup Location
-                <input className="booking-input" name="pickup" value={form.pickup} onChange={handleFormChange} required />
-                {formErrors.pickup && <div className="form-error">{formErrors.pickup}</div>}
-              </label>
-              <label className="booking-label">Dropoff Location
-                <input className="booking-input" name="dropoff" value={form.dropoff} onChange={handleFormChange} required />
-                {formErrors.dropoff && <div className="form-error">{formErrors.dropoff}</div>}
-              </label>
-              <label className="booking-label">Post Code
-                <input className="booking-input" name="postcode" value={form.postcode} onChange={handleFormChange} required />
-                {formErrors.postcode && <div className="form-error">{formErrors.postcode}</div>}
-              </label>
-              <label className="booking-label">Date
-                <input className="booking-input" type="date" name="date" value={form.date} onChange={handleFormChange} required />
-                {formErrors.date && <div className="form-error">{formErrors.date}</div>}
-              </label>
-              <label className="booking-label">Time
-                <input className="booking-input" type="time" name="time" value={form.time} onChange={handleFormChange} required />
-                {formErrors.time && <div className="form-error">{formErrors.time}</div>}
-              </label>
-            </div>
-            {/* Google Maps Embed for Sydney */}
-            <div className="booking-map-embed">
-              <iframe
-                title="Sydney Map"
-                width="100%"
-                height="220"
-                style={{ border: 0, borderRadius: '10px' }}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106312.4752229376!2d151.043255!3d-33.867487!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12ae3e8b2c7e9b%3A0x5017d681632c5a0!2sSydney%20NSW%2C%20Australia!5e0!3m2!1sen!2sau!4v1689999999999!5m2!1sen!2sau"
-              ></iframe>
-            </div>
-          </div>
-          <div className="booking-btn-row">
-            <button className="booking-back-btn" onClick={() => setStep(bookingType === 'Airport Transfer' ? 2 : 1)}>Back</button>
-            <button className="booking-next-btn" onClick={() => { handleDetailsSubmit(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Next</button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    )
-  }
-
-  // Step 4: Choose vehicle
-  if (step === 4) {
-    return (
-      <div className="booking-page-root">
-        <div className="booking-main-card">
-          <Stepper />
-          <h2 className="booking-title">Choose Your Vehicle</h2>
-          <p className="booking-subtext">Calculated Distance: <b>{distance} km</b></p>
-          <div className="booking-vehicle-grid">
-            {carData.map((car, idx) => {
-              const total = fare + toll;
-              const carImage = carImages[car.name] || car.pic;
-              return (
-                <div className={`booking-vehicle-card${selectedVehicle && selectedVehicle.name === car.name ? ' selected' : ''}`} key={idx} onClick={() => handleVehicleSelect(car)} tabIndex={0}>
-                  <div className="vehicle-img-wrap">
-                    {carImage ? (
-                      <img src={carImage} alt={car.name} className="vehicle-img" />
-                    ) : (
-                      <div className="vehicle-img-placeholder">Image Coming Soon</div>
-                    )}
-                  </div>
-                  <div className="vehicle-info">
-                    <div className="vehicle-title">{car.name}</div>
-                    <div className="vehicle-specs">🪑 {car.seat} | 🧳 {car.luggage_capacity}</div>
-                    <div className="vehicle-rate">Base Fare: ${fare}</div>
-                    {bookingType === 'Airport Transfer' && <div className="vehicle-rate">Toll: ${toll}</div>}
-                    <div className="vehicle-rate vehicle-rate-total">Total: ${total}</div>
-                  </div>
-                  <button className="vehicle-select-btn">Select</button>
-                </div>
-              );
-            })}
-          </div>
-          <div className="booking-btn-row">
-            <button className="booking-back-btn" onClick={() => setStep(3)}>Back</button>
-            <button className="booking-next-btn" onClick={() => { setStep(5); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={!selectedVehicle}>Next</button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Step 5: Confirmation
-  if (step === 5 && selectedVehicle && !confirmed) {
-    const total = fare + toll;
-    const carImage = carImages[selectedVehicle.name] || selectedVehicle.pic;
-    return (
-      <div className="booking-page-root">
-        <div className="booking-main-card">
-          <Stepper />
-          <h2 className="booking-title">Booking Summary</h2>
-          <div className="booking-summary-flex">
-            <div className="booking-summary-details">
-              <div><b>Name:</b> {form.name}</div>
-              <div><b>Phone:</b> {form.phone}</div>
-              <div><b>Email:</b> {form.email}</div>
-              <div><b>Pickup:</b> {form.pickup}</div>
-              <div><b>Dropoff:</b> {form.dropoff}</div>
-              <div><b>Post Code:</b> {form.postcode}</div>
-              <div><b>Date:</b> {form.date}</div>
-              <div><b>Time:</b> {form.time}</div>
-              <div><b>Booking Type:</b> {bookingType}</div>
-              {bookingType === 'Airport Transfer' && <div><b>Terminal:</b> {terminal}</div>}
-              <div><b>Calculated Distance:</b> {distance} km</div>
-              <div><b>Total Price:</b> ${total}</div>
-              {bookingType === 'Airport Transfer' && <div><b>Includes Toll Tax:</b> ${toll}</div>}
-            </div>
-            <div className="booking-summary-car">
-              <div className="booking-summary-car-img-wrap">
-                {carImage ? (
-                  <img src={carImage} alt={selectedVehicle.name} className="booking-summary-car-img" />
-                ) : (
-                  <div className="vehicle-img-placeholder">Image Coming Soon</div>
-                )}
+          {form.serviceType === 'Airport Transfer' && (
+            <>
+              <div className="form-group">
+                <label>Flight Number</label>
+                <input type="text" name="flightNumber" value={form.flightNumber} onChange={handleInputChange} placeholder="e.g., QF432" />
               </div>
-              <div className="booking-summary-car-title">{selectedVehicle.name}</div>
-              <div className="vehicle-specs">🪑 {selectedVehicle.seat} | 🧳 {selectedVehicle.luggage_capacity}</div>
+              <div className="form-group">
+                <label>Flight Time</label>
+                <input type="time" name="flightTime" value={form.flightTime} onChange={handleInputChange} />
+              </div>
+            </>
+          )}
+
+          {/* Pickup & Drop-off Fields BEFORE Vehicle */}
+          <div className="form-group">
+            <label>{form.bookingMethod === 'time' ? 'Pickup Location' : 'Pickup Address'}</label>
+            <input type="text" name="pickup" value={form.pickup} onChange={handleInputChange} required />
+          </div>
+          <div className="form-group">
+            <label>Pickup Postcode</label>
+            <input type="text" name="pickupPostcode" value={form.pickupPostcode} onChange={handleInputChange} required />
+          </div>
+          {form.bookingMethod === 'distance' && (
+            <>
+              <div className="form-group">
+                <label>Drop-off Address</label>
+                <input type="text" name="dropoff" value={form.dropoff} onChange={handleInputChange} required />
+              </div>
+              <div className="form-group">
+                <label>Drop-off Postcode</label>
+                <input type="text" name="dropoffPostcode" value={form.dropoffPostcode} onChange={handleInputChange} required />
+              </div>
+            </>
+          )}
+
+          {/* Vehicle Preference */}
+          <div className="form-group">
+            <label>Vehicle Preference</label>
+            <select name="vehiclePreference" value={form.vehiclePreference} onChange={handleInputChange} required>
+              <option value="">-- Select a Vehicle --</option>
+              <option value="Executive Sedan">Executive Sedan (1-3 Passengers, 2 Suitcases) — Lexus, Mercedes E Class, BMW 5 Series</option>
+              <option value="Premium Sedan">Premium Sedan (1-3 Passengers, 2 Suitcases) — Mercedes S Class, BMW 7 Series, Audi A8</option>
+              <option value="SUV">SUV (1-4 Passengers, 3 Suitcases, 2 Carry On) — Audi Q7 or Similar</option>
+              <option value="Van">Van (1-6 Passengers, 5 Suitcases) — Mercedes Van or Similar</option>
+              <option value="Mini Bus">Mini Bus (1-11 Passengers, 6 Suitcases/Trailer) — Mercedes Sprinter or Similar</option>
+            </select>
+          </div>
+
+          {/* Luggage and Passengers side by side */}
+          <div className="form-group">
+            <label>Luggage</label>
+            <input type="text" name="luggage" value={form.luggage} onChange={handleInputChange} placeholder="e.g., 2 large bags" />
+          </div>
+          <div className="form-group">
+            <label>Passengers</label>
+            <input type="number" name="passengers" min="1" max="24" value={form.passengers} onChange={handleInputChange} />
+          </div>
+
+          <div className="form-group">
+            <label>Date</label>
+            <input type="date" name="date" value={form.date} onChange={handleInputChange} required />
+          </div>
+          <div className="form-group">
+            <label>Time</label>
+            <input type="time" name="time" value={form.time} onChange={handleInputChange} required />
+          </div>
+
+          {/* Options */}
+          <div className="form-group full-width">
+            <label className="checkbox-label">
+              <input type="checkbox" name="babySeat" checked={form.babySeat} onChange={handleInputChange} />
+              Add Australian Standard Baby Seat (+$15)
+            </label>
+          </div>
+
+          {/* Google Map Embed after baby seat */}
+          <div className="form-group full-width booking-map-embed" style={{margin: '1.5rem 0'}}>
+            <iframe
+              src="https://maps.google.com/maps?q=sydney&t=&z=10&ie=UTF8&iwloc=&output=embed"
+              width="600"
+              height="300"
+              style={{ border: 0, width: '100%', borderRadius: '12px' }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Map of Sydney"
+            ></iframe>
+          </div>
+
+          {/* Personal & Journey Details */}
+          <h2 className="form-section-title">Your Details</h2>
+          <div className="form-group">
+            <label>Full Name</label>
+            <input type="text" name="name" value={form.name} onChange={handleInputChange} required />
+          </div>
+          <div className="form-group">
+            <label>Email</label>
+            <input type="email" name="email" value={form.email} onChange={handleInputChange} required />
+          </div>
+          <div className="form-group">
+            <label>Phone</label>
+            <PhoneInput country={'au'} value={form.phone} onChange={handlePhoneChange} />
+          </div>
+          
+          <div className="form-group full-width">
+            <label>Special Instructions</label>
+            <textarea name="specialInstructions" value={form.specialInstructions} onChange={handleInputChange} rows="10" placeholder="Any special requests?"></textarea>
+          </div>
+        </div>
+        <div className="form-actions">
+            <button type="button" onClick={() => setStep(1)}>Back</button>
+            <button type="button" onClick={proceedToPayment}>Proceed to Payment</button>
+        </div>
+      </form>
+    </div>
+  );
+
+  const renderStep3 = () => (
+    <div className="step-container">
+      <h2 className="step-title">Step 02: Payment Details</h2>
+      <div className="estimated-cost summary-container" style={{marginBottom: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+          <h3>Estimated Total: ${estimatedCost}</h3>
+      </div>
+      <div className="omni-form">
+        <div className="form-grid">
+          <div className="form-group full-width">
+            <label>Payment Method</label>
+            <div className="payment-options">
+              <label className="radio-label">
+                <input type="radio" name="paymentMethod" value="Card" checked={form.paymentMethod === 'Card'} onChange={handleInputChange} />
+                Credit/Debit Card
+              </label>
+              <label className="radio-label">
+                <input type="radio" name="paymentMethod" value="Cash" checked={form.paymentMethod === 'Cash'} onChange={handleInputChange} />
+                Cash
+              </label>
             </div>
           </div>
-          <div className="booking-btn-row">
-            <button className="booking-back-btn" onClick={() => setStep(4)}>Back</button>
-            <button className="booking-next-btn" onClick={() => { setConfirmed(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Confirm Booking</button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
-  // Step 6: Final confirmation message
-  if (confirmed) {
-    return (
-      <div className="booking-page-root">
-        <div className="booking-main-card">
-          <div className="booking-final-confirmation">
-            <div className="booking-confirmation-icon">✅</div>
-            <h2 className="booking-title">Booking Confirmed!</h2>
-            <p className="booking-confirmation-message">Thank you for your booking. Your ride has been successfully scheduled. We look forward to serving you!</p>
-            <button className="booking-next-btn" onClick={() => window.location.href = '/'}>Return Home</button>
-          </div>
+          {form.paymentMethod === 'Card' && (
+            <>
+              <h3 className="form-section-title">Payment Details</h3>
+              <div className="form-group">
+                <label>Name on Card</label>
+                <input type="text" name="nameOnCard" value={form.nameOnCard} onChange={handleInputChange} required />
+              </div>
+              <div className="form-group">
+                <label>Card Type</label>
+                <select name="cardType" value={form.cardType} onChange={handleInputChange}>
+                  <option value="Visa">Visa</option>
+                  <option value="Mastercard">Mastercard</option>
+                  <option value="Amex">American Express</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Card Number</label>
+                <input type="text" name="cardNumber" placeholder="xxxx xxxx xxxx xxxx" className="form-control" />
+              </div>
+              <div className="form-group">
+                <label>Expiry Date</label>
+                <div className="expiry-date-fields">
+                  <select name="expiryMonth" value={form.expiryMonth} onChange={handleInputChange} required>
+                    <option value="">Month</option>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i + 1} value={i + 1}>{String(i + 1).padStart(2, '0')}</option>
+                    ))}
+                  </select>
+                  <select name="expiryYear" value={form.expiryYear} onChange={handleInputChange} required>
+                    <option value="">Year</option>
+                    {Array.from({ length: 10 }, (_, i) => (
+                      <option key={i} value={new Date().getFullYear() + i}>{new Date().getFullYear() + i}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>CVC</label>
+                <input type="text" name="cvc" placeholder="123" className="form-control" />
+              </div>
+              <h3 className="form-section-title">Terms and Conditions</h3>
+              <div className="form-group full-width">
+                <label className="checkbox-label">
+                  <input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={handleInputChange} required />
+                  I accept the terms and conditions.
+                </label>
+              </div>
+            </>
+          )}
         </div>
-        <Footer />
+        <div className="form-actions">
+          <button type="button" onClick={() => setStep(2)}>Back</button>
+          <button type="button" onClick={() => setStep(4)}>View Summary</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep4 = () => {
+    return (
+      <div className="step-container summary-container">
+        <h2 className="step-title">Booking Summary</h2>
+        <div className="summary-details">
+          <p><strong>Booking Type:</strong> {form.bookingMethod === 'distance' ? 'Distance-Based' : 'Time-Based'}</p>
+          <p><strong>Service:</strong> {form.serviceType}</p>
+          {form.flightNumber && <p><strong>Flight Number:</strong> {form.flightNumber}</p>}
+          {form.flightTime && <p><strong>Flight Time:</strong> {form.flightTime}</p>}
+          <p><strong>Pickup:</strong> {`${form.pickup}, ${form.pickupPostcode}`}</p>
+          {form.dropoff && <p><strong>Drop-off:</strong> {`${form.dropoff}, ${form.dropoffPostcode}`}</p>}
+          <p><strong>Date & Time:</strong> {form.date} at {form.time}</p>
+          <p><strong>Passengers:</strong> {form.passengers}</p>
+          {form.bookingMethod === 'distance' && form.distance && <p><strong>Distance:</strong> {form.distance} km</p>}
+          <p><strong>Luggage:</strong> {form.luggage}</p>
+          <p><strong>Baby Seat:</strong> {form.babySeat ? 'Yes (+$15)' : 'No'}</p>
+          {form.specialInstructions && <p><strong>Special Instructions:</strong> {form.specialInstructions}</p>}
+          <p><strong>Payment Method:</strong> {form.paymentMethod}</p>
+        </div>
+        
+        <div className="booking-map-embed">
+          <iframe
+            src="https://maps.google.com/maps?q=sydney&t=&z=10&ie=UTF8&iwloc=&output=embed"
+            width="600"
+            height="300"
+            style={{ border: 0, width: '100%', borderRadius: '12px' }}
+            allowFullScreen=""
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Map of Sydney"
+          ></iframe>
+        </div>
+
+        <div className="estimated-cost">
+          <h3>Estimated Total: ${estimatedCost}</h3>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-actions">
+            <button type="button" onClick={() => setStep(3)}>Back</button>
+            <button type="submit" className="submit-btn">Confirm & Book</button>
+          </div>
+        </form>
       </div>
     );
-  }
-  return null;
+  };
+
+  return (
+    <div className="booking-page-root">
+      <div className="booking-form-container">
+        {step === 1 && renderStep1()}
+        {step === 2 && renderStep2()}
+        {step === 3 && renderStep3()}
+        {step === 4 && renderStep4()}
+      </div>
+    </div>
+  );
 };
 
 export default BookingPage; 
