@@ -8,6 +8,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import AirportShuttleIcon from '@mui/icons-material/AirportShuttle';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Footer from '../components/Footer/Footer';
 
 const services = [
   {
@@ -55,6 +56,7 @@ const services = [
 ];
 
 const ServicesPage = () => (
+  <>
   <Box minHeight="100vh" sx={{ background: 'linear-gradient(135deg, #f5f7fa 60%, #c3cfe2 100%)', py: 8 }}>
     <Container>
       <Typography variant="h3" color="primary" fontWeight={700} mb={6} align="center">Our Services</Typography>
@@ -80,6 +82,9 @@ const ServicesPage = () => (
       </Grid>
     </Container>
   </Box>
+  {/* Footer */}
+  <Footer />
+  </>
 );
 
 export default ServicesPage; 

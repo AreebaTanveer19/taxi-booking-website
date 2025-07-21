@@ -7,6 +7,7 @@ import team1 from '../assets/A7.png';
 import team2 from '../assets/A8.png';
 import team3 from '../assets/Q7.png';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer/Footer';
 
 const values = [
   {
@@ -32,6 +33,7 @@ const team = [
 const AboutPage = () => {
   const navigate = useNavigate();
   return (
+    <>
     <div className="about-root">
       {/* Hero Banner */}
       <section className="about-hero" style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.7),rgba(24,24,24,0.7)), url(${aboutImg})` }}>
@@ -129,6 +131,9 @@ const AboutPage = () => {
         </motion.div>
       </section>
     </div>
+    {/* Footer */}
+    <Footer />
+    </>
   );
 };
 

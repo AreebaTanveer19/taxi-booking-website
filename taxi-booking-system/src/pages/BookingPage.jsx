@@ -6,6 +6,7 @@ import '../styles/BookingPage.css';
 import A7 from '../assets/A7.png';
 import A8 from '../assets/A8.png';
 import Q7 from '../assets/Q7.png';
+import Footer from '../components/Footer/Footer';
 
 const SYDNEY_TERMINALS = ['T1 International', 'T2 Domestic', 'T3 Qantas Domestic'];
 const AIRPORT_TOLL_TAX = 15;
@@ -162,8 +163,12 @@ const BookingPage = () => {
             <button className={`hero-btn${bookingType === 'Airport Transfer' ? ' active' : ''}`} onClick={() => setBookingType('Airport Transfer')}>Airport Transfer</button>
             <button className={`hero-btn${bookingType === 'Point to Point' ? ' active' : ''}`} onClick={() => setBookingType('Point to Point')}>Point to Point</button>
           </div>
-          <button className="booking-next-btn" disabled={!bookingType} onClick={() => setStep(bookingType === 'Airport Transfer' ? 2 : 3)}>Next</button>
+          <button className="booking-next-btn" disabled={!bookingType} onClick={() => {
+            setStep(bookingType === 'Airport Transfer' ? 2 : 3);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}>Next</button>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -175,7 +180,7 @@ const BookingPage = () => {
         <div className="booking-main-card">
           <Stepper />
           <h2 className="booking-title">Select Sydney Airport Terminal</h2>
-          <form className="booking-form" onSubmit={e => { e.preventDefault(); setStep(3); }}>
+          <form className="booking-form" onSubmit={e => { e.preventDefault(); setStep(3); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
             <label htmlFor="terminal-select" className="booking-label">Terminal</label>
             <select
               id="terminal-select"
@@ -195,6 +200,7 @@ const BookingPage = () => {
             </div>
           </form>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -257,9 +263,10 @@ const BookingPage = () => {
           </div>
           <div className="booking-btn-row">
             <button className="booking-back-btn" onClick={() => setStep(bookingType === 'Airport Transfer' ? 2 : 1)}>Back</button>
-            <button className="booking-next-btn" onClick={handleDetailsSubmit}>Next</button>
+            <button className="booking-next-btn" onClick={() => { handleDetailsSubmit(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Next</button>
           </div>
         </div>
+        <Footer />
       </div>
     )
   }
@@ -299,9 +306,10 @@ const BookingPage = () => {
           </div>
           <div className="booking-btn-row">
             <button className="booking-back-btn" onClick={() => setStep(3)}>Back</button>
-            <button className="booking-next-btn" onClick={() => setStep(5)} disabled={!selectedVehicle}>Next</button>
+            <button className="booking-next-btn" onClick={() => { setStep(5); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={!selectedVehicle}>Next</button>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -345,9 +353,10 @@ const BookingPage = () => {
           </div>
           <div className="booking-btn-row">
             <button className="booking-back-btn" onClick={() => setStep(4)}>Back</button>
-            <button className="booking-next-btn" onClick={() => setConfirmed(true)}>Confirm Booking</button>
+            <button className="booking-next-btn" onClick={() => { setConfirmed(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Confirm Booking</button>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -364,10 +373,10 @@ const BookingPage = () => {
             <button className="booking-next-btn" onClick={() => window.location.href = '/'}>Return Home</button>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
-
   return null;
 };
 

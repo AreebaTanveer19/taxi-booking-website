@@ -18,7 +18,7 @@ const Footer = () => {
             <span>ABHI NAE PATA</span> Chauffeurs
           </h3>
           <p className="footer-text">
-            Premium taxi and chauffeur services in Sydney. Safe, reliable, and comfortable rides for all your travel needs.
+            Premium ride and chauffeur services in Sydney. Safe, reliable, and comfortable rides for all your travel needs.
           </p>
           <div className="footer-contact-info">
             <div><b>Phone:</b> <a href="tel:0123456789">0123 456 789</a></div>
