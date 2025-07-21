@@ -1257,6 +1257,8 @@ body.menu-open {
     min-height: 440px;
     max-width: 250px;
     padding: 28px 8px 24px 8px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 } 
 
@@ -1375,12 +1377,39 @@ body.menu-open {
   .services-cards-img-grid {
     grid-template-columns: 1fr;
     gap: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
+    justify-items: center;
   }
   .services-card-img-v2 {
     min-height: 220px;
+    margin-left: auto;
+    margin-right: auto;
   }
   .services-main-title {
     font-size: 1.3rem;
+  }
+
+  .aboutus-cards-section {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .aboutus-cards-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    max-width: 700px;
+    justify-items: center;
+    align-items: center;
+  }
+  .aboutus-card {
+    min-height: 440px;
+    max-width: 250px;
+    padding: 28px 8px 24px 8px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 } 
 
@@ -1595,4 +1624,54 @@ body.menu-open {
 .quote-btn:hover {
   background: #ffd54f;
   color: #181818;
+} 
+
+@media (max-width: 700px) {
+  .why-section,
+  .services-section-img,
+  .services-section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100vw;
+    box-sizing: border-box;
+  }
+  .why-title,
+  .services-main-title {
+    text-align: center !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .aboutus-cards-section {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .aboutus-cards-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    max-width: 700px;
+    justify-items: center;
+    align-items: center;
+  }
+  .aboutus-card {
+    min-height: 440px;
+    max-width: 250px;
+    padding: 28px 8px 24px 8px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .services-main-title {
+    margin-bottom: 28px !important;
+  }
+  .services-main-sub {
+    display: none !important;
+  }
 } 

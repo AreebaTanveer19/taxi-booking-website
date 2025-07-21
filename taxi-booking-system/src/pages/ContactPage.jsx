@@ -2,6 +2,8 @@ import React from 'react';
 import ContactForm from '../components/ContactForm';
 import '../styles/ContactPage.css';
 import Footer from '../components/Footer/Footer';
+import { motion } from 'framer-motion';
+import contactImg from '../assets/contact.png';
 
 const CONTACT_INFO = {
   phone: '0123 456 789',
@@ -14,6 +16,11 @@ const ContactPage = () => {
   // Replace SYDNEY_MAP_URL with Google Static Maps API (no key)
   const SYDNEY_MAP_URL = 'https://maps.googleapis.com/maps/api/staticmap?center=Sydney,Australia&zoom=12&size=400x200&maptype=roadmap&markers=color:black%7Clabel:S%7CSydney';
   return (
+    <>
+    {/* Hero Section */}
+    <section className="about-hero" style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.1),rgba(24,24,24,0.1)), url(${contactImg})` }}>
+      {/* No text or buttons, just the background image */}
+    </section>
     <div className="contact-page-root">
       <div className="contact-page-container">
         <div className="contact-form-section">
@@ -39,12 +46,15 @@ const ContactPage = () => {
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106312.4752229376!2d151.043255!3d-33.867487!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12ae3e8b2c7e9b%3A0x5017d681632c5a0!2sSydney%20NSW%2C%20Australia!5e0!3m2!1sen!2sau!4v1689999999999!5m2!1sen!2sau"
-            ></iframe>
+              ></iframe>
           </div>
         </div>
       </div>
       
     </div>
+    {/* Footer */}
+    <Footer />
+    </>
   );
 };
 

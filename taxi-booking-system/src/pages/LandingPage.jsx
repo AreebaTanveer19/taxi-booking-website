@@ -141,10 +141,10 @@ const LandingPage = () => {
           <div className="hero-text">
             <span className="hero-tagline hide-on-mobile-hero">Travel securely with us !</span>
             <h1 className="hero-headline">
-              Book your taxi from<br />anywhere today!
+              Book your ride from<br />anywhere today!
             </h1>
             <p className="hero-subtext hide-on-mobile-hero">
-              Enjoy fast, reliable, and comfortable rides with our professional drivers. Book your taxi in seconds and travel anywhere, anytime—24/7. Your journey, your way, with safety and convenience guaranteed.
+              Enjoy fast, reliable, and comfortable rides with our professional drivers. Book your ride in seconds and travel anywhere, anytime—24/7. Your journey, your way, with safety and convenience guaranteed.
             </p>
             <div className="hero-btn-group hero-btn-group-row">
               <button className="hero-btn hero-btn-primary" onClick={() => navigate('/book')}>

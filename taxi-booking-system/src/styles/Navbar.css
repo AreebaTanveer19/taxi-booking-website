@@ -482,6 +482,34 @@
     transform: rotate(-45deg) translate(6px, -6px);
   }
 
+  /* Mobile Sidebar Styles */
+  .navbar-sidebar {
+    height: 70vh;
+    min-height: 400px;
+    max-height: 95vh;
+    border-bottom-left-radius: 2.2rem;
+    border-bottom-right-radius: 2.2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  }
+
+  /* Make navbar fixed and faded on mobile */
+  .navbar-main {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1202;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    transition: background 0.25s, backdrop-filter 0.25s;
+  }
+
+  .navbar-main-container {
+    height: 48px;
+    padding: 0 4vw;
+  }
+
   /* Mobile Menu Overlay */
   .navbar-links {
     position: fixed;

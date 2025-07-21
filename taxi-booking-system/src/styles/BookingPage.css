@@ -4,9 +4,8 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f7f8fa 60%, #e3e6ee 100%);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 8px;
+  flex-direction: column;
+  padding: 32px 0 0 0;
 }
 .booking-main-card {
   background: #fff;
@@ -20,6 +19,7 @@
   flex-direction: column;
   align-items: center;
   animation: bookingCardFadeIn 0.7s cubic-bezier(0.4,0,0.2,1);
+  flex: 1 0 auto;
 }
 @keyframes bookingCardFadeIn {
   0% { opacity: 0; transform: translateY(40px) scale(0.98); }

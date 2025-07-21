@@ -4,9 +4,10 @@ import logoImg from '../assets/logo.png';
 
 const navLinks = [
   { label: 'HOME', path: '/' },
-  { label: 'ABOUT', path: '/about' },
+  { label: 'BOOK', path: '/book' },
   { label: 'SERVICES', path: '/services' },
   { label: 'OUR FLEET', path: '/fleet' },
+  { label: 'ABOUT', path: '/about' },
   { label: 'CONTACT', path: '/contact' },
 ];
 
