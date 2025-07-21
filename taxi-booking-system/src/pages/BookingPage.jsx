@@ -254,6 +254,19 @@ const BookingPage = () => {
                 {formErrors.time && <div className="form-error">{formErrors.time}</div>}
               </label>
             </div>
+            {/* Google Maps Embed for Sydney */}
+            <div className="booking-map-embed">
+              <iframe
+                title="Sydney Map"
+                width="100%"
+                height="220"
+                style={{ border: 0, borderRadius: '10px' }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106312.4752229376!2d151.043255!3d-33.867487!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12ae3e8b2c7e9b%3A0x5017d681632c5a0!2sSydney%20NSW%2C%20Australia!5e0!3m2!1sen!2sau!4v1689999999999!5m2!1sen!2sau"
+              ></iframe>
+            </div>
           </div>
           <div className="booking-btn-row">
             <button className="booking-back-btn" onClick={() => setStep(bookingType === 'Airport Transfer' ? 2 : 1)}>Back</button>

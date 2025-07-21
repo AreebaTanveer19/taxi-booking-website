@@ -468,4 +468,24 @@
   border-radius: 12px 0 0 12px !important;
   border: 1px solid #d0d5dd !important;
   background: #f9fafb !important;
-} 
+}
+
+.booking-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.booking-map-embed {
+  margin-top: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.booking-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
