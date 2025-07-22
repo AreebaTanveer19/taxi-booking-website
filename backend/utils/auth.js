@@ -1,10 +1,16 @@
-// Admin middleware (demo version)
+// Admin middleware using .env credentials
 module.exports = function adminOnly(req, res, next) {
-  // For demo: check for a header 'x-admin-token' with value 'secret-admin-token'
-  // In production, use JWT or session auth!
-  const token = req.headers['x-admin-token'];
-  if (token === 'secret-admin-token') {
+  console.log('Received credentials:', req.body);
+  console.log('Expected credentials:', {
+    username: process.env.ADMIN_USERNAME,
+    password: process.env.ADMIN_PASSWORD
+  });
+  
+  const { username, password } = req.body;
+  
+  if (username === process.env.ADMIN_USERNAME && 
+      password === process.env.ADMIN_PASSWORD) {
     return next();
   }
   return res.status(403).json({ success: false, message: 'Access denied: Admins only.' });
-}; 
+};
