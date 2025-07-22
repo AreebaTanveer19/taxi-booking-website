@@ -1,24 +1,31 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-  name: String,
-  phone: String,
-  email: String,
-  pickup: String,
-  dropoff: String,
-  postcode: String,
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
+  bookingMethod: String,
+  city: String,
+  serviceType: String,
+  flightNumber: String,
+  flightTime: String,
+  luggage: String,
+  specialInstructions: String,
+  paymentMethod: String,
+  nameOnCard: String,
+  cardType: String,
+  expiryMonth: String,
+  expiryYear: String,
+  termsAccepted: Boolean,
+  vehiclePreference: String,
   date: String,
   time: String,
-  bookingType: String,
-  terminal: String,
-  distance: Number,
-  fare: Number,
-  toll: Number,
-  vehicle: Object,
-  total: Number,
-  createdAt: { type: Date, default: Date.now },
-});
+  passengers: Number,
+  babySeat: Boolean,
+  pickup: String,
+  dropoff: String,
+  distance: String,
+  pickupPostcode: String,
+  dropoffPostcode: String,
+  estimatedCost: String
+}, { timestamps: true });
 
-const Booking = mongoose.model('Booking', bookingSchema);
-
-module.exports = Booking; 
+module.exports = mongoose.model('Booking', bookingSchema);

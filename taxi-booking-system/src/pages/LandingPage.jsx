@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import taxiImg from '../assets/taxi.jpeg';
+import taxiImg from '../assets/taxi1.jpg';
 import '../styles/LandingPage.css';
 import { FaChair, FaSnowflake, FaSuitcase, FaStar } from 'react-icons/fa';
 import { GiCarSeat } from 'react-icons/gi';

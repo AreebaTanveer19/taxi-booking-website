@@ -84,12 +84,32 @@ const BookingPage = () => {
     setStep(3); // Move to payment page
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Final submission to backend API
-    console.log('Final Booking Data:', { ...form, estimatedCost });
-    // Here you would make the API call to your backend
+  
+    const bookingData = { ...form, estimatedCost };
+  
+    try {
+      const response = await fetch('http://localhost:5000/api/bookings/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+      });
+  
+      const result = await response.json();
+  
+      if (result.success) {
+        alert('Booking submitted! Admin has been notified.');
+        setStep(1); // Optional: Reset form or redirect
+      } else {
+        alert('Booking failed. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      alert('Something went wrong. Try again later.');
+    }
   };
+  
 
   const renderStep1 = () => (
     <div className="step-container">
@@ -175,11 +195,11 @@ const BookingPage = () => {
             <label>Vehicle Preference</label>
             <select name="vehiclePreference" value={form.vehiclePreference} onChange={handleInputChange} required>
               <option value="">-- Select a Vehicle --</option>
-              <option value="Executive Sedan">Executive Sedan (1-3 Passengers, 2 Suitcases) — Lexus, Mercedes E Class, BMW 5 Series</option>
-              <option value="Premium Sedan">Premium Sedan (1-3 Passengers, 2 Suitcases) — Mercedes S Class, BMW 7 Series, Audi A8</option>
-              <option value="SUV">SUV (1-4 Passengers, 3 Suitcases, 2 Carry On) — Audi Q7 or Similar</option>
+              <option value="Executive Sedan">Executive Sedan (1-3 Passengers, 2 Suitcases) </option>
+              <option value="Premium Sedan">Premium Sedan (1-3 Passengers, 2 Suitcases) </option>
+              <option value="SUV">SUV (1-4 Passengers, 3 Suitcases, 2 Carry On) </option>
               <option value="Van">Van (1-6 Passengers, 5 Suitcases) — Mercedes Van or Similar</option>
-              <option value="Mini Bus">Mini Bus (1-11 Passengers, 6 Suitcases/Trailer) — Mercedes Sprinter or Similar</option>
+              <option value="Sprinter">Sprinter (1-11 Passengers, 6 Suitcases/Trailer)</option>
             </select>
           </div>
 

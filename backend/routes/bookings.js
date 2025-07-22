@@ -1,62 +1,73 @@
 const express = require('express');
 const router = express.Router();
-const nodemailer = require('nodemailer');
 const Booking = require('../models/Booking');
+const User = require('../models/Users');
+const adminOnly = require('../utils/auth');
 
-// Nodemailer Transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// Create a new booking
-router.post('/', async (req, res) => {
+router.post('/book', async (req, res) => {
   try {
-    const booking = new Booking(req.body);
-    await booking.save();
+    // Extract user details
+    const { name, email, phone, ...rideDetails } = req.body;
 
-    // Send email notification to admin
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: process.env.ADMIN_EMAIL,
-      subject: 'New Taxi Booking Received',
-      html: `
-        <h2>New Booking Details</h2>
-        <p><strong>Name:</strong> ${booking.name}</p>
-        <p><strong>Phone:</strong> ${booking.phone}</p>
-        <p><strong>Email:</strong> ${booking.email}</p>
-        <p><strong>Pickup:</strong> ${booking.pickup}</p>
-        <p><strong>Dropoff:</strong> ${booking.dropoff}</p>
-        <p><strong>Date & Time:</strong> ${booking.date} at ${booking.time}</p>
-        <p><strong>Total Fare:</strong> $${booking.total}</p>
-      `,
-    };
+    // Input validation
+    if (!name || !email || !phone) {
+      return res.status(400).json({ success: false, message: 'Name, email, and phone are required.' });
+    }
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-      } else {
-        console.log('Email sent:', info.response);
-      }
-    });
+    // Save user details
+    const user = new User({ name, email, phone });
+    const savedUser = await user.save();
 
-    res.status(201).json(booking);
-  } catch (error) {
-    res.status(400).json({ error: 'Failed to create booking' });
+    // Save booking/ride details with userId
+    const bookingData = { ...rideDetails, userId: savedUser._id };
+    const newBooking = new Booking(bookingData);
+    const savedBooking = await newBooking.save();
+
+    res.status(201).json({ success: true, message: 'Booking saved', booking: savedBooking, user: savedUser });
+  } catch (err) {
+    console.error('Booking/User save error:', err);
+    res.status(500).json({ success: false, message: 'Error saving booking', error: err.message });
   }
 });
 
-// Get all bookings
-router.get('/', async (req, res) => {
+// Create a new user
+router.post('/user', async (req, res) => {
   try {
-    const bookings = await Booking.find().sort({ createdAt: -1 });
-    res.json(bookings);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch bookings' });
+    const userData = req.body;
+    const newUser = new User(userData);
+    const savedUser = await newUser.save();
+    res.status(201).json({ success: true, message: 'User created', user: savedUser });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error creating user' });
   }
 });
 
-module.exports = router; 
+// Get all bookings with user info
+router.get('/all', async (req, res) => {
+  try {
+    const bookings = await Booking.find().populate('userId');
+    res.json({ success: true, bookings });
+  } catch (err) {
+    console.error('Error fetching bookings:', err);
+    res.status(500).json({ success: false, message: 'Error fetching bookings' });
+  }
+});
+
+// Get all users
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json({ success: true, users });
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ success: false, message: 'Error fetching users' });
+  }
+});
+
+// Example admin-only route
+router.get('/admin/secret', adminOnly, (req, res) => {
+  res.json({ success: true, message: 'Welcome, admin! This is a protected route.' });
+});
+
+module.exports = router;
