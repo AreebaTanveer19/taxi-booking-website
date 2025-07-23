@@ -1,8 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import BookingPage from './pages/BookingPage';
-// import BookingConfirmationPage from './pages/BookingConfirmationPage';
-import DriverDashboard from './pages/DriverDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
@@ -13,7 +11,7 @@ import AccessDenied from './pages/AccessDenied';
 import AdminLogin from './pages/AdminLogin';
 import { useState } from 'react';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+// Remove process.env reference since we're using proxy
 
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -21,7 +19,7 @@ function App() {
   // Admin login function
   const handleAdminLogin = async (credentials) => {
     try {
-      const response = await fetch('/api/admin/login', {
+      const response = await fetch('http://localhost:5000/api/admin/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
@@ -39,18 +37,15 @@ function App() {
   
   return (
     <Router>
-      <Navbar />
+      
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/book" element={<BookingPage />} />
-        {/* <Route path="/confirmation" element={<BookingConfirmationPage />} /> */}
-        <Route path="/driver" element={<DriverDashboard />} />
-        <Route path="/admin-login" element={<AdminLogin onLogin={handleAdminLogin} />} />
-        <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Navigate to="/admin-login" />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/fleet" element={<FleetPage />} />
-        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/" element={<><Navbar /><LandingPage /></>} />
+        <Route path="/book" element={<><Navbar /><BookingPage /></>} />
+        <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <AdminLogin onLogin={handleAdminLogin} />} />
+        <Route path="/about" element={<><Navbar /><AboutPage /></>} />
+        <Route path="/contact" element={<><Navbar /><ContactPage /></>} />
+        <Route path="/fleet" element={<><Navbar /><FleetPage /></>} />
+        <Route path="/services" element={<><Navbar /><ServicesPage /></>} />
         <Route path="/access-denied" element={<AccessDenied />} />
       </Routes>
     </Router>

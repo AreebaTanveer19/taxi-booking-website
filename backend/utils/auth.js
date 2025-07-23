@@ -1,10 +1,8 @@
-// Admin middleware using .env credentials
+// Secure admin middleware
 module.exports = function adminOnly(req, res, next) {
-  console.log('Received credentials:', req.body);
-  console.log('Expected credentials:', {
-    username: process.env.ADMIN_USERNAME,
-    password: process.env.ADMIN_PASSWORD
-  });
+  if (!req.body || !req.body.username || !req.body.password) {
+    return res.status(400).json({ success: false, message: 'Username and password required' });
+  }
   
   const { username, password } = req.body;
   
@@ -12,5 +10,5 @@ module.exports = function adminOnly(req, res, next) {
       password === process.env.ADMIN_PASSWORD) {
     return next();
   }
-  return res.status(403).json({ success: false, message: 'Access denied: Admins only.' });
+  return res.status(403).json({ success: false, message: 'Access denied' });
 };

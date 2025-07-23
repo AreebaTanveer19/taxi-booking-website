@@ -1,42 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, IconButton, TextField, InputAdornment } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import SearchIcon from '@mui/icons-material/Search';
+import '../styles/AdminDashboard.css';
 
-const AdminDashboard = () => {
+export default function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
+  const [showUsers, setShowUsers] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/bookings');
+      const data = await response.json();
+      if (data.success) {
+        setBookings(data.bookings);
+        setError(null);
+      } else {
+        setError('Failed to load bookings');
+      }
+    } catch (err) {
+      setError('Network error while loading bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/users');
+      const data = await response.json();
+      if (data.success) {
+        setUsers(data.users);
+        setError(null);
+      } else {
+        setError('Failed to load users');
+      }
+    } catch (err) {
+      setError('Network error while loading users');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/bookings/all')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setBookings(data.bookings);
-      });
+    fetchBookings();
+    fetchUsers();
   }, []);
 
-  // Sort bookings by date (descending)
   const sortedBookings = [...bookings].sort((a, b) => {
     const dateA = new Date(`${a.date} ${a.time}`);
     const dateB = new Date(`${b.date} ${b.time}`);
     return dateB - dateA;
   });
 
-  // Filter bookings by search
-  const filteredBookings = sortedBookings.filter(b => {
-    const values = [
-      b.userId?.name, b.userId?.email, b.userId?.phone,
-      b.bookingMethod, b.city, b.serviceType, b.flightNumber, b.flightTime, b.luggage, b.specialInstructions,
-      b.paymentMethod, b.nameOnCard, b.cardType, b.expiryMonth, b.expiryYear, b.termsAccepted ? 'Yes' : 'No',
-      b.vehiclePreference, b.date, b.time, b.passengers, b.babySeat ? 'Yes' : 'No',
-      b.pickup, b.dropoff, b.distance, b.pickupPostcode, b.dropoffPostcode, b.estimatedCost, b.status
-    ];
-    return values.some(val => val && val.toString().toLowerCase().includes(search.toLowerCase()));
-  });
+  const filteredBookings = sortedBookings.filter(b => 
+    b.userId?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    b.userId?.email?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const handleDelete = (id) => {
-    setBookings(bks => bks.filter(b => b._id !== id));
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/bookings/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await response.json();
+      if (data.success) {
+        setBookings(bks => bks.filter(b => b._id !== id));
+      }
+    } catch (err) {
+      setError('Failed to delete booking');
+    }
   };
 
   const handleExport = () => {
@@ -89,111 +125,211 @@ const AdminDashboard = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  return (
-    <Box minHeight="100vh" sx={{ background: 'linear-gradient(135deg, #f5f7fa 60%, #c3cfe2 100%)', py: 6 }}>
-      <Paper elevation={6} sx={{ maxWidth: 1800, mx: 'auto', p: 4, borderRadius: 5 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h4" color="primary">Admin Dashboard</Typography>
-          <Button variant="contained" color="primary" startIcon={<FileDownloadIcon />} onClick={handleExport}>
-            Export to CSV
-          </Button>
-        </Box>
-        <Box mb={2}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Search bookings..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ width: 350 }}
-          />
-        </Box>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>Booking Method</TableCell>
-                <TableCell>City</TableCell>
-                <TableCell>Service Type</TableCell>
-                <TableCell>Flight Number</TableCell>
-                <TableCell>Flight Time</TableCell>
-                <TableCell>Luggage</TableCell>
-                <TableCell>Special Instructions</TableCell>
-                <TableCell>Payment Method</TableCell>
-                <TableCell>Name On Card</TableCell>
-                <TableCell>Card Type</TableCell>
-                <TableCell>Expiry Month</TableCell>
-                <TableCell>Expiry Year</TableCell>
-                <TableCell>Terms Accepted</TableCell>
-                <TableCell>Vehicle Preference</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Time</TableCell>
-                <TableCell>Passengers</TableCell>
-                <TableCell>Baby Seat</TableCell>
-                <TableCell>Pickup</TableCell>
-                <TableCell>Dropoff</TableCell>
-                <TableCell>Distance</TableCell>
-                <TableCell>Pickup Postcode</TableCell>
-                <TableCell>Dropoff Postcode</TableCell>
-                <TableCell>Estimated Cost</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredBookings.map(b => (
-                <TableRow key={b._id}>
-                  <TableCell>{b.userId?.name || ''}</TableCell>
-                  <TableCell>{b.userId?.email || ''}</TableCell>
-                  <TableCell>{b.userId?.phone || ''}</TableCell>
-                  <TableCell>{b.bookingMethod}</TableCell>
-                  <TableCell>{b.city}</TableCell>
-                  <TableCell>{b.serviceType}</TableCell>
-                  <TableCell>{b.flightNumber}</TableCell>
-                  <TableCell>{b.flightTime}</TableCell>
-                  <TableCell>{b.luggage}</TableCell>
-                  <TableCell>{b.specialInstructions}</TableCell>
-                  <TableCell>{b.paymentMethod}</TableCell>
-                  <TableCell>{b.nameOnCard}</TableCell>
-                  <TableCell>{b.cardType}</TableCell>
-                  <TableCell>{b.expiryMonth}</TableCell>
-                  <TableCell>{b.expiryYear}</TableCell>
-                  <TableCell>{b.termsAccepted ? 'Yes' : 'No'}</TableCell>
-                  <TableCell>{b.vehiclePreference}</TableCell>
-                  <TableCell>{b.date}</TableCell>
-                  <TableCell>{b.time}</TableCell>
-                  <TableCell>{b.passengers}</TableCell>
-                  <TableCell>{b.babySeat ? 'Yes' : 'No'}</TableCell>
-                  <TableCell>{b.pickup}</TableCell>
-                  <TableCell>{b.dropoff}</TableCell>
-                  <TableCell>{b.distance}</TableCell>
-                  <TableCell>{b.pickupPostcode}</TableCell>
-                  <TableCell>{b.dropoffPostcode}</TableCell>
-                  <TableCell>{b.estimatedCost}</TableCell>
-                  <TableCell>{b.status || 'Confirmed'}</TableCell>
-                  <TableCell>
-                    <IconButton color="error" onClick={() => handleDelete(b._id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </Box>
-  );
-};
+  const handleLogout = () => {
+    // Clear admin auth state
+    localStorage.removeItem('adminToken');
+    window.location.href = '/admin';
+  };
 
-export default AdminDashboard; 
+  return (
+    <div className="admin-dashboard">
+      {/* Sidebar */}
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <img src="/logo.jpeg" alt="Logo" className="sidebar-logo" />
+          <h2 className="sidebar-title">Horizon Chauffeurs</h2>
+        </div>
+        
+        <ul className="nav-menu">
+          <li className="nav-item">
+            <a href="#" className="nav-link active">
+              <span className="nav-icon">📊</span>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li className="nav-item">
+            <button 
+              className={`nav-link ${!showUsers ? 'active' : ''}`}
+              onClick={() => {
+                fetchBookings();
+                setShowUsers(false);
+              }}
+            >
+              <span className="nav-icon">🚖</span>
+              <span>Bookings</span>
+            </button>
+          </li>
+          <li className="nav-item">
+            <button 
+              className={`nav-link ${showUsers ? 'active' : ''}`}
+              onClick={() => {
+                fetchUsers();
+                setShowUsers(true);
+              }}
+            >
+              <span className="nav-icon">👥</span>
+              <span>Users</span>
+            </button>
+          </li>
+          <li className="nav-item">
+            <button 
+              className="nav-link" 
+              onClick={handleLogout}
+              style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              <span className="nav-icon">🚪</span>
+              <span>Logout</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      {/* Main Content */}
+      <div className="main-content">
+        <div className="dashboard-header">
+          <h1 className="header-title">Dashboard</h1>
+          <div className="user-profile">
+            <span>Welcome, Admin</span>
+            <div className="user-avatar">👤</div>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="cards-container">
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">Total Bookings</h3>
+              <div className="card-icon">📅</div>
+            </div>
+            <p className="card-value">{bookings.length}</p>
+          </div>
+          
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">Active Drivers</h3>
+              <div className="card-icon">👨‍✈️</div>
+            </div>
+            <p className="card-value">24</p>
+          </div>
+          
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">Revenue</h3>
+              <div className="card-icon">💰</div>
+            </div>
+            <p className="card-value">$12,450</p>
+          </div>
+        </div>
+
+        {/* Recent Bookings */}
+        {showUsers ? (
+          <div className="recent-bookings">
+            <h2 className="section-title">Users</h2>
+            <table className="bookings-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.length > 0 ? (
+                  users.map(u => (
+                    <tr key={u._id}>
+                      <td>{u.name}</td>
+                      <td>{u.email}</td>
+                      <td>{u.phone}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="no-bookings">
+                      No users found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="recent-bookings">
+            <h2 className="section-title">Recent Bookings</h2>
+            
+            <div className="search-bar">
+              <input 
+                type="text" 
+                placeholder="Search bookings..." 
+                value={search} 
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            
+            <table className="bookings-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Pickup</th>
+                  <th>Dropoff</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredBookings.length > 0 ? (
+                  filteredBookings.map(b => (
+                    <tr key={b._id}>
+                      <td>{b.userId?.name || ''}</td>
+                      <td>{b.userId?.email || ''}</td>
+                      <td>{b.userId?.phone || ''}</td>
+                      <td>{b.pickup}</td>
+                      <td>{b.dropoff}</td>
+                      <td>{b.date}</td>
+                      <td>{b.status || 'Confirmed'}</td>
+                      <td>
+                        <button 
+                          className="delete-btn" 
+                          onClick={() => handleDelete(b._id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8" className="no-bookings">
+                      No bookings found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+        
+        {/* Export Button */}
+        {!showUsers && (
+          <button onClick={handleExport}>Export to CSV</button>
+        )}
+        
+        {/* Error Message */}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+        
+        {/* Loading Indicator */}
+        {loading && (
+          <div className="loading-indicator">
+            Loading...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
