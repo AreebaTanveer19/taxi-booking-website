@@ -27,7 +27,7 @@ const Navbar = () => {
       {/* Top Black Bar (hidden on mobile) */}
       <div className="navbar-topbar hide-on-mobile">
         <div className="navbar-topbar-left navbar-topbar-welcome">
-          <span className="navbar-topbar-welcome-text"><b>Welcome to <span className="navbar-topbar-site">abhi naam ni pta</span></b>, we hope you will enjoy our services and have a good experience.</span>
+          <span className="navbar-topbar-welcome-text"><b>Welcome to <span className="navbar-topbar-site">Horizon Chauffeurs</span></b>, we hope you will enjoy our services and have a good experience.</span>
         </div>
         <div className="navbar-topbar-right">
           <span className="navbar-topbar-item"><span className="navbar-topbar-icon-email">✉️</span>info@abhinaamnipta.au</span>
@@ -42,7 +42,7 @@ const Navbar = () => {
               <img src={logoImg} alt="Logo" className="navbar-logo-img-asset" />
             </span>
             <span className="navbar-logo-text">
-              <span className="navbar-logo-title">ABHI NAE PATA</span>
+              <span className="navbar-logo-title">HORIZON</span>
               <span className="navbar-logo-sub">CHAUFFEURS</span>
             </span>
           </div>

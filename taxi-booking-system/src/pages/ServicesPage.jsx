@@ -9,82 +9,137 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import AirportShuttleIcon from '@mui/icons-material/AirportShuttle';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Footer from '../components/Footer/Footer';
+import '../styles/ServicesPage.css';
+import servicesHeroImg from '../assets/taxi1.png';
+import corporateimg from '../assets/taxi1.png';
+import airportimg from '../assets/taxi1.png';
+import weddingimg from '../assets/taxi1.png';
+import executiveimg from '../assets/taxi1.png';
+import crewimg from '../assets/taxi1.png';
+import tourimg from '../assets/taxi1.png';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const services = [
   {
     name: 'Airport Transfers',
     icon: <FlightTakeoffIcon fontSize="large" />, 
-    desc: 'Seamless airport pickups and drop-offs with real-time flight tracking and meet & greet service.',
-    useCases: ['Domestic & International Flights', 'Family & Group Transfers', 'Business Travelers'],
+    image: airportimg,
+    desc: 'Reliable and punctual airport transfers for all your flights.',
+    useCases: [
+      'Domestic & International Flights',
+      'Meet & Greet Service',
+      'Flight Tracking',
+      'Luggage Assistance'
+    ]
   },
   {
     name: 'Corporate Transfers',
-    icon: <BusinessCenterIcon fontSize="large" />, 
-    desc: 'Professional rides for business meetings, conferences, and executive travel.',
-    useCases: ['Meetings & Conferences', 'VIP Client Transfers', 'Corporate Events'],
+    icon: <BusinessCenterIcon fontSize="large" />,
+    image: corporateimg,
+    desc: 'Professional transportation for business executives and corporate events.',
+    useCases: [
+      'Executive Commutes',
+      'Client Meetings',
+      'Corporate Events',
+      'Conference Transfers'
+    ]
   },
   {
-    name: 'Wedding Transfers',
-    icon: <EventIcon fontSize="large" />, 
-    desc: 'Arrive in style for your special day with our luxury wedding transfer service.',
-    useCases: ['Bride & Groom Arrival', 'Guest Shuttles', 'Reception Transfers'],
+    name: 'Wedding Services',
+    icon: <EventIcon fontSize="large" />,
+    image: weddingimg,
+    desc: 'Elegant and stylish wedding car hire for your special day.',
+    useCases: [
+      'Bridal Party Transport',
+      'Groom Transport',
+      'Guest Shuttles',
+      'Venue Transfers'
+    ]
   },
   {
-    name: 'Special Events',
-    icon: <EmojiEventsIcon fontSize="large" />, 
-    desc: 'Make every event memorable with our punctual and stylish event transfer service.',
-    useCases: ['Concerts & Festivals', 'Birthday Parties', 'Sporting Events'],
+    name: 'Event Transportation',
+    icon: <EmojiEventsIcon fontSize="large" />,
+    image: executiveimg,
+    desc: 'Group transportation for concerts, sports, and special events.',
+    useCases: [
+      'Concert Transfers',
+      'Sporting Events',
+      'Galas & Awards',
+      'VIP Event Access'
+    ]
   },
   {
-    name: 'Executive Transfers',
-    icon: <DirectionsCarIcon fontSize="large" />, 
-    desc: 'Prestige and comfort for executives, with privacy and productivity features.',
-    useCases: ['Board Meetings', 'Hotel Transfers', 'Airport Pickups'],
+    name: 'Tours & Sightseeing',
+    icon: <DirectionsCarIcon fontSize="large" />,
+    image: tourimg,
+    desc: 'Guided tours with luxury transportation to explore the city.',
+    useCases: [
+      'City Tours',
+      'Wine Country Tours',
+      'Custom Itineraries',
+      'Multi-Day Excursions'
+    ]
   },
   {
-    name: 'Crew Transportation',
-    icon: <AirportShuttleIcon fontSize="large" />, 
-    desc: 'Efficient and reliable crew transport for airlines, film, and events.',
-    useCases: ['Airline Crew', 'Film & TV Crews', 'Event Staff'],
-  },
-  {
-    name: 'Parcel Delivery',
-    icon: <LocalShippingIcon fontSize="large" />, 
-    desc: 'Fast and secure parcel delivery for urgent and scheduled shipments.',
-    useCases: ['Documents', 'Gifts', 'Business Deliveries'],
-  },
+    name: 'Crew Shuttles',
+    icon: <LocalShippingIcon fontSize="large" />,
+    image: crewimg,
+    desc: 'Efficient crew transportation for film, TV, and production teams.',
+    useCases: [
+      'Film & TV Shoots',
+      'Production Crews',
+      'Equipment Transport',
+      'Location Shuttles'
+    ]
+  }
 ];
 
-const ServicesPage = () => (
-  <>
-  <Box minHeight="100vh" sx={{ background: 'linear-gradient(135deg, #f5f7fa 60%, #c3cfe2 100%)', py: 8 }}>
-    <Container>
-      <Typography variant="h3" color="primary" fontWeight={700} mb={6} align="center">Our Services</Typography>
-      <Grid container spacing={4} justifyContent="center">
-        {services.map((s, i) => (
-          <Grid item xs={12} sm={6} md={3} key={i}>
-            <Paper elevation={2} sx={{ p: 4, textAlign: 'center', borderRadius: 4, transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 8 } }}>
-              {s.icon}
-              <Typography variant="h6" fontWeight={600} mt={2}>{s.name}</Typography>
-              <Typography variant="body2" mb={2}>{s.desc}</Typography>
-              <List dense>
-                {s.useCases.map((uc, idx) => (
-                  <ListItem key={idx} sx={{ py: 0 }}>
-                    <ListItemIcon sx={{ minWidth: 28 }}><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary={uc} />
-                  </ListItem>
-                ))}
-              </List>
-              <Button variant="outlined" color="primary">Learn More</Button>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-    </Container>
-  </Box>
-  {/* Footer */}
-  <Footer />
-  </>
-);
+const ServicesPage = () => {
+  return (
+    <>
+      {/* Hero Section */}
+      <section className="services-hero" style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.7), rgba(24,24,24,0.7)), url(${servicesHeroImg})` }}>
+        <motion.div 
+          className="services-hero-content"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h1 className="services-hero-title">Our Premium Services</h1>
+          <p className="services-hero-subtitle">Experience luxury transportation tailored to your needs</p>
+        </motion.div>
+      </section>
 
-export default ServicesPage; 
+      {/* Services Grid */}
+      <div className="services-container">
+        <div className="services-grid">
+          {services.map((service, index) => (
+            <div className="service-card" key={index}>
+              <div className="service-image" style={{ backgroundImage: `url(${service.image})` }}></div>
+              <div className="service-content">
+                <div className="service-icon">{service.icon}</div>
+                <h3 className="service-name">{service.name}</h3>
+                <p className="service-desc">{service.desc}</p>
+                <ul className="service-use-cases">
+                  {service.useCases.map((useCase, idx) => (
+                    <li key={idx}>
+                      <span className="check-icon">✓</span> {useCase}
+                    </li>
+                  ))}
+                </ul>
+                <Link to={`/services/${service.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <button className="learn-more-btn">Learn More</button>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Footer />
+    </>
+  );
+};
+
+export default ServicesPage;

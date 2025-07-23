@@ -6,7 +6,7 @@ import hero2 from '../assets/elegant-uber-driver-giving-taxi-ride.jpg';
 import hero3 from '../assets/pexels-pavel-danilyuk-8425023.jpg';
 import hero4 from '../assets/pexels-pavel-danilyuk-8425035.jpg';
 import '../styles/LandingPage.css';
-import { FaChair, FaSnowflake, FaSuitcase, FaStar } from 'react-icons/fa';
+import { FaChair, FaSnowflake, FaSuitcase, FaStar, FaCar, FaClock, FaShieldAlt, FaRegClock } from 'react-icons/fa';
 import { GiCarSeat } from 'react-icons/gi';
 import carData from '../assets/carData.json';
 import Footer from '../components/Footer/Footer';
@@ -105,54 +105,6 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-
-      {/* Why Choose Us */}
-      {/* <motion.h2 
-        className="why-title"
-        variants={titleVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-      >
-        Why Choose Us
-      </motion.h2> */}
-      {/* About Us Cards Section */}
-      <div className="aboutus-cards-section">
-        <div className="aboutus-cards-grid">
-          <div className="aboutus-card">
-            <div className="aboutus-card-title">Luxury Cars</div>
-            <div className="aboutus-card-icon-wrap">
-              <span className="aboutus-card-icon luxury-icon"></span>
-              <span className="aboutus-card-orbit"></span>
-            </div>
-            <div className="aboutus-card-desc">Unleash opulence on every drive with our premium fleet of luxury vehicles. Experience the perfect blend of comfort, style, and sophistication as you travel across Sydney, making every journey truly memorable and extraordinary.</div>
-          </div>
-          <div className="aboutus-card">
-            <div className="aboutus-card-title">24/7 Service</div>
-            <div className="aboutus-card-icon-wrap">
-              <span className="aboutus-card-icon service-icon"></span>
-              <span className="aboutus-card-orbit"></span>
-            </div>
-            <div className="aboutus-card-desc">Elevate your journey anytime, anywhere with our exclusive 24/7 chauffeur service. Whether it’s an early morning airport run or a late-night event, our professional drivers are always ready to serve you with reliability and class.</div>
-          </div>
-          <div className="aboutus-card">
-            <div className="aboutus-card-title">Security</div>
-            <div className="aboutus-card-icon-wrap">
-              <span className="aboutus-card-icon security-icon"></span>
-              <span className="aboutus-card-orbit"></span>
-            </div>
-            <div className="aboutus-card-desc">Drive with confidence knowing your safety is our top priority. Our vehicles are equipped with advanced security features and our chauffeurs are trained to provide a secure, discreet, and comfortable experience at all times.</div>
-          </div>
-          <div className="aboutus-card">
-            <div className="aboutus-card-title">On Time</div>
-            <div className="aboutus-card-icon-wrap">
-              <span className="aboutus-card-icon time-icon"></span>
-              <span className="aboutus-card-orbit"></span>
-            </div>
-            <div className="aboutus-card-desc">Punctuality perfected—arrive in luxury, on time, every time. We pride ourselves on our commitment to timeliness, ensuring you reach your destination promptly and stress-free, no matter the occasion or schedule.</div>
-          </div>
-        </div>
-      </div>
 
       {/* Our Services */}
       <div className="services-section-img">
