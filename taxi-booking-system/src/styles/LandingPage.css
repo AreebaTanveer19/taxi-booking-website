@@ -21,21 +21,39 @@ body, .landing-root {
 
 /* Hero Section */
 .hero-section {
+  position: relative;
   min-height: calc(100vh - 64px);
   height: calc(100vh - 64px);
-  background: #181818;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: 0;
   overflow: hidden;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 32px rgba(0,0,0,);
   z-index: 10;
 }
+
+.hero-bg-images {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-bg-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.hero-bg-image.active {
+  opacity: 1;
+}
+
 .hero-container {
+  position: relative;
+  z-index: 2;
   width: 100%;
   max-width: 1320px;
   margin: 0 auto;
@@ -47,6 +65,7 @@ body, .landing-root {
   height: 100%;
   padding-left: 4vw;
 }
+
 .hero-text {
   flex: 1;
   color: #fff;
@@ -175,11 +194,11 @@ body, .landing-root {
 }
 @media (max-width: 900px) {
   .hero-section {
-    min-height: 80vh;
-    height: auto;
-    padding: 0 0 32px 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .hero-container {
     flex-direction: column;
@@ -188,24 +207,20 @@ body, .landing-root {
     height: auto;
     justify-content: center;
     padding-left: 0;
+    margin-top: 0;
   }
   .hero-text {
     padding-right: 0;
     text-align: center;
     align-items: center;
-  }
-  .hero-image-wrapper {
     justify-content: center;
-    margin-top: 24px;
-  }
-  .hero-image {
-    max-width: 90vw;
+    margin-top: 0;
   }
 }
 @media (max-width: 600px) {
   .hero-section {
-    min-height: 70vh;
-    padding: 0 0 18px 0;
+    min-height: 100vh;
+    height: 100vh;
   }
   .hero-headline {
     font-size: 1.3rem;
@@ -220,7 +235,69 @@ body, .landing-root {
 }
 
 
-/* WHY CHOOSE US - Visual Redesign */
+/* Why Choose Us - Visual Redesign */
+
+.why-choose-us {
+  padding: 4rem 2rem;
+  background: #f8f9fa;
+  text-align: center;
+}
+
+.why-choose-us .section-title {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: #2c3e50;
+  position: relative;
+  display: inline-block;
+}
+
+.why-choose-us .section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #3498db;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.benefit-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.benefit-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.benefit-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.benefit-card p {
+  color: #7f8c8d;
+  line-height: 1.6;
+}
 
 .why-section {
   background: #fff;

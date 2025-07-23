@@ -114,4 +114,54 @@
   display: flex;
   align-items: center;
   gap: 0.2rem;
-} 
+}
+
+.fleet-hero {
+  min-height: 60vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.fleet-hero-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  color: #fff;
+  padding: 80px 16px 100px 16px;
+}
+
+.fleet-hero-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+}
+
+.fleet-hero-sub {
+  color: #e0e0e0;
+  margin-bottom: 32px;
+  font-size: 1.18rem;
+  font-weight: 400;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.18);
+}
+
+@media (max-width: 700px) {
+  .fleet-hero {
+    min-height: 50vh;
+  }
+  
+  .fleet-hero-title {
+    font-size: 2rem;
+  }
+  
+  .fleet-hero-sub {
+    font-size: 1rem;
+  }
+}

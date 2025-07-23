@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import taxiImg from '../assets/taxi1.jpg';
+import taxiImg from '../assets/taxi1.png';
+import hero1 from '../assets/businesswoman-getting-taxi-cab.jpg';
+import hero2 from '../assets/elegant-uber-driver-giving-taxi-ride.jpg';
+import hero3 from '../assets/pexels-pavel-danilyuk-8425023.jpg';
+import hero4 from '../assets/pexels-pavel-danilyuk-8425035.jpg';
 import '../styles/LandingPage.css';
 import { FaChair, FaSnowflake, FaSuitcase, FaStar } from 'react-icons/fa';
 import { GiCarSeat } from 'react-icons/gi';
@@ -9,80 +13,43 @@ import Footer from '../components/Footer/Footer';
 import A7 from '../assets/A7.png';
 import A8 from '../assets/A8.png';
 import Q7 from '../assets/Q7.png';
-// import { motion } from 'framer-motion';
+import corporateimg from '../assets/corporate.jpeg';
+import airportimg from '../assets/airport.jpg';
+import crewimg from '../assets/crew.jpeg';
 
-
-// const fleet = [
-//   {
-//     name: 'Luxury Sedan',
-//     image: 'https://images.unsplash.com/photo-1652890058094-a3fe8ead30fa?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-//     capacity: '1-4',
-//     desc: 'Premium comfort for up to 4 passengers.',
-//     rating: 5
-//   },
-//   {
-//     name: 'Mercedes Sprinter',
-//     image: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=400&q=80',
-//     capacity: '1-16',
-//     desc: 'Spacious van for groups and events.',
-//     rating: 4
-//   },
-//   {
-//     name: 'Audi Q7',
-//     image: 'https://images.unsplash.com/photo-1655284180060-5c823b34f211?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-//     capacity: '1-7',
-//     desc: 'Luxury SUV for up to 7 passengers.',
-//     rating: 5
-//   },
-//   {
-//     name: 'Executive Car',
-//     image: 'https://images.unsplash.com/photo-1592891024301-bf7948cee673?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-//     capacity: '1-4',
-//     desc: 'Executive comfort for business travel.',
-//     rating: 5
-//   },
-//   {
-//     name: 'BMW 7 Series',
-//     image: 'https://images.unsplash.com/photo-1711244961816-4fe38bdafc16?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-//     capacity: '1-4',
-//     desc: 'Experience the ultimate in luxury and performance with our BMW 7 Series. Perfect for business and VIP travel.',
-//     rating: 5
-//   },
-//   {
-//     name: 'Premium SUV',
-//     image: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=600&q=80',
-//     capacity: '1-6',
-//     desc: 'Spacious and comfortable premium SUV, ideal for families, groups, and long journeys.',
-//     rating: 5
-//   },
-// ];
+const heroImages = [hero1, hero2, hero4 , taxiImg];
 
 const services = [
   {
     name: 'Corporate Transfers',
-    image: 'https://images.unsplash.com/photo-1605414262199-63817d195576?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    image: corporateimg,
     desc: 'Planning is essential for corporate occasions, and a dependable chauffeur service is necessary. Our highly trained and experienced corporate chauffeurs will see to it that you and your guests arrive in the utmost elegance.'
   },
   {
     name: 'Airport Transfers',
-    image: 'https://images.unsplash.com/photo-1649559963715-8c34a1c31bf5?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    image: airportimg,
     desc: 'Experience the ultimate in airport chauffeur hire service. Our premium airport transfers are your reliable choice for seamless travel, ready to meet all your domestic and international flights, anytime you need.'
   },
   {
-    name: 'Wedding Car ',
-    image: 'Wedding Car & Chauffeur Hire',
-    desc: 'Make your special day even more unforgettable with our exquisite wedding transfer service. Our dedicated chauffeurs ensure a seamless and elegant arrival, adding a touch of luxury to your wedding experience.'
+    name: 'Wedding Car',
+    image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=464&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    desc: 'Elegant wedding car hire for a seamless and stylish arrival.'
+  },
+  {
+    name: 'Crew Transportation',
+    image: crewimg,
+    desc: 'Prompt and comfortable crew transport for your team\'s needs.'
   },
   {
     name: 'Parcel Delivery',
-    image: 'https://images.unsplash.com/photo-1632174380104-95808fb87cd1?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    desc: 'Swift and secure parcel delivery with our trusted transport service. We ensure your packages arrive safely and on time, every time.'
+    image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
+    desc: 'Swift and secure parcel delivery across Sydney and beyond.'
   },
   {
     name: 'Special Events',
-    image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=464&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    desc: 'Make every event memorable with our premium event transfer service for concerts, parties, and more. Enjoy reliable, stylish, and comfortable rides for all your special occasions.'
-  },
+    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+    desc: 'Make every event memorable with our premium event transfer service for concerts, parties, and more.'
+  }
 ];
 
 const fleetImages = {
@@ -93,45 +60,31 @@ const fleetImages = {
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  
-  // const containerVariants = {
-  //   hidden: { opacity: 0 },
-  //   visible: {
-  //     opacity: 1,
-  //     transition: {
-  //       staggerChildren: 0.2
-  //     }
-  //   }
-  // };
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // const itemVariants = {
-  //   hidden: { opacity: 0, y: 30 },
-  //   visible: {
-  //     opacity: 1,
-  //     y: 0,
-  //     transition: {
-  //       duration: 0.6,
-  //       ease: "easeOut"
-  //     }
-  //   }
-  // };
-
-  // const titleVariants = {
-  //   hidden: { opacity: 0, y: -30 },
-  //   visible: {
-  //     opacity: 1,
-  //     y: 0,
-  //     transition: {
-  //       duration: 0.8,
-  //       ease: "easeOut"
-  //     }
-  //   }
-  // };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000); // Change image every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
       {/* Hero Section */}
-      <div className="hero-section" style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.5), rgba(24,24,24,0.58)), url(${taxiImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <section className="hero-section">
+        <div className="hero-bg-images">
+          {heroImages.map((image, index) => (
+            <div 
+              key={index}
+              className={`hero-bg-image ${index === currentImageIndex ? 'active' : ''}`}
+              style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.5), rgba(24,24,24,0.5)), url(${image})` }}
+            />
+          ))}
+        </div>
         <div className="hero-container">
           <div className="hero-text">
             <span className="hero-tagline hide-on-mobile-hero">Travel securely with us !</span>
@@ -151,7 +104,7 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Why Choose Us */}
       {/* <motion.h2 
@@ -206,7 +159,7 @@ const LandingPage = () => {
         <h2 className="services-main-title">We are Offering Various Sydney Chauffeur Services</h2>
         <div className="services-main-sub">Our chauffeurs are highly skilled experts who have undergone extensive training and are knowledgeable drivers.</div>
         <div className="services-cards-img-grid">
-          <div className="services-card-img-v2 blue" style={{ backgroundImage: `url(${services[0].image})` }}>
+          <div className="services-card-img-v2" style={{ backgroundImage: `url(${services[0].image})` }}>
             <div className="services-card-img-overlay-v2">
               <div className="services-card-title-img-v2">{services[0].name}</div>
               <div className="services-card-desc-img-v2">Professional chauffeurs for corporate events and business travel in Sydney.</div>
@@ -224,10 +177,10 @@ const LandingPage = () => {
               <div className="services-card-desc-img-v2">Elegant wedding car hire for a seamless and stylish arrival.</div>
             </div>
           </div>
-          <div className="services-card-img-v2" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80)' }}>
+          <div className="services-card-img-v2" style={{ backgroundImage: `url(${services[5].image})` }}>
             <div className="services-card-img-overlay-v2">
-              <div className="services-card-title-img-v2">Crew Transportation</div>
-              <div className="services-card-desc-img-v2">Prompt and comfortable crew transport for your team’s needs.</div>
+              <div className="services-card-title-img-v2">{services[5].name}</div>
+              <div className="services-card-desc-img-v2">{services[5].desc}</div>
             </div>
           </div>
           <div className="services-card-img-v2" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80)' }}>
@@ -236,15 +189,15 @@ const LandingPage = () => {
               <div className="services-card-desc-img-v2">Prestige executive transfers for business and VIP clients.</div>
             </div>
           </div>
+          <div className="services-card-img-v2" style={{ backgroundImage: `url(${services[4].image})` }}>
+            <div className="services-card-img-overlay-v2">
+              <div className="services-card-title-img-v2">{services[4].name}</div>
+              <div className="services-card-desc-img-v2">{services[4].desc}</div>
+            </div>
+          </div>
           <div className="services-card-img-v2" style={{ backgroundImage: `url(${services[3].image})` }}>
             <div className="services-card-img-overlay-v2">
               <div className="services-card-title-img-v2">{services[3].name}</div>
-              <div className="services-card-desc-img-v2">Swift and secure parcel delivery across Sydney and beyond.</div>
-            </div>
-          </div>
-          <div className="services-card-img-v2 red" style={{ backgroundImage: `url(${services[4].image})` }}>
-            <div className="services-card-img-overlay-v2">
-              <div className="services-card-title-img-v2">{services[4].name}</div>
               <div className="services-card-desc-img-v2">Personalized chauffeur service for special events and tours.</div>
             </div>
           </div>
