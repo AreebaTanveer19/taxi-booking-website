@@ -4,11 +4,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../assets/hero-bg.jpg');
   background-size: cover;
   background-position: center;
   color: white;
   text-align: center;
   padding: 2rem;
+  position: relative;
 }
 
 .services-hero-content {
@@ -30,11 +32,40 @@
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-content {
+  text-align: center;
+  color: white;
+  padding: 2rem;
+  max-width: 800px;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
 /* Services Container */
 .services-container {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 4rem 2rem;
+  margin: 3rem auto;
+  padding: 0 20px;
 }
 
 .services-intro {
@@ -59,84 +90,72 @@
 .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  gap: 25px;
 }
 
 .service-card {
-  background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  display: flex;
-  flex-direction: column;
+  height: 100%;
+  transition: all 0.3s ease;
 }
 
 .service-image {
-  height: 200px;
+  height: 300px;
   background-size: cover;
   background-position: center;
-}
-
-.service-content {
-  padding: 1.5rem;
-}
-
-.service-icon {
+  position: relative;
   display: flex;
-  justify-content: center;
-  padding: 0.5rem 0 1rem;
-  color: #ffb300;
-  font-size: 2.5rem;
+  align-items: flex-end;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center center;
+  overflow: hidden;
+  filter: brightness(0.95);
 }
 
-.service-name {
-  text-align: center;
+.service-overlay {
+  background: linear-gradient(transparent, rgba(0,0,0,0.9));
+  padding: 2rem;
+  color: white;
+  width: 100%;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translateY(30px);
+  opacity: 0.85;
+}
+
+.service-overlay h3 {
   font-size: 1.5rem;
-  margin: 1rem 0 0.5rem;
-  color: #181818;
+  margin-bottom: 0.5rem;
 }
 
 .service-desc {
-  text-align: center;
-  color: #555;
-  padding: 0 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
-.service-use-cases {
-  padding: 0 2rem 1.5rem;
-  list-style: none;
+.service-link {
+  text-decoration: none;
+  color: inherit;
 }
 
-.service-use-cases li {
-  margin-bottom: 0.8rem;
-  display: flex;
-  align-items: flex-start;
+.service-link.featured {
+  grid-column: span 2;
 }
 
-.check-icon {
-  color: #4caf50;
-  font-weight: bold;
-  margin-right: 0.5rem;
+.service-link.featured .service-image {
+  height: 350px;
 }
 
-.learn-more-btn {
-  display: block;
-  width: 80%;
-  margin: 0 auto 2rem;
-  padding: 0.8rem;
-  background: #ffb300;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s ease;
+.service-link:hover .service-image {
+  transform: scale(1.08);
+  filter: brightness(1.05);
 }
 
-.learn-more-btn:hover {
-  background: #e6a100;
+.service-link:hover .service-overlay {
+  background: linear-gradient(transparent, rgba(0,0,0,0.97));
+  transform: translateY(0);
+  opacity: 1;
 }
 
 /* Service Detail Page Styling */
@@ -212,13 +231,22 @@
   margin-right: 0.5rem;
 }
 
+/* Redesigned Services Page Styles */
+.services-page {
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .services-hero-title {
-    font-size: 2.2rem;
+  .services-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .services-hero-subtitle {
-    font-size: 1.2rem;
+  .service-link.featured {
+    grid-column: span 1;
+  }
+  .service-image, 
+  .service-link.featured .service-image {
+    height: 250px;
   }
 }

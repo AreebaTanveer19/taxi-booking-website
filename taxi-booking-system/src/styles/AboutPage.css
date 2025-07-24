@@ -13,65 +13,69 @@ html, body {
 
 /* Hero Banner */
 .about-hero {
-  min-height: 60vh;
+  position: relative;
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
+  height: 80vh;
+  min-height: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  padding: 0;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-}
-.about-hero-content {
-  max-width: 700px;
-  margin: 0 auto;
+  color: white;
   text-align: center;
-  color: #fff;
-  padding: 80px 16px 100px 16px;
+  overflow: hidden;
+}
+
+.about-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+}
+
+.about-hero-content {
+  position: relative;
   z-index: 2;
+  max-width: 800px;
+  padding: 0 20px;
 }
+
 .about-hero-title {
-  font-size: 2.7rem;
-  font-weight: 800;
-  margin-bottom: 18px;
-  line-height: 1.1;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.22);
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  letter-spacing: 1px;
 }
+
 .about-hero-sub {
-  color: #e0e0e0;
-  margin-bottom: 32px;
-  font-size: 1.18rem;
-  font-weight: 400;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.18);
+  font-size: 1.5rem;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+  text-shadow: 0 1px 5px rgba(0,0,0,0.3);
 }
+
 .about-hero-btn {
   background: #ffb300;
   color: #181818;
-  font-weight: 700;
-  font-size: 1.1rem;
-  padding: 16px 48px;
-  border-radius: 18px;
   border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  margin: 0 10px;
+  transition: all 0.3s ease;
 }
-.about-hero-btn:hover {
-  background: #ffd54f;
-  transform: translateY(-2px) scale(1.03);
-}
+
 .about-hero-btn-secondary {
-  background: #181818;
-  color: #fffefe;
-  border: 2px solid #181818;
-}
-.about-hero-btn-secondary:hover, .about-hero-btn-secondary:focus-visible {
-  background: #202020;
-  color: #fff;
-  border: 2px solid #181818;
-  transform: translateY(-2px) scale(1.03);
+  background: transparent;
+  color: white;
+  border: 2px solid white;
 }
 
 .about-hero-btn-group {
@@ -236,62 +240,67 @@ html, body {
 
 /* Team Section */
 .about-team {
-  margin: 64px auto 0 auto;
-  max-width: 1200px;
-  padding: 0 12px;
+  padding: 100px 0;
+  background: #f8f8f8;
 }
+
 .about-team-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-top: 32px;
-}
-.about-team-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-  padding: 38px 16px 32px 16px;
-  text-align: center;
-  color: #222;
-  min-width: 0;
-  max-width: 260px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  max-width: 1200px;
   margin: 0 auto;
-  transition: box-shadow 0.25s, transform 0.25s, border 0.25s;
-  border: 2px solid #fff9c4;
+  padding: 0 20px;
+}
+
+.about-team-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  transition: all 0.4s ease;
+  text-align: center;
+}
+
+.about-team-img-container {
   position: relative;
-  z-index: 1;
-  cursor: pointer;
+  height: 300px;
+  overflow: hidden;
 }
-.about-team-card:hover {
-  box-shadow: 0 8px 32px #ffb30044, 0 2px 16px #fff17644;
-  border: 2.5px solid #ffb300;
-  transform: translateY(-8px) scale(1.045);
-}
+
 .about-team-img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 3px solid #ffb300;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 8px #ffb30033;
+  transition: transform 0.5s ease;
 }
+
+.about-team-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+}
+
 .about-team-name {
+  font-size: 1.5rem;
   font-weight: 700;
-  font-size: 1.1rem;
+  margin: 20px 0 5px;
   color: #181818;
-  margin-bottom: 4px;
 }
+
 .about-team-role {
   color: #ffb300;
-  font-size: 0.98rem;
-  margin-bottom: 8px;
   font-weight: 600;
+  margin-bottom: 15px;
 }
+
 .about-team-quote {
-  color: #444;
-  font-size: 0.97rem;
+  padding: 0 20px 30px;
   font-style: italic;
+  color: #666;
 }
 
 /* CTA Strip */

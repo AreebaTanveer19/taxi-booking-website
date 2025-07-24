@@ -30,32 +30,88 @@ const team = [
   { img: team3, name: 'Ravi Patel', role: 'Customer Success', quote: 'We listen, we care, and we deliver excellence.' },
 ];
 
+const fadeInUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      duration: 0.8,
+      ease: [0.6, -0.05, 0.01, 0.99]
+    }
+  }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
 const AboutPage = () => {
   const navigate = useNavigate();
   return (
     <>
     <div className="about-root">
       {/* Hero Banner */}
-      <section className="about-hero" style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.7),rgba(24,24,24,0.7)), url(${aboutImg})` }}>
-        <motion.div className="about-hero-content" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <h1 className="about-hero-title">We Drive More Than Miles — We Drive Experiences</h1>
-          <motion.p className="about-hero-sub" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}>
+      <motion.section 
+        className="about-hero" 
+        style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.7),rgba(24,24,24,0.7)), url(${aboutImg})` }}
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <motion.div 
+          className="about-hero-content" 
+          variants={fadeInUp}
+        >
+          <motion.h1 
+            className="about-hero-title"
+            variants={fadeInUp}
+          >
+            We Drive More Than Miles — We Drive Experiences
+          </motion.h1>
+          <motion.p 
+            className="about-hero-sub"
+            variants={fadeInUp}
+            custom={1}
+          >
             Experience the difference with our commitment to safety, luxury, and heartfelt service. Every journey is tailored for your comfort and peace of mind.
           </motion.p>
-          <div className="about-hero-btn-group">
-            <motion.button className="about-hero-btn" whileHover={{ scale: 1.06 }} onClick={() => navigate('/book')}>
+          <motion.div 
+            className="about-hero-btn-group"
+            variants={fadeInUp}
+            custom={2}
+          >
+            <motion.button 
+              className="about-hero-btn" 
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 5px 15px rgba(255, 179, 0, 0.4)"
+              }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate('/book')}
+            >
               Book a Ride
             </motion.button>
             <motion.button
               className="about-hero-btn about-hero-btn-secondary"
-              whileHover={{ scale: 1.06 }}
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 5px 15px rgba(255, 255, 255, 0.2)"
+              }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Get Personalized Quote
             </motion.button>
-          </div>
+          </motion.div>
         </motion.div>
-      </section>
+      </motion.section>
 
       {/* Our Story */}
       <section className="about-story">
@@ -100,27 +156,43 @@ const AboutPage = () => {
       </section>
 
       {/* Meet the Team */}
-      <section className="about-team">
-        <motion.h2 className="about-section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>Meet the Team</motion.h2>
+      <motion.section 
+        className="about-team"
+        initial="hidden"
+        whileInView="visible"
+        variants={staggerContainer}
+        viewport={{ once: true, margin: "-100px" }}
+      >
+        <motion.h2 
+          className="about-section-title"
+          variants={fadeInUp}
+        >
+          Meet the Team
+        </motion.h2>
         <div className="about-team-grid">
           {team.map((member, i) => (
             <motion.div
               className="about-team-card"
               key={member.name}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.05, boxShadow: '0 8px 32px #ffb30044' }}
+              variants={fadeInUp}
+              whileHover={{ 
+                scale: 1.03,
+                boxShadow: "0 15px 30px rgba(0,0,0,0.1)"
+              }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <img src={member.img} alt={member.name} className="about-team-img" />
+              <div className="about-team-img-container">
+                <img src={member.img} alt={member.name} className="about-team-img" />
+                <div className="about-team-overlay"></div>
+              </div>
               <div className="about-team-name">{member.name}</div>
               <div className="about-team-role">{member.role}</div>
               <div className="about-team-quote">“{member.quote}”</div>
             </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA / Trust Banner */}
       <section className="about-cta-strip">

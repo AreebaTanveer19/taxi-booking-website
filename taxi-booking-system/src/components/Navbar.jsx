@@ -4,8 +4,22 @@ import logoImg from '../assets/logo.png';
 
 const navLinks = [
   { label: 'HOME', path: '/' },
-  { label: 'BOOK', path: '/book' },
-  { label: 'SERVICES', path: '/services' },
+  { 
+    label: 'BOOK', 
+    path: '/book' 
+  },
+  { 
+    label: 'SERVICES', 
+    path: '/services',
+    dropdown: [
+      { label: 'Airport Transfers', path: '/services/airport-transfers' },
+      { label: 'Corporate Transfers', path: '/services/corporate-transfers' },
+      { label: 'Wedding Services', path: '/services/wedding-services' },
+      { label: 'Parcel Transfer', path: '/services/parcel-transfer' },
+      { label: 'Special Events', path: '/services/special-events' },
+      { label: 'Crew Transfers', path: '/services/crew-transfers' }
+    ]
+  },
   { label: 'OUR FLEET', path: '/fleet' },
   { label: 'ABOUT', path: '/about' },
   { label: 'CONTACT', path: '/contact' },
@@ -55,8 +69,20 @@ const Navbar = () => {
           {/* Desktop links */}
           <ul className="navbar-main-links hide-on-mobile">
             {navLinks.map(link => (
-              <li key={link.label}>
-                <a className="navbar-main-link" href={link.path}>{link.label}</a>
+              <li key={link.label} className={link.dropdown ? 'has-dropdown' : ''}>
+                <a className="navbar-main-link" href={link.path}>
+                  {link.label}
+                  {link.dropdown && <span className="dropdown-arrow">▼</span>}
+                </a>
+                {link.dropdown && (
+                  <ul className="dropdown-menu">
+                    {link.dropdown.map(item => (
+                      <li key={item.label}>
+                        <a href={item.path}>{item.label}</a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>

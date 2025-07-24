@@ -9,30 +9,14 @@ import ServicesPage from './pages/ServicesPage';
 import Navbar from './components/Navbar';
 import AccessDenied from './pages/AccessDenied';
 import AdminLogin from './pages/AdminLogin';
-import { useState } from 'react';
+import ServiceTemplate from './components/ServiceTemplate';
 
 // Remove process.env reference since we're using proxy
 
 function App() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  // Admin login function
-  const handleAdminLogin = async (credentials) => {
-    try {
-      const response = await fetch('http://localhost:5000/api/admin/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
-      
-      if (response.ok) {
-        setIsAdmin(true);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      return false;
-    }
+  const isAdminAuthenticated = () => {
+    const token = localStorage.getItem('adminToken');
+    return !!token; // Convert to boolean
   };
   
   return (
@@ -41,11 +25,15 @@ function App() {
       <Routes>
         <Route path="/" element={<><Navbar /><LandingPage /></>} />
         <Route path="/book" element={<><Navbar /><BookingPage /></>} />
-        <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <AdminLogin onLogin={handleAdminLogin} />} />
+        <Route 
+          path="/admin" 
+          element={isAdminAuthenticated() ? <AdminDashboard /> : <AdminLogin />} 
+        />
         <Route path="/about" element={<><Navbar /><AboutPage /></>} />
         <Route path="/contact" element={<><Navbar /><ContactPage /></>} />
         <Route path="/fleet" element={<><Navbar /><FleetPage /></>} />
         <Route path="/services" element={<><Navbar /><ServicesPage /></>} />
+        <Route path="/services/:serviceId" element={<><Navbar /><ServiceTemplate /></>} />
         <Route path="/access-denied" element={<AccessDenied />} />
       </Routes>
     </Router>

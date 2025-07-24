@@ -3,6 +3,7 @@ const router = express.Router();
 const adminOnly = require('../utils/auth');
 const Booking = require('../models/Booking');
 const User = require('../models/Users');
+const jwt = require('jsonwebtoken');
 
 // Admin verification endpoint
 router.post('/verify', (req, res) => {
@@ -13,6 +14,28 @@ router.post('/verify', (req, res) => {
       user: { username: process.env.ADMIN_USERNAME }
     });
   });
+});
+
+// Admin login
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  
+  if (username === process.env.ADMIN_USERNAME && 
+      password === process.env.ADMIN_PASSWORD) {
+    const token = jwt.sign(
+      { username },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    return res.json({ success: true, token });
+  }
+  
+  return res.status(401).json({ success: false, message: 'Invalid credentials' });
+});
+
+// Logout endpoint
+router.post('/logout', (req, res) => {
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 // Protected admin routes

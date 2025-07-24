@@ -1,0 +1,104 @@
+.service-page {
+  color: #333;
+}
+
+.service-hero {
+  height: 60vh;
+  min-height: 400px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: rgba(0,0,0,0.6);
+  background-blend-mode: overlay;
+}
+
+.service-hero-content {
+  text-align: center;
+  color: white;
+  padding: 0 20px;
+  max-width: 800px;
+}
+
+.service-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.service-hero p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.service-container {
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+.service-details h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+.service-details p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+.service-features {
+  background: #f9f9f9;
+  padding: 30px;
+  border-radius: 8px;
+  margin: 40px 0;
+}
+
+.service-features h3 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.service-features ul {
+  list-style: none;
+  padding: 0;
+}
+
+.service-features li {
+  margin-bottom: 15px;
+  padding-left: 25px;
+  position: relative;
+}
+
+.service-features li:before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #ffb300;
+  font-weight: bold;
+}
+
+.service-cta {
+  text-align: center;
+  margin: 50px 0;
+}
+
+.book-now-btn {
+  background: #ffb300;
+  color: #181818;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.book-now-btn:hover {
+  background: #ffa000;
+  transform: translateY(-2px);
+}

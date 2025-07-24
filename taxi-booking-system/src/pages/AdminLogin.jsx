@@ -10,7 +10,7 @@ export default function AdminLogin({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!credentials.username || !credentials.password) {
       setError('Please enter both username and password');
       return;
@@ -18,29 +18,30 @@ export default function AdminLogin({ onLogin }) {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/admin/verify', {
+      console.log('Sending login request with:', credentials);
+      const response = await fetch('http://localhost:5000/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        setError('Invalid response from server');
-        return;
+      console.log('Received response:', response);
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
-      if (data.success) {
-        await onLogin(credentials);
-        navigate('/admin');
+      if (data.success && data.token) {
+        localStorage.setItem('adminToken', data.token);
+        window.location.href = '/admin'; // Force full page reload to ensure auth state updates
       } else {
         setError(data.message || 'Invalid credentials');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.message || 'Authentication failed');
+      setError(err.message || 'Network error during login');
     } finally {
       setIsLoading(false);
     }

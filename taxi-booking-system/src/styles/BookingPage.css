@@ -47,11 +47,12 @@
   transition: all 0.3s ease;
   flex: 1;
   max-width: 300px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 .booking-method-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-5px) scale(1.02);
   border-color: #ffb300;
-  box-shadow: 0 8px 24px rgba(255, 179, 0, 0.15);
+  box-shadow: 0 10px 20px rgba(255, 179, 0, 0.2);
 }
 .method-icon {
   font-size: 2.5rem;
@@ -114,6 +115,14 @@
   border-radius: 8px;
   border: 1px solid #d0d5dd;
   font-size: 1rem;
+  transition: all 0.3s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #ffb300;
+  box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.2);
 }
 
 .checkbox-label {
@@ -144,6 +153,9 @@
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 .form-actions button:first-child {
   background: #e5e7eb;
@@ -152,6 +164,15 @@
 .form-actions button:last-child {
   background: #ffb300;
   color: #181818;
+  box-shadow: 0 4px 6px rgba(255, 179, 0, 0.25);
+}
+
+.form-actions button:hover {
+  transform: translateY(-2px);
+}
+
+.form-actions button:active {
+  transform: translateY(0);
 }
 
 .summary-container {
@@ -234,4 +255,31 @@
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+}
+
+/* Animation Classes */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease-out;
+}
+
+/* Loading Animation */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

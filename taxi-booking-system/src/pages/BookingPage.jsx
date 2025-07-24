@@ -12,6 +12,7 @@ const BookingPage = () => {
     serviceType: '',
     flightNumber: '',
     flightTime: '',
+    terminal: '',
     luggage: '',
     specialInstructions: '',
     paymentMethod: 'Card',
@@ -77,8 +78,18 @@ const BookingPage = () => {
     if (form.babySeat) {
       finalCost += 15;
     }
-    if (form.serviceType === 'Airport Transfer') {
-      finalCost += 15;
+    if (form.serviceType === 'Airport Transfers') {
+      finalCost += 15; // Airport surcharge
+      // Add variable toll tax based on terminal
+      if (form.terminal === 'T1 International') {
+        finalCost += 15;
+      } else if (form.terminal === 'T2 Domestic') {
+        finalCost += 11.5;
+      } else if (form.terminal === 'T3 Domestic') {
+        finalCost += 6.2;
+      } else if (form.terminal === 'T4 Domestic') {
+        finalCost += 6.2;
+      }
     }
     setEstimatedCost(finalCost.toFixed(2));
     setStep(3); // Move to payment page
@@ -139,6 +150,7 @@ const BookingPage = () => {
           <div className="form-group">
             <label>City</label>
             <select name="city" value={form.city} onChange={handleInputChange}>
+              <option value="">----Select your city---</option>
               <option value="Sydney">Sydney</option>
               <option value="Melbourne">Melbourne</option>
             </select>
@@ -155,17 +167,34 @@ const BookingPage = () => {
             </select>
           </div>
 
-          {form.serviceType === 'Airport Transfer' && (
-            <>
-              <div className="form-group">
-                <label>Flight Number</label>
-                <input type="text" name="flightNumber" value={form.flightNumber} onChange={handleInputChange} placeholder="e.g., QF432" />
-              </div>
-              <div className="form-group">
-                <label>Flight Time</label>
-                <input type="time" name="flightTime" value={form.flightTime} onChange={handleInputChange} />
-              </div>
-            </>
+          {form.serviceType === 'Airport Transfers' && (
+            <div className="form-group">
+              <label>Terminal</label>
+              <select name="terminal" value={form.terminal} onChange={handleInputChange}>
+                <option value="">-- Select Terminal --</option>
+                
+                {form.city === 'Sydney' && (
+                  <>
+                    <optgroup label="Sydney Airport Terminals">
+                      <option value="T1 International">T1 International</option>
+                      <option value="T2 Domestic">T2 Domestic</option>
+                      <option value="T3 Domestic">T3 Domestic</option>
+                    </optgroup>
+                  </>
+                )}
+                
+                {form.city === 'Melbourne' && (
+                  <>
+                    <optgroup label="Melbourne Airport Terminals">
+                      <option value="T1 International">T1 International</option>
+                      <option value="T2 Domestic">T2 Domestic</option>
+                      <option value="T3 Domestic">T3 Domestic</option>
+                      <option value="T4 Domestic">T4 Domestic</option>
+                    </optgroup>
+                  </>
+                )}
+              </select>
+            </div>
           )}
 
           {/* Pickup & Drop-off Fields BEFORE Vehicle */}
