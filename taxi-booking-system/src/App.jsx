@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import LandingPage from './pages/LandingPage';
 import BookingPage from './pages/BookingPage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -13,6 +14,16 @@ import ServiceTemplate from './components/ServiceTemplate';
 
 // Remove process.env reference since we're using proxy
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   const isAdminAuthenticated = () => {
     const token = localStorage.getItem('adminToken');
@@ -21,7 +32,7 @@ function App() {
   
   return (
     <Router>
-      
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<><Navbar /><LandingPage /></>} />
         <Route path="/book" element={<><Navbar /><BookingPage /></>} />
@@ -32,6 +43,7 @@ function App() {
         <Route path="/about" element={<><Navbar /><AboutPage /></>} />
         <Route path="/contact" element={<><Navbar /><ContactPage /></>} />
         <Route path="/fleet" element={<><Navbar /><FleetPage /></>} />
+        {/* <Route path="/fleet/:vehicleId" element={<><Navbar /><FleetTemplate /></>} /> */}
         <Route path="/services" element={<><Navbar /><ServicesPage /></>} />
         <Route path="/services/:serviceId" element={<><Navbar /><ServiceTemplate /></>} />
         <Route path="/access-denied" element={<AccessDenied />} />

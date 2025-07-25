@@ -13,7 +13,7 @@ import A7 from '../assets/A7.png';
 import A8 from '../assets/A8.png';
 import Q7 from '../assets/Q7.png';
 import corporateimg from '../assets/corporate.jpeg';
-import airportimg from '../assets/airport.jpg';
+
 import crewimg from '../assets/crew.jpeg';
 import { motion } from 'framer-motion';
 
@@ -53,10 +53,31 @@ const services = [
 ];
 
 const fleetImages = {
-  'AUDI Q7': Q7,
-  'AUDI A8': A8,
-  'AUDI A7': A7,
+  'SUV': Q7,
+  'Premium Sedan': A8,
+  'Executive Sedan': A7,
 };
+
+const fleetItems = [
+  {
+    name: 'Executive Sedan',
+    passengers: '1-3 Passengers',
+    luggage: '2 Suitcases',
+    imageKey: 'Executive Sedan'
+  },
+  {
+    name: 'Premium Sedan',
+    passengers: '1-3 Passengers',
+    luggage: '2 Suitcases',
+    imageKey: 'Premium Sedan'
+  },
+  {
+    name: 'SUV',
+    passengers: '1-4 Passengers',
+    luggage: '3 Suitcases ',
+    imageKey: 'SUV'
+  }
+];
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -133,7 +154,10 @@ const LandingPage = () => {
               Enjoy fast, reliable, and comfortable rides with our professional drivers. Book your ride in seconds and travel anywhere, anytime—24/7. Your journey, your way, with safety and convenience guaranteed.
             </p>
             <div className="hero-btn-group hero-btn-group-row">
-              <button className="hero-btn hero-btn-primary" onClick={() => navigate('/book')}>
+              <button className="hero-btn hero-btn-primary" onClick={() => {
+                window.scrollTo(0, 0);
+                navigate('/book');
+              }}>
                 Book Now
               </button>
               <button className="hero-btn hero-btn-secondary" onClick={() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'})}>
@@ -179,7 +203,10 @@ const LandingPage = () => {
         <div className="promo-content">
           <h2 className="promo-title promo-title-large">Discount up to 10% only for Regular Customersr</h2>
           <div className="promo-desc promo-desc-large">Enjoy exclusive savings! Our loyal customers receive a 10% discount on every ride. Thank you for choosing us for your journeys—your loyalty is always rewarded.</div>
-          <button className="hero-btn hero-btn-primary promo-btn">Book Now</button>
+          <button className="hero-btn hero-btn-primary promo-btn" onClick={() => {
+            window.scrollTo(0, 0);
+            navigate('/book');
+          }}>Book Now</button>
         </div>
       </div>
 
@@ -191,57 +218,45 @@ const LandingPage = () => {
         viewport={{ once: true, margin: "-100px" }}
         variants={containerVariants}
       >
-        {carData.slice(0, 3).map((car, idx) => {
-          const carImage = fleetImages[car.name] || car.pic;
-          return (
-            <motion.div 
-              className="car-card pro-fleet-card" 
-              key={idx}
-              variants={cardVariants}
-              whileHover={{ y: -5, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
-            >
-              <div className="car-image-wrapper">
-                {carImage ? (
-                  <motion.img 
-                    src={carImage} 
-                    alt={car.name} 
-                    className="car-image"
-                    whileHover={{ scale: 1.03 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                ) : (
-                  <div className="car-image-placeholder">Image Coming Soon</div>
-                )}
-              </div>
-              <div className="car-card-header">
-                <h2 className="car-name pro-fleet-name">{car.name}</h2>
-                <div className="car-rating-row pro-fleet-rating">
-                  {[...Array(5)].map((_, i) => (
-                    <FaStar 
-                      key={i} 
-                      color={i < (car.rating || 5) ? '#ffb300' : '#e0e0e0'} 
-                      size={22} 
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="car-card-actions">
-                <motion.button 
-                  className="quote-btn pro-fleet-btn" 
-                  style={{background:'#ffb300',color:'#181818'}}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Get a Free Quote
-                </motion.button>
-              </div>
-              <div className="car-specs-row pro-fleet-specs">
-                <span title="Seats"><GiCarSeat color="#181818" size={20} /> <span className="pro-fleet-spec">{car.seat} x</span></span>
-                <span title="Luggage"><FaSuitcase color="#181818" size={18} /> <span className="pro-fleet-spec">{car.luggage_capacity}</span></span>
-              </div>
-            </motion.div>
-          );
-        })}
+        {fleetItems.map((fleetItem, idx) => (
+          <motion.div 
+            className="car-card pro-fleet-card" 
+            key={idx}
+            variants={cardVariants}
+            whileHover={{ y: -5, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
+          >
+            <div className="car-image-wrapper">
+              <motion.img 
+                src={fleetImages[fleetItem.imageKey]} 
+                alt={fleetItem.name} 
+                className="car-image"
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+            <div className="car-card-header">
+              <h2 className="car-name pro-fleet-name">{fleetItem.name}</h2>
+            </div>
+            <div className="car-card-actions">
+              <motion.button 
+                className="quote-btn pro-fleet-btn" 
+                style={{background:'#ffb300',color:'#181818'}}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  navigate('/book');
+                }}
+              >
+                Instant Quote
+              </motion.button>
+            </div>
+            <div className="car-specs-row pro-fleet-specs">
+              <span title="Capacity"><FaChair/>{fleetItem.passengers}</span>
+              <span title="Luggage"><FaSuitcase/>{fleetItem.luggage}</span>
+            </div>
+          </motion.div>
+        ))}
       </motion.div>
       <div className="fleet-show-more-wrapper">
         <a href="/fleet" className="fleet-show-more-btn">Show More</a>

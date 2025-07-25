@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import '../styles/BookingPage.css';
-import { FaRoute, FaClock } from 'react-icons/fa';
+import { FaRoute, FaArrowRight, FaCar, FaCarSide, FaRegClock } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const BookingPage = () => {
   const [step, setStep] = useState(1);
+  const [selectedOption, setSelectedOption] = useState(null);
   const [form, setForm] = useState({
     bookingMethod: '', // 'distance' or 'time'
-    city: 'Sydney',
+    city: '',
     serviceType: '',
-    flightNumber: '',
-    flightTime: '',
+    flightDetails: {
+      flightNumber: '',
+      flightTime: '',
+    },
     terminal: '',
     luggage: '',
     specialInstructions: '',
@@ -123,26 +127,86 @@ const BookingPage = () => {
   
 
   const renderStep1 = () => (
-    <div className="step-container">
-      <h2 className="step-title">How Would You Like to Book?</h2>
-      <p className="step-subtitle">Choose the option that best fits your travel needs.</p>
-      <div className="booking-method-options">
-        <div className="booking-method-card" onClick={() => { setForm({ ...form, bookingMethod: 'distance' }); setStep(2); }}>
-          <FaRoute className="method-icon" />
-          <h3>Distance-Based</h3>
-          <p>Ideal for single trips from point A to point B.</p>
-        </div>
-        <div className="booking-method-card" onClick={() => { setForm({ ...form, bookingMethod: 'time' }); setStep(2); }}>
-          <FaClock className="method-icon" />
-          <h3>Time-Based</h3>
-          <p>Perfect for multiple stops, events, or hourly hire.</p>
-        </div>
+    <motion.div 
+      className="step-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.h2 
+        className="step-title"
+        initial={{ y: -20 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        Welcome to Horizon Chauffeurs
+      </motion.h2>
+      
+      <div className="wave-divider">
+        <FaRoute className="wave-icon" />
       </div>
-    </div>
+      
+      <p className="step-subtitle">Choose the option that best fits your travel needs</p>
+      
+      <div className="booking-method-options">
+        <motion.div 
+          className={`booking-method-card ${selectedOption === 'distance' ? 'selected' : ''}`}
+          onClick={() => {
+            setForm({ ...form, bookingMethod: 'distance' });
+            setSelectedOption('distance');
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <div className="method-icon">
+            <FaCarSide className="animated-car" />
+          </div>
+          <h3>Distance-Based</h3>
+          <p>Ideal for single trips from point A to point B</p>
+        </motion.div>
+
+        <motion.div 
+          className={`booking-method-card ${selectedOption === 'time' ? 'selected' : ''}`}
+          onClick={() => {
+            setForm({ ...form, bookingMethod: 'time' });
+            setSelectedOption('time');
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <div className="method-icon">
+            <FaRegClock className="animated-clock" />
+          </div>
+          <h3>Time-Based</h3>
+          <p>Perfect for hourly rentals and multiple stops</p>
+        </motion.div>
+      </div>
+      
+      {selectedOption && (
+        <motion.button 
+          className="continue-btn"
+          onClick={() => setStep(2)}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          whileHover={{ 
+            scale: 1.05,
+            boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
+          }}
+        >
+          Continue to Booking <FaArrowRight />
+        </motion.button>
+      )}
+    </motion.div>
   );
 
   const renderStep2 = () => (
-    <div className="step-container">
+    <motion.div
+      className="step-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <h2 className="step-title">Step 01: Booking Details</h2>
       <form className="omni-form">
         <div className="form-grid">
@@ -197,6 +261,31 @@ const BookingPage = () => {
             </div>
           )}
 
+          {form.serviceType === 'Airport Transfers' && (
+            <>
+              <div className="form-section-title">Flight Details</div>
+              <div className="form-group">
+                <label>Flight Number</label>
+                <input 
+                  type="text" 
+                  name="flightNumber" 
+                  value={form.flightDetails.flightNumber} 
+                  onChange={(e) => setForm(prev => ({ ...prev, flightDetails: { ...prev.flightDetails, flightNumber: e.target.value } }))} 
+                  placeholder="e.g. EK412"
+                />
+              </div>
+              <div className="form-group">
+                <label>Flight Time</label>
+                <input 
+                  type="time" 
+                  name="flightTime" 
+                  value={form.flightDetails.flightTime} 
+                  onChange={(e) => setForm(prev => ({ ...prev, flightDetails: { ...prev.flightDetails, flightTime: e.target.value } }))}
+                />
+              </div>
+            </>
+          )}
+
           {/* Pickup & Drop-off Fields BEFORE Vehicle */}
           <div className="form-group">
             <label>{form.bookingMethod === 'time' ? 'Pickup Location' : 'Pickup Address'}</label>
@@ -227,7 +316,7 @@ const BookingPage = () => {
               <option value="Executive Sedan">Executive Sedan (1-3 Passengers, 2 Suitcases) </option>
               <option value="Premium Sedan">Premium Sedan (1-3 Passengers, 2 Suitcases) </option>
               <option value="SUV">SUV (1-4 Passengers, 3 Suitcases, 2 Carry On) </option>
-              <option value="Van">Van (1-6 Passengers, 5 Suitcases) — Mercedes Van or Similar</option>
+              <option value="Van">Van (1-6 Passengers, 5 Suitcases)</option>
               <option value="Sprinter">Sprinter (1-11 Passengers, 6 Suitcases/Trailer)</option>
             </select>
           </div>
@@ -298,14 +387,14 @@ const BookingPage = () => {
             <button type="button" onClick={proceedToPayment}>Proceed to Payment</button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 
   const renderStep3 = () => (
     <div className="step-container">
       <h2 className="step-title">Step 02: Payment Details</h2>
       <div className="estimated-cost summary-container" style={{marginBottom: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
-          <h3>Estimated Total: ${estimatedCost}</h3>
+          <h3>Estimated Total: ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</h3>
       </div>
       <div className="omni-form">
         <div className="form-grid">
@@ -383,40 +472,42 @@ const BookingPage = () => {
 
   const renderStep4 = () => {
     return (
-      <div className="step-container summary-container">
+      <div className="step-container">
         <h2 className="step-title">Booking Summary</h2>
+        
         <div className="summary-details">
-          <p><strong>Booking Type:</strong> {form.bookingMethod === 'distance' ? 'Distance-Based' : 'Time-Based'}</p>
-          <p><strong>Service:</strong> {form.serviceType}</p>
-          {form.flightNumber && <p><strong>Flight Number:</strong> {form.flightNumber}</p>}
-          {form.flightTime && <p><strong>Flight Time:</strong> {form.flightTime}</p>}
-          <p><strong>Pickup:</strong> {`${form.pickup}, ${form.pickupPostcode}`}</p>
-          {form.dropoff && <p><strong>Drop-off:</strong> {`${form.dropoff}, ${form.dropoffPostcode}`}</p>}
-          <p><strong>Date & Time:</strong> {form.date} at {form.time}</p>
-          <p><strong>Passengers:</strong> {form.passengers}</p>
-          {form.bookingMethod === 'distance' && form.distance && <p><strong>Distance:</strong> {form.distance} km</p>}
-          <p><strong>Luggage:</strong> {form.luggage}</p>
-          <p><strong>Baby Seat:</strong> {form.babySeat ? 'Yes (+$15)' : 'No'}</p>
+          <p><strong>Booking Method:</strong> {form.bookingMethod === 'distance' ? 'Distance-Based' : 'Time-Based'}</p>
+          <p><strong>Service Type:</strong> {form.serviceType || 'Not specified'}</p>
+          
+          {form.serviceType === 'Airport Transfers' && (
+            <>
+              <p><strong>Flight Number:</strong> {form.flightDetails.flightNumber || 'Not specified'}</p>
+              <p><strong>Flight Time:</strong> {form.flightDetails.flightTime || 'Not specified'}</p>
+            </>
+          )}
+          
+          <p><strong>Pickup Location:</strong> {form.pickup || 'Not specified'}</p>
+          {form.pickupPostcode && <p><strong>Pickup Postcode:</strong> {form.pickupPostcode}</p>}
+          
+          {form.dropoff && <p><strong>Drop-off Location:</strong> {form.dropoff}</p>}
+          {form.dropoffPostcode && <p><strong>Drop-off Postcode:</strong> {form.dropoffPostcode}</p>}
+          
+          <p><strong>Date:</strong> {form.date || 'Not specified'}</p>
+          <p><strong>Time:</strong> {form.time || 'Not specified'}</p>
+          
+          <p><strong>Vehicle Type:</strong> {form.vehiclePreference || 'Not specified'}</p>
+          <p><strong>Passengers:</strong> {form.passengers || 'Not specified'}</p>
+          <p><strong>Luggage:</strong> {form.luggage || 'Not specified'}</p>
+          
+          {form.babySeat && <p><strong>Baby Seat:</strong> Yes</p>}
           {form.specialInstructions && <p><strong>Special Instructions:</strong> {form.specialInstructions}</p>}
-          <p><strong>Payment Method:</strong> {form.paymentMethod}</p>
+          
+          <div className="estimated-cost">
+            <p>Estimated Total: ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</p>
+          </div>
         </div>
         
-        <div className="booking-map-embed">
-          <iframe
-            src="https://maps.google.com/maps?q=sydney&t=&z=10&ie=UTF8&iwloc=&output=embed"
-            width="600"
-            height="300"
-            style={{ border: 0, width: '100%', borderRadius: '12px' }}
-            allowFullScreen=""
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Map of Sydney"
-          ></iframe>
-        </div>
-
-        <div className="estimated-cost">
-          <h3>Estimated Total: ${estimatedCost}</h3>
-        </div>
+        {/* Payment and confirmation buttons */}
         <form onSubmit={handleSubmit}>
           <div className="form-actions">
             <button type="button" onClick={() => setStep(3)}>Back</button>

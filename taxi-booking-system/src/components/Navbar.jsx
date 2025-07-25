@@ -20,7 +20,10 @@ const navLinks = [
       { label: 'Crew Transfers', path: '/services/crew-transfers' }
     ]
   },
-  { label: 'OUR FLEET', path: '/fleet' },
+  { 
+    label: 'OUR FLEET', 
+    path: '/fleet',
+  },
   { label: 'ABOUT', path: '/about' },
   { label: 'CONTACT', path: '/contact' },
 ];
