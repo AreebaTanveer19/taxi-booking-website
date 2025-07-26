@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import services from './data/servicesData';
 import '../styles/ServicePage.css';
+import Footer from '../components/Footer/Footer';
 
 const ServiceTemplate = () => {
   const { serviceId } = useParams();
@@ -38,6 +39,7 @@ const ServiceTemplate = () => {
   };
 
   return (
+    <>
     <div className="service-page">
       {/* Breadcrumb Navigation */}
       <motion.div 
@@ -65,7 +67,7 @@ const ServiceTemplate = () => {
           <motion.div 
             className="hero-content"
             variants={slideUp}
-          >
+            >
             <motion.h1 variants={slideUp}>{service.name}</motion.h1>
             <motion.p variants={slideUp}>{service.desc}</motion.p>
             <motion.button
@@ -133,6 +135,8 @@ const ServiceTemplate = () => {
         </motion.div>
       </motion.section>
     </div>
+    <Footer />
+    </>
   );
 };
 

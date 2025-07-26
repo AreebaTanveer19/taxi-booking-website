@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaUserFriends, FaSuitcase, FaChevronDown } from 'react-icons/fa';
 import '../styles/FleetPage.css';
+import Footer from '../components/Footer/Footer';
 
 export default function FleetPage() {
   const [expandedId, setExpandedId] = useState(null);
@@ -83,6 +84,7 @@ export default function FleetPage() {
   ];
   
   return (
+    <>
     <div className="fleet-page">
       <motion.section 
         className="fleet-hero"
@@ -174,5 +176,7 @@ export default function FleetPage() {
         ))}
       </motion.div>
     </div>
+    <Footer />
+    </>
   );
 }

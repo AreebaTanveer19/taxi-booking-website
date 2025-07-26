@@ -16,6 +16,7 @@ import corporateimg from '../assets/corporate.jpeg';
 
 import crewimg from '../assets/crew.jpeg';
 import { motion } from 'framer-motion';
+import { openWhatsApp } from '../utils/whatsapp';
 
 const heroImages = [hero2, hero1, hero4 , taxiImg];
 
@@ -23,32 +24,32 @@ const services = [
   {
     name: 'Corporate Transfers',
     image: corporateimg,
-    desc: 'Our highly trained and experienced corporate chauffeurs will see to it that you and your guests arrive in the utmost elegance.'
+    desc: 'Professional chauffeurs for elegant corporate travel and executive transfers.'
   },
   {
     name: 'Airport Transfers',
     image: 'https://i.pinimg.com/736x/e4/d3/57/e4d357b529f775361b5d1ecca7f55115.jpg',
-    desc: 'Our premium airport transfers are your reliable choice for seamless travel, ready to meet all your domestic and international flights, anytime you need.'
+    desc: 'Reliable airport pickups and drop-offs for domestic and international flights.'
   },
   {
     name: 'Wedding Transfers',
     image: 'https://i.pinimg.com/736x/68/31/58/6831587c6a1d886558d3ddb9bfd78fbf.jpg',
-    desc: 'Elegant wedding car hire for a seamless and stylish arrival.'
+    desc: 'Luxurious wedding car hire for a stylish and seamless special day of your life.'
   },
   {
     name: 'Crew Transfers',
     image: crewimg,
-    desc: 'Prompt and comfortable crew transport for your team\'s needs.'
+    desc: 'Efficient crew transport solutions for the business teams and professionals.'
   },
   {
     name: 'Parcel Delivery',
     image: 'https://i.pinimg.com/736x/0a/eb/3e/0aeb3ea13895bf06694135173b017f18.jpg',
-    desc: 'Swift and secure parcel delivery across Sydney and beyond.'
+    desc: 'Swift and secure parcel delivery services across Sydney with safety measures.'
   },
   {
     name: 'Special Events',
     image: 'https://i.pinimg.com/736x/4e/a0/a0/4ea0a0bcabce609bb88fad491994e951.jpg',
-    desc: 'Make every event memorable with our premium event transfer service for concerts, parties, and more.'
+    desc: 'Premium event transportation for concerts, parties, and special occasions.'
   }
 ];
 
@@ -160,7 +161,10 @@ const LandingPage = () => {
               }}>
                 Book Now
               </button>
-              <button className="hero-btn hero-btn-secondary" onClick={() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'})}>
+              <button 
+                className="hero-btn hero-btn-secondary" 
+                onClick={() => openWhatsApp()}
+              >
                 Get Personalized Quote
               </button>
             </div>
@@ -191,6 +195,12 @@ const LandingPage = () => {
                 <div className="services-card-img-overlay-v2">
                   <div className="services-card-title-img-v2">{service.name}</div>
                   <div className="services-card-desc-img-v2">{service.desc}</div>
+                  {/* <button 
+                    className="services-card-button-v2"
+                    onClick={() => openWhatsApp(service.name)}
+                  >
+                    Get Instant Quote
+                  </button> */}
                 </div>
               </div>
             ))}
@@ -203,10 +213,12 @@ const LandingPage = () => {
         <div className="promo-content">
           <h2 className="promo-title promo-title-large">Discount up to 10% only for Regular Customersr</h2>
           <div className="promo-desc promo-desc-large">Enjoy exclusive savings! Our loyal customers receive a 10% discount on every ride. Thank you for choosing us for your journeys—your loyalty is always rewarded.</div>
-          <button className="hero-btn hero-btn-primary promo-btn" onClick={() => {
-            window.scrollTo(0, 0);
-            navigate('/book');
-          }}>Book Now</button>
+          <button 
+            className="hero-btn hero-btn-primary promo-btn"
+            onClick={() => openWhatsApp()}
+          >
+            Book Now
+          </button>
         </div>
       </div>
 
@@ -243,10 +255,7 @@ const LandingPage = () => {
                 style={{background:'#ffb300',color:'#181818'}}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  window.scrollTo(0, 0);
-                  navigate('/book');
-                }}
+                onClick={() => openWhatsApp(fleetItem.name)}
               >
                 Instant Quote
               </motion.button>

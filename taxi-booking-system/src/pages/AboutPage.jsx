@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import '../styles/AboutPage.css';
-const aboutImg = 'https://i.pinimg.com/1200x/d2/be/7a/d2be7ac815b24abe0797a35bb8383f3a.jpg';
 import { FaRegHeart, FaCarSide, FaShieldAlt, FaBolt } from 'react-icons/fa';
+import { openWhatsApp } from '../utils/whatsapp'; // Import the WhatsApp utility
+const aboutImg = 'https://i.pinimg.com/1200x/d2/be/7a/d2be7ac815b24abe0797a35bb8383f3a.jpg';
 const team1 = 'https://i.pinimg.com/736x/f6/2c/31/f62c31c18a9bfbec1f0e7b80977fa755.jpg';
 const team2 = 'https://i.pinimg.com/736x/f6/2c/31/f62c31c18a9bfbec1f0e7b80977fa755.jpg';
 const team3 = 'https://i.pinimg.com/736x/f6/2c/31/f62c31c18a9bfbec1f0e7b80977fa755.jpg';
-
 
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer/Footer';
@@ -137,7 +137,7 @@ const AboutPage = () => {
                 boxShadow: "0 5px 15px rgba(255, 255, 255, 0.2)"
               }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => openWhatsApp("About Page Hero")}
             >
               Get Personalized Quote
             </motion.button>
@@ -301,7 +301,7 @@ const AboutPage = () => {
                 boxShadow: "0 5px 15px rgba(255, 255, 255, 0.2)"
               }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => openWhatsApp("About Page")}
             >
               Get a Personalized Quote
               <span className="about-cta-btn-icon">→</span>
