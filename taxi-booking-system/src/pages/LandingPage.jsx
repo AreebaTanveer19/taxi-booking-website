@@ -62,19 +62,19 @@ const fleetImages = {
 const fleetItems = [
   {
     name: 'Executive Sedan',
-    passengers: '1-3 Passengers',
+    passengers: '1-3 PAX',
     luggage: '2 Suitcases',
     imageKey: 'Executive Sedan'
   },
   {
     name: 'Premium Sedan',
-    passengers: '1-3 Passengers',
+    passengers: '1-3 PAX',
     luggage: '2 Suitcases',
     imageKey: 'Premium Sedan'
   },
   {
-    name: 'SUV',
-    passengers: '1-4 Passengers',
+    name: 'Premium SUV',
+    passengers: '1-4 PAX',
     luggage: '3 Suitcases ',
     imageKey: 'SUV'
   }

@@ -34,7 +34,7 @@ export default function FleetPage() {
     {
       id: 1,
       name: 'Executive Sedan',
-      capacity: '1-3 Passengers • 2 Suitcases',
+      capacity: '1-3 PAX • 2 Suitcases',
       models: 'Lexus, Mercedes E Class, BMW 5 Series',
       features: ['Air Conditioning', 'Leather Seats', 'Phone Chargers', 'Bottled Water'],
       image: 'https://i.pinimg.com/736x/00/9d/fa/009dfa15dcde9017020e6589eb166bad.jpg',
@@ -44,7 +44,7 @@ export default function FleetPage() {
     {
       id: 2,
       name: 'Premium Sedan',
-      capacity: '1-3 Passengers • 2 Suitcases',
+      capacity: '1-3 PAX • 2 Suitcases',
       models: 'Mercedes S Class, BMW 7 Series or Audi A8',
       features: ['Premium Sound System', 'Massage Seats', 'WiFi', 'Refreshments'],
       image: 'https://i.pinimg.com/1200x/a9/71/d0/a971d076a33b6270548439fa6c24d467.jpg',
@@ -54,7 +54,7 @@ export default function FleetPage() {
     {
       id: 3,
       name: 'SUV',
-      capacity: '1-4 Passengers • 3 Suitcases • 2 Carry On',
+      capacity: '1-4 PAX • 3 Suitcases • 2 Carry On',
       models: 'Audi Q7 or Similar',
       features: ['Spacious Interior', 'All-Wheel Drive', 'Child Seats Available', 'Climate Control'],
       image: 'https://i.pinimg.com/1200x/1d/d3/4a/1dd34ad755b30b3f0f00d65a1418bf1c.jpg',
@@ -64,7 +64,7 @@ export default function FleetPage() {
     {
       id: 4,
       name: 'Van',
-      capacity: '1-6 Passengers • 5 Suitcases',
+      capacity: '1-6 PAX • 5 Suitcases',
       models: 'Mercedes Van or Similar',
       features: ['Ample Luggage Space', 'Comfortable Seating', 'Privacy Partitions', 'Entertainment System'],
       image: 'https://i.pinimg.com/1200x/a3/28/3c/a3283ca191f3ca879a3fe4567c513d11.jpg',
@@ -74,7 +74,7 @@ export default function FleetPage() {
     {
       id: 5,
       name: 'Mini Bus',
-      capacity: '1-11 Passengers • 6 Suitcases/Trailer',
+      capacity: '1-11 PAX • 6 Suitcases/Trailer',
       models: 'Mercedes Sprinter or Similar',
       features: ['Group Transport', 'Luxury Seating', 'Onboard Restroom', 'Professional Driver'],
       image: 'https://i.pinimg.com/1200x/63/32/3c/63323c04621887790f91a67bb46b8ca0.jpg',
