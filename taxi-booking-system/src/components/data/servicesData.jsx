@@ -20,7 +20,7 @@ const servicesData = [
       img3,
     ],
     desc: 'Our premium airport transfer service ensures you arrive at your flight on time and in style. We monitor flight statuses in real-time and adjust pickup times accordingly. Our professional chauffeurs will assist with luggage and provide a comfortable ride in our luxury vehicles.',
-    detailedDesc: 'Choose from our fleet of luxury sedans, SUVs, or vans for your airport transfer. We offer meet-and-greet services where our chauffeur will wait for you in the arrivals hall with a name sign. Our vehicles are equipped with WiFi, bottled water, and phone chargers for your convenience.',
+    detailedDesc: 'Enjoy a seamless and stress-free airport transfer experience with our executive fleet. Choose from luxury sedans, spacious SUVs, or vans tailored to your group size and preference. Our meet-and-greet service ensures a warm welcome with your chauffeur waiting in the arrivals hall holding a name sign. Flights are tracked in real-time to avoid delays. Onboard amenities include complimentary bottled water, high-speed WiFi, mobile chargers, and climate-controlled interiors. Whether you’re flying domestic or international, we ensure timely arrival and personalized attention.',
     features: [
       {
         title: 'Flight Monitoring',
@@ -49,10 +49,10 @@ const servicesData = [
     images: [
       'https://i.pinimg.com/736x/19/b5/fc/19b5fcec704c5767652b1dbebffd52ae.jpg',
       img2,
-      img3
+      'https://i.pinimg.com/736x/00/9d/fa/009dfa15dcde9017020e6589eb166bad.jpg'
     ],
     desc: 'Professional transportation solutions for business executives and corporate events. Our discreet chauffeurs understand the importance of punctuality for business meetings.',
-    detailedDesc: 'Our corporate clients enjoy priority booking and 24/7 support. Vehicles are equipped with work-friendly amenities including laptop trays, premium sound systems, and privacy partitions. We maintain strict confidentiality for all corporate clients.',
+    detailedDesc: 'Our corporate transport service is designed with business efficiency in mind. Whether it’s a single executive commute or a full-day roadshow with multiple meetings, we offer clean, discreet, and punctual rides. All vehicles feature laptop trays, USB ports, onboard WiFi, and privacy partitions to allow productivity en route. Dedicated account managers, 24/7 support, and priority scheduling make us the preferred choice for leading corporations. Rest assured with professional chauffeurs trained to uphold complete confidentiality and handle time-critical schedules.',
     features: [
       {
         title: 'Discreet Service',
@@ -80,11 +80,11 @@ const servicesData = [
     icon: <EventIcon fontSize="large" />,
     images: [
       'https://i.pinimg.com/736x/62/af/ad/62afadc281ac579ceb3d575f5351df80.jpg',
-      img2,
-      img3
+      'https://i.pinimg.com/1200x/a9/71/d0/a971d076a33b6270548439fa6c24d467.jpg',
+      'https://i.pinimg.com/736x/00/9d/fa/009dfa15dcde9017020e6589eb166bad.jpg'
     ],
     desc: 'Make your special day unforgettable with our elegant wedding car hire service. We offer classic and modern vehicles to complement your wedding theme.',
-    detailedDesc: 'Our wedding packages include decorated vehicles, complimentary champagne, and flexible scheduling to accommodate wedding day timelines. We provide door-to-door service for the bridal party and can coordinate with your wedding planner.',
+    detailedDesc: 'Create a grand entrance on your wedding day with our stunning wedding transportation options. Choose from timeless classics, luxury limousines, or modern SUVs, all available with customized decorations matching your wedding colors. Services include red carpet rollout, bridal bouquet holders, and courteous chauffeurs in formal attire. Complimentary chilled champagne is provided for toasts and photo moments. From bridal party shuttles to VIP guest transfers, we coordinate closely with your wedding planner to ensure everything runs perfectly on schedule.',
     features: [
       {
         title: 'Decorated Vehicles',
@@ -112,11 +112,11 @@ const servicesData = [
     icon: <LocalShippingIcon fontSize="large" />,
     images: [
       'https://i.pinimg.com/736x/0a/eb/3e/0aeb3ea13895bf06694135173b017f18.jpg',
-      img2,
-      img3
+      'https://i.pinimg.com/1200x/a3/28/3c/a3283ca191f3ca879a3fe4567c513d11.jpg',
+      'https://i.pinimg.com/1200x/63/32/3c/63323c04621887790f91a67bb46b8ca0.jpg'
     ],
     desc: 'Reliable and secure parcel delivery service for time-sensitive packages across the city.',
-    detailedDesc: 'Our specialized parcel transfer service ensures your important documents and packages reach their destination safely and on time. We offer real-time tracking and flexible pickup/delivery options.',
+    detailedDesc: 'Our fast and secure parcel transfer service is ideal for businesses and individuals who value reliability and speed. Whether you\'re delivering confidential documents, valuable items, or urgent packages, we ensure door-to-door delivery with full transparency. Track your parcel in real-time and receive instant updates via SMS or email. We offer options for same-day, express, and after-hours deliveries. With trained drivers and sealed, secure compartments, your delivery is always in safe hands.',
     features: [
       {
         title: 'Real-Time Tracking',
@@ -144,11 +144,11 @@ const servicesData = [
     icon: <DirectionsCarIcon fontSize="large" />,
     images: [
       'https://i.pinimg.com/736x/0c/51/9d/0c519da9910606b2f4ab3658ea2e4217.jpg',
-      img2,
-      img3
+      'https://i.pinimg.com/1200x/a3/28/3c/a3283ca191f3ca879a3fe4567c513d11.jpg',
+     img3
     ],
     desc: 'Premium transportation for special occasions and exclusive events. Arrive in style for your important moments.',
-    detailedDesc: 'Our special event service provides luxury transportation tailored for your unique occasions. Whether it\'s anniversaries, birthdays, or exclusive gatherings, we offer discreet and professional service with vehicles that make a statement.',
+    detailedDesc: 'Make a memorable impression at your next celebration with our luxury transportation for special events. From milestone birthdays to gala nights, our elegant vehicles add a touch of sophistication to any occasion. Each ride is tailored with music, refreshments, and ambiance suited to your theme. Chauffeurs ensure timely arrivals and hassle-free travel so you can focus on enjoying your event. Our service is ideal for red carpet arrivals, VIP guests, and intimate gatherings that demand elegance and class.',
     features: [
       {
         title: 'Luxury Vehicles',
@@ -176,11 +176,11 @@ const servicesData = [
     icon: <LocalShippingIcon fontSize="large" />,
     images: [
       'https://i.pinimg.com/1200x/fe/cc/a5/fecca506a23622ee7634b308ff007150.jpg',
-      img2,
+      'https://i.pinimg.com/1200x/a3/28/3c/a3283ca191f3ca879a3fe4567c513d11.jpg',
       img3
     ],
     desc: 'Reliable transportation for film crews, production teams, and corporate groups requiring frequent shuttles between locations.',
-    detailedDesc: 'Our crew shuttle service offers flexible scheduling to accommodate changing production needs. We provide vehicles ranging from luxury vans to coaches, all with ample storage space for equipment. Our drivers are experienced in navigating to remote locations and film sets.',
+    detailedDesc: 'Transport your production team or technical crew with efficiency and professionalism. Our vehicles range from executive vans to large coaches, equipped with ample storage space for gear and equipment. We understand the dynamic nature of film and event production, offering round-the-clock availability, last-minute routing changes, and multiple location pickups. Our drivers are familiar with studio locations, remote filming sites, and event venues, ensuring your team stays on schedule while traveling comfortably and securely.',
     features: [
       {
         title: 'Flexible Scheduling',
