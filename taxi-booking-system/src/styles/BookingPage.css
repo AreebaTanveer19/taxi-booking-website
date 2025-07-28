@@ -1,4 +1,378 @@
-/* Styles for the multi-step booking form */
+/* Luxury Multi-Step Chauffeur Booking Form Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Open+Sans:wght@400;700&display=swap');
+
+body, .booking-page-root {
+  font-family: 'Inter', 'Open Sans', Arial, sans-serif;
+  background: linear-gradient(135deg, #f5f8fa 0%, #e9efff 100%);
+  min-height: 100vh;
+  /* No background image */
+}
+
+.booking-page-root {
+  padding: 48px 1rem;
+}
+
+.progress-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+.progress-step {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e2e8f0;
+  transition: background 0.3s, border 0.3s, color 0.3s;
+}
+.progress-step.active {
+  background: #23408e;
+  color: #fff;
+  border: 2px solid #23408e;
+}
+.progress-step.completed {
+  background: #3ea6ff;
+  color: #fff;
+  border: 2px solid #3ea6ff;
+}
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: linear-gradient(90deg, #23408e 60%, #3ea6ff 100%);
+  border-radius: 2px;
+  margin: 0 8px;
+}
+
+.booking-form-container {
+  max-width: 820px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(35, 64, 142, 0.13);
+  padding: 40px 28px 32px 28px;
+  position: relative;
+}
+
+.step-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 2rem 1rem;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(35,64,142,0.08);
+  text-align: center;
+  animation: fadeInStep 0.5s;
+}
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  color: #23408e;
+  text-align: left;
+  padding-left: 0.5rem;
+  width: 100%;
+  letter-spacing: -1px;
+}
+
+.step-subtitle {
+  font-size: 1.15rem;
+  color: #3d4a5c;
+  margin-bottom: 2.2rem;
+  text-align: left;
+  padding-left: 0.5rem;
+}
+
+.booking-method-options {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 3rem 0 2rem 0;
+}
+.booking-method-card {
+  flex: 1;
+  min-width: 260px;
+  max-width: 340px;
+  padding: 2.2rem 1.2rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fafc 70%, #e3eefe 100%);
+  border: 1.5px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  box-shadow: 0 2px 10px rgba(35,64,142,0.05);
+  position: relative;
+}
+.booking-method-card.selected {
+  background: linear-gradient(135deg, #e9efff 60%, #c9e7ff 100%);
+  border: 2px solid #23408e;
+  box-shadow: 0 6px 24px rgba(35,64,142,0.11);
+}
+.booking-method-card:hover {
+  transform: translateY(-7px) scale(1.04);
+  border-color: #3ea6ff;
+  box-shadow: 0 10px 32px rgba(62,166,255,0.13);
+}
+.method-icon {
+  font-size: 2.7rem;
+  color: #23408e;
+  margin-bottom: 1.3rem;
+  animation: iconPulse 1.5s infinite alternate;
+}
+@keyframes iconPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+.booking-method-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #23408e;
+}
+.booking-method-card p {
+  color: #3d4a5c;
+  font-size: 1.05rem;
+}
+
+.omni-form {
+  width: 100%;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.7rem 2rem;
+}
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  color: #23408e;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  width: 100%;
+  font-family: inherit;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #3ea6ff;
+  box-shadow: 0 0 0 3px rgba(62,166,255,0.13);
+  outline: none;
+}
+.form-group label {
+  color: #23408e;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+.form-section-title {
+  text-align: left;
+  margin: 2rem 0 1rem 0;
+  font-size: 1.18rem;
+  color: #3ea6ff;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.3rem;
+  width: 100%;
+  grid-column: 1 / -1;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.child-seats-group {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+}
+.child-seats-group label {
+  font-size: 1rem;
+  color: #23408e;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  margin-left: 0.7rem;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #e2e8f0;
+  border-radius: 34px;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 20px; width: 20px;
+  left: 4px; bottom: 4px;
+  background: #fff;
+  border-radius: 50%;
+  transition: .4s;
+  box-shadow: 0 2px 6px rgba(35,64,142,0.13);
+}
+input:checked + .slider {
+  background: #3ea6ff;
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.booking-map-embed iframe {
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(35,64,142,0.07);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  margin-top: 2.2rem;
+}
+.form-actions button {
+  padding: 13px 32px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #23408e;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(35,64,142,0.09);
+  position: relative;
+  overflow: hidden;
+}
+.form-actions button:last-child, .submit-btn {
+  background: linear-gradient(135deg, #3ea6ff 60%, #23408e 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(62,166,255,0.18);
+}
+.form-actions button:hover, .submit-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  background: linear-gradient(135deg, #23408e 60%, #3ea6ff 100%);
+}
+.form-actions button:active, .submit-btn:active {
+  transform: translateY(1px);
+}
+
+.estimated-cost {
+  width: 100%;
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(90deg, #f5f8fa 70%, #e9efff 100%);
+  border-radius: 12px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #23408e;
+  box-shadow: 0 2px 10px rgba(35,64,142,0.06);
+}
+.summary-details {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  background: rgba(244, 246, 255, 0.9);
+  padding: 1.5rem;
+  border-radius: 14px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(35,64,142,0.05);
+  color: #2c3e50;
+}
+.summary-details p {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(35,64,142,0.04);
+}
+.summary-details p:last-child {
+  border-bottom: none;
+}
+
+/* Animated transitions for Framer Motion fade/slide */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.4s cubic-bezier(.25,.8,.25,1);
+}
+
+/* Responsive Styles */
+@media (max-width: 900px) {
+  .booking-form-container {
+    padding: 20px 4px 12px 4px;
+  }
+  .step-title {
+    font-size: 1.5rem;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .booking-method-options {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+}
+@media (max-width: 600px) {
+  .booking-form-container {
+    padding: 10px 0 0 0;
+  }
+  .step-container {
+    padding: 1rem 0.3rem 1rem 0.3rem;
+  }
+}
+
+/* Phone Input Styling */
+.react-tel-input .form-control {
+  width: 100% !important;
+  padding-left: 50px !important;
+  font-family: 'Inter', 'Open Sans', Arial, sans-serif;
+  border-radius: 10px !important;
+}
+.react-tel-input .flag-dropdown {
+  left: 1px !important;
+  border-radius: 10px 0 0 10px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  background: #f8fafc !important;
+}
+.react-tel-input .selected-flag {
+  padding: 0 8px 0 12px !important;
+}
+
 .booking-page-root {
   background: #f9fafb;
   padding: 48px 1rem;

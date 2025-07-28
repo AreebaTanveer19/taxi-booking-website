@@ -1,5 +1,5 @@
 export const openWhatsApp = (serviceName = '') => {
-  const phoneNumber = '923264140389';
+  const phoneNumber = '61416535987';
   const message = serviceName 
     ? `Hello, I'm interested in ${serviceName} service!` 
     : "Hello, I'm interested in your services!";

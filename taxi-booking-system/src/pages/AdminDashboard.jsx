@@ -156,7 +156,7 @@ export default function AdminDashboard() {
         'Name', 'Email', 'Phone',
         'Booking Method', 'City', 'Service Type', 'Flight Number', 'Flight Time', 'Luggage', 'Special Instructions',
         'Payment Method', 'Name On Card', 'Card Type', 'Expiry Month', 'Expiry Year', 'Terms Accepted',
-        'Vehicle Preference', 'Date', 'Time', 'Passengers', 'Baby Seat',
+        'Vehicle Preference', 'Date', 'Time', 'Passengers', 'Child Under 7', 'Booster Seats', 'Baby Seats',
         'Pickup', 'Dropoff', 'Distance', 'Pickup Postcode', 'Dropoff Postcode', 'Estimated Cost', 'Status'
       ],
       ...filteredBookings.map(b => [
@@ -180,7 +180,9 @@ export default function AdminDashboard() {
         b.date,
         b.time,
         b.passengers,
-        b.babySeat ? 'Yes' : 'No',
+        b.hasChildUnder7 ? 'Yes' : 'No',
+        b.boosterSeatQty || 0,
+        b.babySeatQty || 0,
         b.pickup,
         b.dropoff,
         b.distance,
@@ -384,7 +386,9 @@ export default function AdminDashboard() {
                           <p><strong>Email:</strong> {booking.userId?.email || booking.email}</p>
                           <p><strong>Phone:</strong> {booking.userId?.phone || booking.phone}</p>
                           <p><strong>Passengers:</strong> {booking.passengers}</p>
-                          {booking.babySeat && <p><strong>Baby Seat:</strong> Yes</p>}
+                          {booking.hasChildUnder7 && <p><strong>Child Under 7:</strong> Yes</p>}
+                          {booking.hasChildUnder7 && <p><strong>Booster Seats:</strong> {booking.boosterSeatQty}</p>}
+                          {booking.hasChildUnder7 && <p><strong>Baby Seats:</strong> {booking.babySeatQty}</p>}
                           {booking.luggage && <p><strong>Luggage:</strong> {booking.luggage}</p>}
                         </div>
 

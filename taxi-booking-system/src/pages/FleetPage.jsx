@@ -4,6 +4,7 @@ import { FaUserFriends, FaSuitcase, FaChevronDown } from 'react-icons/fa';
 import '../styles/FleetPage.css';
 import Footer from '../components/Footer/Footer';
 
+
 export default function FleetPage() {
   const [expandedId, setExpandedId] = useState(null);
 
@@ -37,7 +38,7 @@ export default function FleetPage() {
       capacity: '1-3 PAX • 2 Suitcases',
       models: 'Lexus, Mercedes E Class, BMW 5 Series',
       features: ['Air Conditioning', 'Leather Seats', 'Phone Chargers', 'Bottled Water'],
-      image: 'https://i.pinimg.com/736x/00/9d/fa/009dfa15dcde9017020e6589eb166bad.jpg',
+      image: 'https://i.pinimg.com/1200x/fa/9e/3d/fa9e3dbc28c719ec1caa58a73dcf261f.jpg',
       description: 'The Executive Sedan combines elegance and efficiency for professionals and travelers who value comfort and punctuality. Ideal for business executives, this vehicle ensures a smooth ride with plush interiors and advanced climate control. Whether you’re heading to a corporate meeting or the airport, this sedan reflects style and professionalism at every turn.',
       idealFor: 'Business meetings, airport transfers, and special occasions'
     },
@@ -53,7 +54,7 @@ export default function FleetPage() {
     },
     {
       id: 3,
-      name: 'SUV',
+      name: 'Premium SUV',
       capacity: '1-4 PAX • 3 Suitcases • 2 Carry On',
       models: 'Audi Q7 or Similar',
       features: ['Spacious Interior', 'All-Wheel Drive', 'Child Seats Available', 'Climate Control'],
@@ -63,7 +64,7 @@ export default function FleetPage() {
     },
     {
       id: 4,
-      name: 'Van',
+      name: 'Luxury Van',
       capacity: '1-6 PAX • 5 Suitcases',
       models: 'Mercedes Van or Similar',
       features: ['Ample Luggage Space', 'Comfortable Seating', 'Privacy Partitions', 'Entertainment System'],
@@ -73,7 +74,7 @@ export default function FleetPage() {
     },
     {
       id: 5,
-      name: 'Mini Bus',
+      name: 'Sprinter',
       capacity: '1-11 PAX • 6 Suitcases/Trailer',
       models: 'Mercedes Sprinter or Similar',
       features: ['Group Transport', 'Luxury Seating', 'Onboard Restroom', 'Professional Driver'],

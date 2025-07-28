@@ -29,15 +29,15 @@ const BookingPage = () => {
     date: '',
     time: '',
     passengers: 1,
-    babySeat: false,
-    name: '',
-    email: '',
-    phone: '',
+
     pickup: '',
     dropoff: '',
     distance: '',
     pickupPostcode: '',
     dropoffPostcode: '',
+    hasChildUnder7: false,
+    boosterSeatQty: 0,
+    babySeatQty: 0,
   });
   const [estimatedCost, setEstimatedCost] = useState(0);
 
@@ -79,9 +79,6 @@ const BookingPage = () => {
 
     // Add surcharges
     let finalCost = cost;
-    if (form.babySeat) {
-      finalCost += 15;
-    }
     if (form.serviceType === 'Airport Transfers') {
       finalCost += 15; // Airport surcharge
       // Add variable toll tax based on terminal
@@ -94,6 +91,10 @@ const BookingPage = () => {
       } else if (form.terminal === 'T4 Domestic') {
         finalCost += 6.2;
       }
+    }
+    if (form.hasChildUnder7) {
+      finalCost += form.boosterSeatQty * 10;
+      finalCost += form.babySeatQty * 15;
     }
     setEstimatedCost(finalCost.toFixed(2));
     setStep(3); // Move to payment page
@@ -312,13 +313,60 @@ const BookingPage = () => {
             <label>Vehicle Preference</label>
             <select name="vehiclePreference" value={form.vehiclePreference} onChange={handleInputChange} required>
               <option value="">-- Select a Vehicle --</option>
-              <option value="Executive Sedan">Executive Sedan (1-3 Passengers, 2 Suitcases) </option>
-              <option value="Premium Sedan">Premium Sedan (1-3 Passengers, 2 Suitcases) </option>
-              <option value="SUV">SUV (1-4 Passengers, 3 Suitcases, 2 Carry On) </option>
-              <option value="Van">Van (1-6 Passengers, 5 Suitcases)</option>
-              <option value="Sprinter">Sprinter (1-11 Passengers, 6 Suitcases/Trailer)</option>
+              <option value="Executive Sedan">Executive Sedan (1-3 Pax, 2 Suitcases) </option>
+              <option value="Premium Sedan">Premium Sedan (1-3 Pax, 2 Suitcases)</option>
+              <option value="Premium Sedan">Premium Sedan (1-4 Pax, 3 Suitcases 2 Carry On)</option>
+              <option value="Luxury Van">Luxury Van (1-6 Pax, 5 Suitcases)</option>
+              <option value="Sprinter">Sprinter (1-11 Pax 6 Suitcases/ Trailer)</option>
             </select>
           </div>
+
+          {/* Child Under 7 Switch */}
+          <div className="form-group">
+            <label htmlFor="hasChildUnder7" style={{ display: 'block', marginBottom: '8px' }}>Do you have a child under 7?</label>
+            <label className="switch">
+              <input
+                type="checkbox"
+                id="hasChildUnder7"
+                name="hasChildUnder7"
+                checked={form.hasChildUnder7}
+                onChange={handleInputChange}
+              />
+              <span className="slider round"></span>
+            </label>
+          </div>
+
+          {/* Booster/Baby Seat Quantity Selectors */}
+          {form.hasChildUnder7 && (
+            <div className="form-group child-seats-group">
+              <div style={{ marginBottom: '10px' }}>
+                <label htmlFor="boosterSeatQty">Booster Seat Quantity</label>
+                <input
+                  type="number"
+                  id="boosterSeatQty"
+                  name="boosterSeatQty"
+                  min="0"
+                  max="3"
+                  value={form.boosterSeatQty}
+                  onChange={handleInputChange}
+                  style={{ width: '60px', marginLeft: '10px' }}
+                />
+              </div>
+              <div>
+                <label htmlFor="babySeatQty">Baby Seat Quantity</label>
+                <input
+                  type="number"
+                  id="babySeatQty"
+                  name="babySeatQty"
+                  min="0"
+                  max="3"
+                  value={form.babySeatQty}
+                  onChange={handleInputChange}
+                  style={{ width: '60px', marginLeft: '10px' }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Luggage and Passengers side by side */}
           <div className="form-group">
@@ -339,13 +387,7 @@ const BookingPage = () => {
             <input type="time" name="time" value={form.time} onChange={handleInputChange} required />
           </div>
 
-          {/* Options */}
-          <div className="form-group full-width">
-            <label className="checkbox-label">
-              <input type="checkbox" name="babySeat" checked={form.babySeat} onChange={handleInputChange} />
-              Add Australian Standard Baby Seat (+$15)
-            </label>
-          </div>
+
 
           {/* Google Map Embed after baby seat */}
           <div className="form-group full-width booking-map-embed" style={{margin: '1.5rem 0'}}>
@@ -498,7 +540,13 @@ const BookingPage = () => {
           <p><strong>Passengers:</strong> {form.passengers || 'Not specified'}</p>
           <p><strong>Luggage:</strong> {form.luggage || 'Not specified'}</p>
           
-          {form.babySeat && <p><strong>Baby Seat:</strong> Yes</p>}
+          
+          {form.hasChildUnder7 && (
+            <>
+              <p><strong>Booster Seat Quantity:</strong> {form.boosterSeatQty}</p>
+              <p><strong>Baby Seat Quantity:</strong> {form.babySeatQty}</p>
+            </>
+          )}
           {form.specialInstructions && <p><strong>Special Instructions:</strong> {form.specialInstructions}</p>}
           
           <div className="estimated-cost">
@@ -521,11 +569,21 @@ const BookingPage = () => {
     <>
       <div className="booking-page-root">
         <div className="booking-form-container">
-          {step === 1 && renderStep1()}
-          {step === 2 && renderStep2()}
-          {step === 3 && renderStep3()}
-          {step === 4 && renderStep4()}
+        {/* Progress Indicator */}
+        <div className="progress-indicator">
+          <div className={`progress-step${step === 1 ? ' active' : step > 1 ? ' completed' : ''}`}>1</div>
+          <div className="progress-bar"></div>
+          <div className={`progress-step${step === 2 ? ' active' : step > 2 ? ' completed' : ''}`}>2</div>
+          <div className="progress-bar"></div>
+          <div className={`progress-step${step === 3 ? ' active' : step > 3 ? ' completed' : ''}`}>3</div>
+          <div className="progress-bar"></div>
+          <div className={`progress-step${step === 4 ? ' active' : ''}`}>4</div>
         </div>
+        {step === 1 && renderStep1()}
+        {step === 2 && renderStep2()}
+        {step === 3 && renderStep3()}
+        {step === 4 && renderStep4()}
+      </div>
       </div>
     </>
   );

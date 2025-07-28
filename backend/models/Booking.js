@@ -25,7 +25,10 @@ const bookingSchema = new mongoose.Schema({
   distance: String,
   pickupPostcode: String,
   dropoffPostcode: String,
-  estimatedCost: String
+  estimatedCost: String,
+  hasChildUnder7: { type: Boolean, default: false },
+  boosterSeatQty: { type: Number, default: 0 },
+  babySeatQty: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Booking', bookingSchema);
