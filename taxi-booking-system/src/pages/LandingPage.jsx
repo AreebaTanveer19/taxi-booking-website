@@ -211,8 +211,8 @@ const LandingPage = () => {
       {/* Promo Section for Regular Customers */}
       <div className="promo-section" style={{ backgroundImage: `linear-gradient(rgba(24,24,24,0.55), rgba(24,24,24,0.55)), url(${taxiImg})` }}>
         <div className="promo-content">
-          <h2 className="promo-title promo-title-large">Discount up to 10% only for Regular Customersr</h2>
-          <div className="promo-desc promo-desc-large">Enjoy exclusive savings! Our loyal customers receive a 10% discount on every ride. Thank you for choosing us for your journeys—your loyalty is always rewarded.</div>
+          <h2 className="promo-title promo-title-large">Get 10% discount on your first 5 rides!</h2>
+          <div className="promo-desc promo-desc-large">Enjoy exclusive savings! New customers receive 10% off their first 5 rides. Experience our premium service at a discounted rate.</div>
           <button 
             className="hero-btn hero-btn-primary promo-btn"
             onClick={() => openWhatsApp()}

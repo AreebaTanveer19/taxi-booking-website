@@ -35,9 +35,9 @@ export default function AdminLogin({ onLogin }) {
 
       if (data.success && data.token) {
         localStorage.setItem('adminToken', data.token);
-        window.location.href = '/admin'; // Force full page reload to ensure auth state updates
+        window.location.href = '/admin';
       } else {
-        setError(data.message || 'Invalid credentials');
+        window.location.href = '/access-denied';
       }
     } catch (err) {
       console.error('Login error:', err);

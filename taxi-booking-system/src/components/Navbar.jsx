@@ -17,7 +17,8 @@ const navLinks = [
       { label: 'Wedding Services', path: '/services/wedding-services' },
       { label: 'Parcel Transfer', path: '/services/parcel-transfer' },
       { label: 'Special Events', path: '/services/special-events' },
-      { label: 'Crew Transfers', path: '/services/crew-transfers' }
+      { label: 'Crew Transfers', path: '/services/crew-transfers' },
+      { label: 'Point to Point', path: '/services/point-to-point' }
     ]
   },
   { 
@@ -47,8 +48,8 @@ const Navbar = () => {
           <span className="navbar-topbar-welcome-text"><b>Welcome to <span className="navbar-topbar-site">Horizon Chauffeurs</span></b>, we hope you will enjoy our services and have a good experience.</span>
         </div>
         <div className="navbar-topbar-right">
-          <span className="navbar-topbar-item"><span className="navbar-topbar-icon-email">✉️</span>info@abhinaamnipta.au</span>
-          <span className="navbar-topbar-item"><span className="navbar-topbar-icon-phone">📞</span>012345678</span>
+          <span className="navbar-topbar-item"><span className="navbar-topbar-icon-email">✉️</span>info@horizonchauffeurs.com</span>
+          <span className="navbar-topbar-item"><span className="navbar-topbar-icon-phone">📞</span>+61 416 535 987</span>
         </div>
       </div>
       {/* Main Navbar */}

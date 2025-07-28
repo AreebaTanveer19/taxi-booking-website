@@ -202,6 +202,39 @@ const servicesData = [
       'Location Shuttles'
     ]
   }
+  ,
+  {
+    id: 'point-to-point',
+    name: 'Point to Point',
+    icon: <DirectionsCarIcon fontSize="large" />, // reuse existing icon
+    images: [
+      'https://i.pinimg.com/1200x/36/56/04/36560421183974f0216101c50fc0e341.jpg',
+      img1,
+      img2
+    ],
+    desc: 'Direct transfers between any two locations with upfront pricing and no hidden stops.',
+    detailedDesc: 'Enjoy hassle-free direct rides between any addresses. Ideal for quick commutes, meetings across town, or evening outings, our point-to-point service offers flat-rate pricing, real-time tracking, and professional chauffeurs who take the fastest, safest routes.',
+    features: [
+      {
+        title: 'Flat-Rate Pricing',
+        description: 'Know your fare before you ride – no surge, no surprises.'
+      },
+      {
+        title: 'Door-to-Door',
+        description: 'Pickup and drop-off exactly where you need.'
+      },
+      {
+        title: 'Real-Time Tracking',
+        description: 'Share your live ETA with friends or colleagues.'
+      }
+    ],
+    useCases: [
+      'City Commutes',
+      'Dinner Reservations',
+      'Cross-Town Meetings',
+      'Errand Runs'
+    ]
+  }
 ];
 
 export default servicesData;

@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import contactImg from '../assets/contact.png';
 
 const CONTACT_INFO = {
-  phone: '0123 456 789',
-  email: 'info@abhinaamnipta.au',
+  phone: '+61 416 535 987',
+  email: 'info@horizonchauffeurs.com',
   hours: 'Mon-Sun: 6:00am - 11:00pm',
   address: 'Sydney, NSW, Australia',
 };

@@ -75,4 +75,30 @@ router.delete('/bookings/:id', async (req, res) => {
   }
 });
 
+// Delete a user
+router.delete('/users/:id', adminOnly, async (req, res) => {
+  try {
+    // First check if user has any bookings
+    const bookings = await Booking.countDocuments({ userId: req.params.id });
+    
+    if (bookings > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cannot delete user with existing bookings' 
+      });
+    }
+    
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    
+    if (!deletedUser) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    res.json({ success: true, message: 'User deleted' });
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    res.status(500).json({ success: false, message: 'Server error deleting user' });
+  }
+});
+
 module.exports = router;

@@ -124,7 +124,6 @@ const BookingPage = () => {
       alert('Something went wrong. Try again later.');
     }
   };
-  
 
   const renderStep1 = () => (
     <motion.div 
@@ -519,14 +518,16 @@ const BookingPage = () => {
   };
 
   return (
-    <div className="booking-page-root">
-      <div className="booking-form-container">
-        {step === 1 && renderStep1()}
-        {step === 2 && renderStep2()}
-        {step === 3 && renderStep3()}
-        {step === 4 && renderStep4()}
+    <>
+      <div className="booking-page-root">
+        <div className="booking-form-container">
+          {step === 1 && renderStep1()}
+          {step === 2 && renderStep2()}
+          {step === 3 && renderStep3()}
+          {step === 4 && renderStep4()}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

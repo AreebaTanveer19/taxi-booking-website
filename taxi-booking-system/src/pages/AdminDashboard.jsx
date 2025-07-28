@@ -131,6 +131,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteUser = async (userId) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setUsers(users => users.filter(u => u._id !== userId));
+      }
+    } catch (err) {
+      setError('Failed to delete user');
+    }
+  };
+
   const handleExport = () => {
     const csvRows = [
       [
@@ -310,6 +329,7 @@ export default function AdminDashboard() {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -319,11 +339,19 @@ export default function AdminDashboard() {
                       <td>{u.name}</td>
                       <td>{u.email}</td>
                       <td>{u.phone}</td>
+                      <td>
+                        <button 
+                          className="delete-btn" 
+                          onClick={() => handleDeleteUser(u._id)}
+                        >
+                          Delete User
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="3" className="no-bookings">
+                    <td colSpan="4" className="no-bookings">
                       No users found
                     </td>
                   </tr>

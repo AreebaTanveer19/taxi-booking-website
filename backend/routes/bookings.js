@@ -3,30 +3,64 @@ const router = express.Router();
 const Booking = require('../models/Booking');
 const User = require('../models/Users');
 const adminOnly = require('../utils/auth');
+const mongoose = require('mongoose'); // mongoose is required for transactions
 
 router.post('/book', async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
   try {
     // Extract user details
     const { name, email, phone, ...rideDetails } = req.body;
 
     // Input validation
     if (!name || !email || !phone) {
+      await session.abortTransaction();
       return res.status(400).json({ success: false, message: 'Name, email, and phone are required.' });
     }
 
-    // Save user details
-    const user = new User({ name, email, phone });
-    const savedUser = await user.save();
+    // Find or create user with transaction
+    let user = await User.findOne({ 
+      $or: [{ email }, { phone }]
+    }).session(session);
+    
+    if (!user) {
+      user = new User({ name, email, phone });
+      await user.save({ session });
+    }
 
-    // Save booking/ride details with userId
-    const bookingData = { ...rideDetails, userId: savedUser._id };
+    // Create booking
+    const bookingData = { ...rideDetails, userId: user._id };
     const newBooking = new Booking(bookingData);
-    const savedBooking = await newBooking.save();
+    const savedBooking = await newBooking.save({ session });
 
-    res.status(201).json({ success: true, message: 'Booking saved', booking: savedBooking, user: savedUser });
+    await session.commitTransaction();
+    res.status(201).json({ success: true, message: 'Booking saved', booking: savedBooking, user });
   } catch (err) {
-    console.error('Booking/User save error:', err);
+    await session.abortTransaction();
+    
+    if (err.code === 11000) { // Duplicate key error
+      // Retry with existing user
+      try {
+        const user = await User.findOne({ 
+          $or: [{ email: req.body.email }, { phone: req.body.phone }]
+        });
+        
+        if (user) {
+          const bookingData = { ...req.body, userId: user._id };
+          const newBooking = new Booking(bookingData);
+          const savedBooking = await newBooking.save();
+          return res.status(201).json({ success: true, message: 'Booking saved', booking: savedBooking, user });
+        }
+      } catch (retryErr) {
+        console.error('Retry failed:', retryErr);
+      }
+    }
+    
+    console.error('Booking error:', err);
     res.status(500).json({ success: false, message: 'Error saving booking', error: err.message });
+  } finally {
+    session.endSession();
   }
 });
 
