@@ -48,7 +48,7 @@ const Navbar = () => {
           <span className="navbar-topbar-welcome-text"><b>Welcome to <span className="navbar-topbar-site">Horizon Chauffeurs</span></b>, we hope you will enjoy our services and have a good experience.</span>
         </div>
         <div className="navbar-topbar-right">
-          <span className="navbar-topbar-item"><span className="navbar-topbar-icon-email">✉️</span>info@horizonchauffeurs.com</span>
+          <span className="navbar-topbar-item"><span className="navbar-topbar-icon-email">✉️</span>Info@horizonchauffeurs.com.au</span>
           <span className="navbar-topbar-item"><span className="navbar-topbar-icon-phone">📞</span>+61 416 535 987</span>
         </div>
       </div>

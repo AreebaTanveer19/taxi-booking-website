@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { LoadScript, Autocomplete, GoogleMap, DirectionsRenderer } from '@react-google-maps/api';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import '../styles/BookingPage.css';
@@ -6,15 +7,22 @@ import { FaRoute, FaArrowRight, FaCar, FaCarSide, FaRegClock } from 'react-icons
 import { motion } from 'framer-motion';
 
 const BookingPage = () => {
-  const [step, setStep] = useState(1);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const pickupAutocompleteRef = useRef(null);
+  const dropoffAutocompleteRef = useRef(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
+  const [distanceError, setDistanceError] = useState('');
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCQTDN1TiKo-RdMrBtq8fDEfq8RepOIzFI';
+
   const [form, setForm] = useState({
-    bookingMethod: '', // 'distance' or 'time'
+    bookingMethod: '',
+    name: '',
+    email: '',
+    phone: '',
     city: '',
     serviceType: '',
     flightDetails: {
       flightNumber: '',
-      flightTime: '',
+      flightTime: ''
     },
     terminal: '',
     luggage: '',
@@ -28,18 +36,139 @@ const BookingPage = () => {
     vehiclePreference: '',
     date: '',
     time: '',
+    expectedEndTime: '',
     passengers: 1,
-
     pickup: '',
     dropoff: '',
     distance: '',
-    pickupPostcode: '',
-    dropoffPostcode: '',
     hasChildUnder7: false,
-    boosterSeatQty: 0,
-    babySeatQty: 0,
+    babySeats: 0,
+    boosterSeats: 0
   });
+
+  const [step, setStep] = useState(1);
+  const [selectedOption, setSelectedOption] = useState(null);
   const [estimatedCost, setEstimatedCost] = useState(0);
+  const [estimatedFare, setEstimatedFare] = useState(0);
+  const [directions, setDirections] = useState(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  const SYDNEY_CENTER = { lat: -33.8688, lng: 151.2093 };
+  const DEFAULT_ZOOM = 12;
+
+  // Handler for pickup autocomplete
+  const handlePickupPlaceChanged = () => {
+    const place = pickupAutocompleteRef.current.getPlace();
+    if (place && place.formatted_address) {
+      setForm(prev => ({ ...prev, pickup: place.formatted_address }));
+    }
+  };
+
+  // Handler for dropoff autocomplete
+  const handleDropoffPlaceChanged = () => {
+    const place = dropoffAutocompleteRef.current.getPlace();
+    if (place && place.formatted_address) {
+      setForm(prev => ({ ...prev, dropoff: place.formatted_address }));
+    }
+  };
+
+  // Calculate distance when both pickup and dropoff are set
+  useEffect(() => {
+    const calculateDistance = async () => {
+      if (form.pickup && form.dropoff && form.bookingMethod === 'distance') {
+        setDistanceLoading(true);
+        try {
+          const service = new window.google.maps.DistanceMatrixService();
+          const results = await service.getDistanceMatrix({
+            origins: [form.pickup],
+            destinations: [form.dropoff],
+            travelMode: 'DRIVING',
+          });
+          const distance = results.rows[0].elements[0].distance.value;
+          setForm(prev => ({ ...prev, distance }));
+          setEstimatedFare(calculateFare(distance));
+        } catch (error) {
+          setDistanceError('Failed to calculate distance');
+        } finally {
+          setDistanceLoading(false);
+        }
+      }
+    };
+    calculateDistance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.pickup, form.dropoff, form.bookingMethod]);
+
+  const calculateFare = (value) => {
+    let fare = 0;
+    if (form.bookingMethod === 'distance') {
+      const baseFare = 5.00;
+      const perMileRate = 2.50;
+      const distanceInMiles = value * 0.000621371;
+      fare = baseFare + (distanceInMiles * perMileRate);
+    } else {
+      // Time-based calculation
+      const hourlyRates = {
+        'Executive Sedan': 50,
+        'Premium Sedan': 60,
+        'Luxury Van': 80,
+        'Sprinter': 100
+      };
+      const hours = calculateDuration(form.time, form.expectedEndTime) / 60;
+      fare = hours * (hourlyRates[form.vehiclePreference] || 50);
+    }
+    
+    // Add seat charges
+    if (form.hasChildUnder7) {
+      fare += (form.babySeats * 10) + (form.boosterSeats * 10);
+    }
+    
+    return fare.toFixed(2);
+  };
+
+  const calculateRoute = async () => {
+    if (form.pickup && form.dropoff && window.google) {
+      try {
+        const directionsService = new window.google.maps.DirectionsService();
+        
+        const result = await new Promise((resolve, reject) => {
+          directionsService.route({
+            origin: form.pickup,
+            destination: form.dropoff,
+            travelMode: window.google.maps.TravelMode.DRIVING
+          }, (result, status) => {
+            if (status === 'OK') {
+              resolve(result);
+            } else {
+              reject(status);
+            }
+          });
+        });
+        
+        setDirections(result);
+      } catch (error) {
+        console.error('Error calculating route:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (mapLoaded && form.pickup && form.dropoff) {
+      calculateRoute();
+    }
+  }, [form.pickup, form.dropoff, mapLoaded]);
+
+  useEffect(() => {
+    if (form.bookingMethod === 'distance') {
+      calculateRoute();
+    } else if (form.bookingMethod === 'time' && form.time && form.expectedEndTime) {
+      setEstimatedFare(calculateFare(0));
+    }
+  }, [form.pickup, form.dropoff, form.time, form.expectedEndTime, form.bookingMethod]);
+
+  // Google Maps API key validation
+  if (!googleMapsApiKey) {
+    console.error('Google Maps API key is missing');
+  }
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,6 +177,21 @@ const BookingPage = () => {
 
   const handlePhoneChange = (value) => {
     setForm(prev => ({ ...prev, phone: value }));
+  };
+
+  const handleVehicleChange = (e) => {
+    const { value } = e.target;
+    setForm(prev => ({
+      ...prev,
+      vehiclePreference: value
+    }));
+    
+    // Recalculate fare if needed
+    if (form.bookingMethod === 'distance' && form.distance) {
+      setEstimatedFare(calculateFare(form.distance));
+    } else if (form.bookingMethod === 'time' && form.time && form.expectedEndTime) {
+      setEstimatedFare(calculateFare(0));
+    }
   };
 
   const proceedToPayment = () => {
@@ -74,7 +218,16 @@ const BookingPage = () => {
         cost = costAt30km + (distance - 30) * 2;
       }
     } else { // 'time' based booking
-      cost = 100; // Base fare for hourly
+      const start = new Date(`2000-01-01T${form.time}`);
+      const end = new Date(`2000-01-01T${form.expectedEndTime}`);
+      const hours = (end - start) / (1000 * 60 * 60);
+      const hourlyRates = {
+        'Executive Sedan': 60,
+        'Premium Sedan': 80,
+        'Luxury Van': 100,
+        'Sprinter': 120
+      };
+      cost = hours * hourlyRates[form.vehiclePreference] || 0;
     }
 
     // Add surcharges
@@ -93,8 +246,8 @@ const BookingPage = () => {
       }
     }
     if (form.hasChildUnder7) {
-      finalCost += form.boosterSeatQty * 10;
-      finalCost += form.babySeatQty * 15;
+      finalCost += form.babySeats * 10;
+      finalCost += form.boosterSeats * 10;
     }
     setEstimatedCost(finalCost.toFixed(2));
     setStep(3); // Move to payment page
@@ -228,6 +381,7 @@ const BookingPage = () => {
               <option value="Wedding Car">Wedding Car</option>
               <option value="Parcel Delivery">Parcel Delivery</option>
               <option value="Special Events">Special Events</option>
+              <option value="Point to Point">Point to Point</option>
             </select>
           </div>
 
@@ -283,27 +437,95 @@ const BookingPage = () => {
                   onChange={(e) => setForm(prev => ({ ...prev, flightDetails: { ...prev.flightDetails, flightTime: e.target.value } }))}
                 />
               </div>
-            </>
+            </> 
           )}
 
           {/* Pickup & Drop-off Fields BEFORE Vehicle */}
-          <div className="form-group">
-            <label>{form.bookingMethod === 'time' ? 'Pickup Location' : 'Pickup Address'}</label>
-            <input type="text" name="pickup" value={form.pickup} onChange={handleInputChange} required />
-          </div>
-          <div className="form-group">
-            <label>Pickup Postcode</label>
-            <input type="text" name="pickupPostcode" value={form.pickupPostcode} onChange={handleInputChange} required />
-          </div>
           {form.bookingMethod === 'distance' && (
             <>
               <div className="form-group">
-                <label>Drop-off Address</label>
-                <input type="text" name="dropoff" value={form.dropoff} onChange={handleInputChange} required />
+                <label>Pickup Address</label>
+                <div className="Autocomplete">
+                  <Autocomplete
+                    onLoad={autocomplete => {
+                      pickupAutocompleteRef.current = autocomplete;
+                      autocomplete.setComponentRestrictions({ country: 'au' });
+                    }}
+                    onPlaceChanged={handlePickupPlaceChanged}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Pickup location"
+                      value={form.pickup}
+                      onChange={(e) => setForm(prev => ({ ...prev, pickup: e.target.value }))}
+                      required
+                    />
+                  </Autocomplete>
+                </div>
               </div>
               <div className="form-group">
-                <label>Drop-off Postcode</label>
-                <input type="text" name="dropoffPostcode" value={form.dropoffPostcode} onChange={handleInputChange} required />
+                <label>Drop-off Address</label>
+                <div className="Autocomplete">
+                  <Autocomplete
+                    onLoad={autocomplete => {
+                      dropoffAutocompleteRef.current = autocomplete;
+                      autocomplete.setComponentRestrictions({ country: 'au' });
+                    }}
+                    onPlaceChanged={handleDropoffPlaceChanged}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Drop-off location"
+                      value={form.dropoff}
+                      onChange={(e) => setForm(prev => ({ ...prev, dropoff: e.target.value }))}
+                      required
+                    />
+                  </Autocomplete>
+                </div>
+              </div>
+            </>
+          )}
+          {form.bookingMethod === 'time' && (
+            <>
+              <div className="form-group">
+                <label>Pickup Location</label>
+                <div className="Autocomplete">
+                  <Autocomplete
+                    onLoad={autocomplete => {
+                      pickupAutocompleteRef.current = autocomplete;
+                      autocomplete.setComponentRestrictions({ country: 'au' });
+                    }}
+                    onPlaceChanged={handlePickupPlaceChanged}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Pickup location"
+                      value={form.pickup}
+                      onChange={(e) => setForm(prev => ({ ...prev, pickup: e.target.value }))}
+                      required
+                    />
+                  </Autocomplete>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Dropoff Location</label>
+                <div className="Autocomplete">
+                  <Autocomplete
+                    onLoad={autocomplete => {
+                      dropoffAutocompleteRef.current = autocomplete;
+                      autocomplete.setComponentRestrictions({ country: 'au' });
+                    }}
+                    onPlaceChanged={handleDropoffPlaceChanged}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Dropoff location"
+                      value={form.dropoff}
+                      onChange={(e) => setForm(prev => ({ ...prev, dropoff: e.target.value }))}
+                      required
+                    />
+                  </Autocomplete>
+                </div>
               </div>
             </>
           )}
@@ -311,7 +533,7 @@ const BookingPage = () => {
           {/* Vehicle Preference */}
           <div className="form-group">
             <label>Vehicle Preference</label>
-            <select name="vehiclePreference" value={form.vehiclePreference} onChange={handleInputChange} required>
+            <select name="vehiclePreference" value={form.vehiclePreference} onChange={handleVehicleChange} required>
               <option value="">-- Select a Vehicle --</option>
               <option value="Executive Sedan">Executive Sedan (1-3 Pax, 2 Suitcases) </option>
               <option value="Premium Sedan">Premium Sedan (1-3 Pax, 2 Suitcases)</option>
@@ -340,29 +562,27 @@ const BookingPage = () => {
           {form.hasChildUnder7 && (
             <div className="form-group child-seats-group">
               <div style={{ marginBottom: '10px' }}>
-                <label htmlFor="boosterSeatQty">Booster Seat Quantity</label>
-                <input
-                  type="number"
-                  id="boosterSeatQty"
-                  name="boosterSeatQty"
-                  min="0"
-                  max="3"
-                  value={form.boosterSeatQty}
+                <label htmlFor="babySeats">Baby Seats Needed (Additional $10 each)</label>
+                <input 
+                  type="number" 
+                  id="babySeats"
+                  name="babySeats" 
+                  min="0" 
+                  max="3" 
+                  value={form.babySeats || 0} 
                   onChange={handleInputChange}
-                  style={{ width: '60px', marginLeft: '10px' }}
                 />
               </div>
               <div>
-                <label htmlFor="babySeatQty">Baby Seat Quantity</label>
-                <input
-                  type="number"
-                  id="babySeatQty"
-                  name="babySeatQty"
-                  min="0"
-                  max="3"
-                  value={form.babySeatQty}
+                <label htmlFor="boosterSeats">Booster Seats Needed (Additional $10 each)</label>
+                <input 
+                  type="number" 
+                  id="boosterSeats"
+                  name="boosterSeats" 
+                  min="0" 
+                  max="3" 
+                  value={form.boosterSeats || 0} 
                   onChange={handleInputChange}
-                  style={{ width: '60px', marginLeft: '10px' }}
                 />
               </div>
             </div>
@@ -386,21 +606,66 @@ const BookingPage = () => {
             <label>Time</label>
             <input type="time" name="time" value={form.time} onChange={handleInputChange} required />
           </div>
-
-
+          {form.bookingMethod === 'distance' && form.distance && (
+            <p className="distance-display">
+              Distance: {(form.distance / 1000).toFixed(1)} km
+            </p>
+          )}
+          {form.bookingMethod === 'distance' && (
+            <p className="fare-estimate">
+              Estimated Price: ${estimatedFare}
+            </p>
+          )}
+          {form.bookingMethod === 'time' && (
+            <div className="form-group">
+              <label>Expected End Time</label>
+              <input 
+                type="time" 
+                name="expectedEndTime" 
+                value={form.expectedEndTime} 
+                onChange={handleInputChange} 
+                min={form.time}
+                required
+              />
+              {form.expectedEndTime && (
+                <p className="fare-estimate">
+                  Estimated Price: ${estimatedFare}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Google Map Embed after baby seat */}
           <div className="form-group full-width booking-map-embed" style={{margin: '1.5rem 0'}}>
-            <iframe
-              src="https://maps.google.com/maps?q=sydney&t=&z=10&ie=UTF8&iwloc=&output=embed"
-              width="600"
-              height="300"
-              style={{ border: 0, width: '100%', borderRadius: '12px' }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Map of Sydney"
-            ></iframe>
+            <div className="route-map map-container" style={{ height: '300px' }}>
+              <GoogleMap
+                mapContainerStyle={{ height: '100%', width: '100%' }}
+                zoom={DEFAULT_ZOOM}
+                center={directions?.routes[0]?.bounds?.getCenter() || SYDNEY_CENTER}
+                onLoad={() => setMapLoaded(true)}
+                options={{
+                  zoomControl: true,
+                  mapTypeControl: false,
+                  streetViewControl: false,
+                  fullscreenControl: false
+                }}
+              >
+                {directions && <DirectionsRenderer 
+                  directions={directions} 
+                  options={{
+                    polylineOptions: {
+                      strokeColor: '#1976D2',
+                      strokeOpacity: 0.8,
+                      strokeWeight: 4
+                    },
+                    suppressMarkers: false,
+                    markerOptions: {
+                      clickable: false
+                    }
+                  }}
+                />}
+              </GoogleMap>
+            </div>
           </div>
 
           {/* Personal & Journey Details */}
@@ -419,7 +684,7 @@ const BookingPage = () => {
           </div>
           
           <div className="form-group full-width">
-            <label>Special Instructions</label>
+            <label>Special Instructions (Optional)</label>
             <textarea name="specialInstructions" value={form.specialInstructions} onChange={handleInputChange} rows="10" placeholder="Any special requests?"></textarea>
           </div>
         </div>
@@ -432,161 +697,156 @@ const BookingPage = () => {
   );
 
   const renderStep3 = () => (
-    <div className="step-container">
-      <h2 className="step-title">Step 02: Payment Details</h2>
-      <div className="estimated-cost summary-container" style={{marginBottom: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
-          <h3>Estimated Total: ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</h3>
-      </div>
-      <div className="omni-form">
-        <div className="form-grid">
-          <div className="form-group full-width">
-            <label>Payment Method</label>
-            <div className="payment-options">
-              <label className="radio-label">
-                <input type="radio" name="paymentMethod" value="Card" checked={form.paymentMethod === 'Card'} onChange={handleInputChange} />
-                Credit/Debit Card
-              </label>
-              <label className="radio-label">
-                <input type="radio" name="paymentMethod" value="Cash" checked={form.paymentMethod === 'Cash'} onChange={handleInputChange} />
-                Cash
-              </label>
+    <motion.div
+      className="step-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {form.paymentMethod === 'Card' && (
+        <>
+          <h3 className="form-section-title">Payment Details</h3>
+          <div className="form-group">
+            <label>Name on Card</label>
+            <input type="text" name="nameOnCard" value={form.nameOnCard} onChange={handleInputChange} required />
+          </div>
+          <div className="form-group">
+            <label>Card Type</label>
+            <select name="cardType" value={form.cardType} onChange={handleInputChange}>
+              <option value="Visa">Visa</option>
+              <option value="Mastercard">Mastercard</option>
+              <option value="Amex">American Express</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Card Number</label>
+            <input type="text" name="cardNumber" placeholder="xxxx xxxx xxxx xxxx" className="form-control" />
+          </div>
+          <div className="form-group">
+            <label>Expiry Date</label>
+            <div className="expiry-date-fields">
+              <select name="expiryMonth" value={form.expiryMonth} onChange={handleInputChange} required>
+                <option value="">Month</option>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>{String(i + 1).padStart(2, '0')}</option>
+                ))}
+              </select>
+              <select name="expiryYear" value={form.expiryYear} onChange={handleInputChange} required>
+                <option value="">Year</option>
+                {Array.from({ length: 10 }, (_, i) => (
+                  <option key={i} value={new Date().getFullYear() + i}>{new Date().getFullYear() + i}</option>
+                ))}
+              </select>
             </div>
           </div>
-
-          {form.paymentMethod === 'Card' && (
-            <>
-              <h3 className="form-section-title">Payment Details</h3>
-              <div className="form-group">
-                <label>Name on Card</label>
-                <input type="text" name="nameOnCard" value={form.nameOnCard} onChange={handleInputChange} required />
-              </div>
-              <div className="form-group">
-                <label>Card Type</label>
-                <select name="cardType" value={form.cardType} onChange={handleInputChange}>
-                  <option value="Visa">Visa</option>
-                  <option value="Mastercard">Mastercard</option>
-                  <option value="Amex">American Express</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Card Number</label>
-                <input type="text" name="cardNumber" placeholder="xxxx xxxx xxxx xxxx" className="form-control" />
-              </div>
-              <div className="form-group">
-                <label>Expiry Date</label>
-                <div className="expiry-date-fields">
-                  <select name="expiryMonth" value={form.expiryMonth} onChange={handleInputChange} required>
-                    <option value="">Month</option>
-                    {Array.from({ length: 12 }, (_, i) => (
-                      <option key={i + 1} value={i + 1}>{String(i + 1).padStart(2, '0')}</option>
-                    ))}
-                  </select>
-                  <select name="expiryYear" value={form.expiryYear} onChange={handleInputChange} required>
-                    <option value="">Year</option>
-                    {Array.from({ length: 10 }, (_, i) => (
-                      <option key={i} value={new Date().getFullYear() + i}>{new Date().getFullYear() + i}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="form-group">
-                <label>CVC</label>
-                <input type="text" name="cvc" placeholder="123" className="form-control" />
-              </div>
-              <h3 className="form-section-title">Terms and Conditions</h3>
-              <div className="form-group full-width">
-                <label className="checkbox-label">
-                  <input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={handleInputChange} required />
-                  I accept the terms and conditions.
-                </label>
-              </div>
-            </>
-          )}
-        </div>
-        <div className="form-actions">
-          <button type="button" onClick={() => setStep(2)}>Back</button>
-          <button type="button" onClick={() => setStep(4)}>View Summary</button>
-        </div>
+          <div className="form-group">
+            <label>CVC</label>
+            <input type="text" name="cvc" placeholder="123" className="form-control" />
+          </div>
+          <h3 className="form-section-title">Terms and Conditions</h3>
+          <div className="form-group full-width">
+            <label className="checkbox-label">
+              <input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={handleInputChange} required />
+              I accept the terms and conditions.
+            </label>
+          </div>
+        </>
+      )}
+      <div className="form-actions">
+        <button type="button" onClick={() => setStep(2)}>Back</button>
+        <button type="button" onClick={() => setStep(4)}>View Summary</button>
       </div>
-    </div>
+    </motion.div>
   );
 
-  const renderStep4 = () => {
-    return (
-      <div className="step-container">
-        <h2 className="step-title">Booking Summary</h2>
+  const renderStep4 = () => (
+    <motion.div
+      className="step-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <h2 className="step-title">Booking Summary</h2>
+      
+      <div className="summary-details">
+        <p><strong>Booking Method:</strong> {form.bookingMethod === 'distance' ? 'Distance-Based' : 'Time-Based'}</p>
+        <p><strong>Service Type:</strong> {form.serviceType || 'Not specified'}</p>
         
-        <div className="summary-details">
-          <p><strong>Booking Method:</strong> {form.bookingMethod === 'distance' ? 'Distance-Based' : 'Time-Based'}</p>
-          <p><strong>Service Type:</strong> {form.serviceType || 'Not specified'}</p>
-          
-          {form.serviceType === 'Airport Transfers' && (
-            <>
-              <p><strong>Flight Number:</strong> {form.flightDetails.flightNumber || 'Not specified'}</p>
-              <p><strong>Flight Time:</strong> {form.flightDetails.flightTime || 'Not specified'}</p>
-            </>
-          )}
-          
-          <p><strong>Pickup Location:</strong> {form.pickup || 'Not specified'}</p>
-          {form.pickupPostcode && <p><strong>Pickup Postcode:</strong> {form.pickupPostcode}</p>}
-          
-          {form.dropoff && <p><strong>Drop-off Location:</strong> {form.dropoff}</p>}
-          {form.dropoffPostcode && <p><strong>Drop-off Postcode:</strong> {form.dropoffPostcode}</p>}
-          
-          <p><strong>Date:</strong> {form.date || 'Not specified'}</p>
-          <p><strong>Time:</strong> {form.time || 'Not specified'}</p>
-          
-          <p><strong>Vehicle Type:</strong> {form.vehiclePreference || 'Not specified'}</p>
-          <p><strong>Passengers:</strong> {form.passengers || 'Not specified'}</p>
-          <p><strong>Luggage:</strong> {form.luggage || 'Not specified'}</p>
-          
-          
-          {form.hasChildUnder7 && (
-            <>
-              <p><strong>Booster Seat Quantity:</strong> {form.boosterSeatQty}</p>
-              <p><strong>Baby Seat Quantity:</strong> {form.babySeatQty}</p>
-            </>
-          )}
-          {form.specialInstructions && <p><strong>Special Instructions:</strong> {form.specialInstructions}</p>}
-          
-          <div className="estimated-cost">
-            <p>Estimated Total: ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</p>
-          </div>
-        </div>
+        {form.serviceType === 'Airport Transfers' && (
+          <>
+            <p><strong>Flight Number:</strong> {form.flightDetails.flightNumber || 'Not specified'}</p>
+            <p><strong>Flight Time:</strong> {form.flightDetails.flightTime || 'Not specified'}</p>
+          </>
+        )}
         
-        {/* Payment and confirmation buttons */}
-        <form onSubmit={handleSubmit}>
-          <div className="form-actions">
-            <button type="button" onClick={() => setStep(3)}>Back</button>
-            <button type="submit" className="submit-btn">Confirm & Book</button>
-          </div>
-        </form>
+        <p><strong>Pickup Location:</strong> {form.pickup || 'Not specified'}</p>
+        
+        {form.dropoff && (
+          <p><strong>Dropoff Location:</strong> {form.dropoff}</p>
+        )}
+        
+        <p><strong>Date:</strong> {form.date || 'Not specified'}</p>
+        <p><strong>Time:</strong> {form.time || 'Not specified'}</p>
+        {form.distance && (
+          <p><strong>Distance:</strong> {(form.distance / 1000).toFixed(1)} km</p>
+        )}
+        {form.bookingMethod === 'distance' && (
+          <p><strong>Estimated Price:</strong> ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</p>
+        )}
+        {form.expectedEndTime && (
+          <>
+            <p><strong>Expected End Time:</strong> {form.expectedEndTime}</p>
+            <p><strong>Estimated Price:</strong> ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</p>
+          </>
+        )}
+        
+        <p><strong>Vehicle Type:</strong> {form.vehiclePreference || 'Not specified'}</p>
+        <p><strong>Passengers:</strong> {form.passengers || 'Not specified'}</p>
+        <p><strong>Luggage:</strong> {form.luggage || 'Not specified'}</p>
+        
+        {form.hasChildUnder7 && (
+          <>
+            <p><strong>Baby Seats:</strong> {form.babySeats} (${form.babySeats * 10})</p>
+            <p><strong>Booster Seats:</strong> {form.boosterSeats} (${form.boosterSeats * 10})</p>
+          </>
+        )}
+        {form.specialInstructions && <p><strong>Special Instructions:</strong> {form.specialInstructions}</p>}
+        
+        {/* <div className="estimated-cost">
+          <p>Estimated Total: ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</p>
+        </div> */}
       </div>
-    );
-  };
+      
+      {/* Payment and confirmation buttons */}
+      <div className="payment-confirmation-buttons">
+        <button type="button" onClick={() => setStep(3)}>Back</button>
+        <button type="button" onClick={handleSubmit}>Confirm Booking</button>
+      </div>
+    </motion.div>
+  );
 
   return (
-    <>
+    <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
       <div className="booking-page-root">
         <div className="booking-form-container">
-        {/* Progress Indicator */}
-        <div className="progress-indicator">
-          <div className={`progress-step${step === 1 ? ' active' : step > 1 ? ' completed' : ''}`}>1</div>
-          <div className="progress-bar"></div>
-          <div className={`progress-step${step === 2 ? ' active' : step > 2 ? ' completed' : ''}`}>2</div>
-          <div className="progress-bar"></div>
-          <div className={`progress-step${step === 3 ? ' active' : step > 3 ? ' completed' : ''}`}>3</div>
-          <div className="progress-bar"></div>
-          <div className={`progress-step${step === 4 ? ' active' : ''}`}>4</div>
+          {/* Progress Indicator */}
+          <div className="progress-indicator">
+            <div className={`progress-step${step === 1 ? ' active' : step > 1 ? ' completed' : ''}`}>1</div>
+            <div className="progress-bar"></div>
+            <div className={`progress-step${step === 2 ? ' active' : step > 2 ? ' completed' : ''}`}>2</div>
+            <div className="progress-bar"></div>
+            <div className={`progress-step${step === 3 ? ' active' : step > 3 ? ' completed' : ''}`}>3</div>
+            <div className="progress-bar"></div>
+            <div className={`progress-step${step === 4 ? ' active' : ''}`}>4</div>
+          </div>
+          {step === 1 && renderStep1()}
+          {step === 2 && renderStep2()}
+          {step === 3 && renderStep3()}
+          {step === 4 && renderStep4()}
         </div>
-        {step === 1 && renderStep1()}
-        {step === 2 && renderStep2()}
-        {step === 3 && renderStep3()}
-        {step === 4 && renderStep4()}
       </div>
-      </div>
-    </>
+    </LoadScript>
   );
 };
 
-export default BookingPage; 
+export default BookingPage;

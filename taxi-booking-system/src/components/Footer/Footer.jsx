@@ -29,7 +29,7 @@ const Footer = () => {
             </div>
             <div className="contact-item">
               <FaEnvelope className="contact-icon" />
-              <span>info@horizonchauffeurs.com</span>
+              <span>Info@horizonchauffeurs.com.au</span>
             </div>
             <div className="contact-item">
               <FaMapMarkerAlt className="contact-icon" />

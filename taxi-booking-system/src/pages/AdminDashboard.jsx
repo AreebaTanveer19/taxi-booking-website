@@ -157,7 +157,7 @@ export default function AdminDashboard() {
         'Booking Method', 'City', 'Service Type', 'Flight Number', 'Flight Time', 'Luggage', 'Special Instructions',
         'Payment Method', 'Name On Card', 'Card Type', 'Expiry Month', 'Expiry Year', 'Terms Accepted',
         'Vehicle Preference', 'Date', 'Time', 'Passengers', 'Child Under 7', 'Booster Seats', 'Baby Seats',
-        'Pickup', 'Dropoff', 'Distance', 'Pickup Postcode', 'Dropoff Postcode', 'Estimated Cost', 'Status'
+        'Pickup', 'Dropoff', 'Distance', 'Estimated Cost', 'Status'
       ],
       ...filteredBookings.map(b => [
         b.userId?.name || '',
@@ -186,8 +186,6 @@ export default function AdminDashboard() {
         b.pickup,
         b.dropoff,
         b.distance,
-        b.pickupPostcode,
-        b.dropoffPostcode,
         b.estimatedCost,
         b.status || 'Confirmed',
       ]),
@@ -395,9 +393,10 @@ export default function AdminDashboard() {
                         {/* Trip Details */}
                         <div className="details-group">
                           <h4>Trip Details</h4>
-                          <p><strong>From:</strong> {booking.pickup} {booking.pickupPostcode && `(${booking.pickupPostcode})`}</p>
-                          <p><strong>To:</strong> {booking.dropoff} {booking.dropoffPostcode && `(${booking.dropoffPostcode})`}</p>
+                          <p><strong>From:</strong> {booking.pickup}</p>
+                          <p><strong>To:</strong> {booking.dropoff}</p>
                           <p><strong>Date:</strong> {new Date(`${booking.date} ${booking.time}`).toLocaleString()}</p>
+                          {booking.expectedEndTime && <p><strong>Expected End Time:</strong> {booking.expectedEndTime}</p>}
                           <p><strong>Distance:</strong> {booking.distance} km</p>
                           <p><strong>Vehicle:</strong> {booking.vehiclePreference}</p>
                         </div>

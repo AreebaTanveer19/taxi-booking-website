@@ -7,7 +7,7 @@ import contactImg from '../assets/contact.png';
 
 const CONTACT_INFO = {
   phone: '+61 416 535 987',
-  email: 'info@horizonchauffeurs.com',
+  email: 'Info@horizonchauffeurs.com.au',
   hours: 'Mon-Sun: 6:00am - 11:00pm',
   address: 'Sydney, NSW, Australia',
 };

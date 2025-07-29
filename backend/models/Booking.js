@@ -18,17 +18,21 @@ const bookingSchema = new mongoose.Schema({
   vehiclePreference: String,
   date: String,
   time: String,
+  expectedEndTime: String,
   passengers: Number,
-  babySeat: Boolean,
+  babySeats: {
+    type: Number,
+    default: 0
+  },
+  boosterSeats: {
+    type: Number,
+    default: 0
+  },
   pickup: String,
   dropoff: String,
   distance: String,
-  pickupPostcode: String,
-  dropoffPostcode: String,
   estimatedCost: String,
-  hasChildUnder7: { type: Boolean, default: false },
-  boosterSeatQty: { type: Number, default: 0 },
-  babySeatQty: { type: Number, default: 0 }
+  hasChildUnder7: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Booking', bookingSchema);
