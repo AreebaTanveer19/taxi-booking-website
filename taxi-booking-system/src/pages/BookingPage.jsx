@@ -11,7 +11,7 @@ const BookingPage = () => {
   const dropoffAutocompleteRef = useRef(null);
   const [distanceLoading, setDistanceLoading] = useState(false);
   const [distanceError, setDistanceError] = useState('');
-  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCQTDN1TiKo-RdMrBtq8fDEfq8RepOIzFI';
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ;
 
   const [form, setForm] = useState({
     bookingMethod: '',
