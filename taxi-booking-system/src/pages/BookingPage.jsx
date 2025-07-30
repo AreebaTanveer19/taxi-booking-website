@@ -3,7 +3,7 @@ import { LoadScript, Autocomplete, GoogleMap, DirectionsRenderer } from '@react-
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import '../styles/BookingPage.css';
-import { FaRoute, FaArrowRight, FaCar, FaCarSide, FaRegClock } from 'react-icons/fa';
+import { FaRoute, FaArrowRight, FaCar, FaCarSide, FaRegClock, FaUser, FaCreditCard } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 const BookingPage = () => {
@@ -98,6 +98,12 @@ const BookingPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.pickup, form.dropoff, form.bookingMethod]);
 
+  const calculateDuration = (startTime, endTime) => {
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    return (end - start) / (1000 * 60); // Return duration in minutes
+  };
+
   const calculateFare = (value) => {
     let fare = 0;
     if (form.bookingMethod === 'distance') {
@@ -108,10 +114,11 @@ const BookingPage = () => {
     } else {
       // Time-based calculation
       const hourlyRates = {
-        'Executive Sedan': 50,
-        'Premium Sedan': 60,
-        'Luxury Van': 80,
-        'Sprinter': 100
+        'Executive Sedan': 100,
+        'Premium Sedan': 120,
+        'Premium SUV': 110,
+        'Luxury Van': 130,
+        'Sprinter': 150
       };
       const hours = calculateDuration(form.time, form.expectedEndTime) / 60;
       fare = hours * (hourlyRates[form.vehiclePreference] || 50);
@@ -256,7 +263,26 @@ const BookingPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const bookingData = { ...form, estimatedCost };
+    // Calculate final cost with all additional charges
+    let finalCost = parseFloat(estimatedCost);
+    if (form.hasChildUnder7) {
+      finalCost += (form.babySeats * 10) + (form.boosterSeats * 10);
+    }
+    if (form.serviceType === 'Airport Transfers') {
+      finalCost += 15; // Airport surcharge
+      // Add variable toll tax based on terminal
+      if (form.terminal === 'T1 International') {
+        finalCost += 15;
+      } else if (form.terminal === 'T2 Domestic') {
+        finalCost += 11.5;
+      } else if (form.terminal === 'T3 Domestic') {
+        finalCost += 6.2;
+      } else if (form.terminal === 'T4 Domestic') {
+        finalCost += 6.2;
+      }
+    }
+
+    const bookingData = { ...form, estimatedCost: finalCost.toFixed(2) };
   
     try {
       const response = await fetch('http://localhost:5000/api/bookings/book', {
@@ -759,71 +785,165 @@ const BookingPage = () => {
     </motion.div>
   );
 
-  const renderStep4 = () => (
-    <motion.div
-      className="step-container"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <h2 className="step-title">Booking Summary</h2>
-      
-      <div className="summary-details">
-        <p><strong>Booking Method:</strong> {form.bookingMethod === 'distance' ? 'Distance-Based' : 'Time-Based'}</p>
-        <p><strong>Service Type:</strong> {form.serviceType || 'Not specified'}</p>
+  const renderStep4 = () => {
+    // Safely calculate and format fare with fallbacks
+    const rawFare = calculateFare(form);
+    console.log('Fare calculation raw output:', rawFare, typeof rawFare);
+    
+    const fare = Number(rawFare) || 0;
+    const totalFare = fare.toFixed(2);
+    
+    // Fallback UI if calculation fails
+    if (!rawFare || isNaN(fare)) {
+      console.warn('Invalid fare calculation - using fallback value');
+      return (
+        <motion.div className="step-container">
+          <h2 className="step-title">Booking Summary</h2>
+          <div className="error-message">
+            <p>We're having trouble calculating your fare.</p>
+            <button 
+              className="back-button" 
+              onClick={() => setStep(3)}
+            >
+              Back to Payment
+            </button>
+          </div>
+        </motion.div>
+      );
+    }
+    
+    return (
+      <motion.div className="step-container">
+        <h2 className="step-title">Booking Summary</h2>
         
-        {form.serviceType === 'Airport Transfers' && (
-          <>
-            <p><strong>Flight Number:</strong> {form.flightDetails.flightNumber || 'Not specified'}</p>
-            <p><strong>Flight Time:</strong> {form.flightDetails.flightTime || 'Not specified'}</p>
-          </>
-        )}
+        {/* Booking Information */}
+        <div className="summary-section">
+          <h3 className="summary-section-title">
+            <FaRoute /> Booking Information
+          </h3>
+          <div className="summary-row">
+            <span className="summary-label">Booking Method:</span>
+            <span className="summary-value">
+              {form.bookingMethod === 'distance' ? 'Distance-Based' : 'Time-Based'}
+            </span>
+          </div>
+          <div className="summary-row">
+            <span className="summary-label">Pickup Location:</span>
+            <span className="summary-value">{form.pickup || 'Not specified'}</span>
+          </div>
+          {form.dropoff && (
+            <div className="summary-row">
+              <span className="summary-label">Drop-off Location:</span>
+              <span className="summary-value">{form.dropoff}</span>
+            </div>
+          )}
+          {form.distance && (
+            <div className="summary-row">
+              <span className="summary-label">Distance:</span>
+              <span className="summary-value">{(form.distance / 1000).toFixed(1)} km</span>
+            </div>
+          )}
+          {form.expectedEndTime && (
+            <div className="summary-row">
+              <span className="summary-label">Duration:</span>
+              <span className="summary-value">
+                {calculateDuration(form.time, form.expectedEndTime)} minutes
+              </span>
+            </div>
+          )}
+        </div>
         
-        <p><strong>Pickup Location:</strong> {form.pickup || 'Not specified'}</p>
+        {/* Passenger Details */}
+        <div className="summary-section">
+          <h3 className="summary-section-title">
+            <FaUser /> Passenger Details
+          </h3>
+          <div className="summary-row">
+            <span className="summary-label">Full Name:</span>
+            <span className="summary-value">{form.name || 'Not specified'}</span>
+          </div>
+          <div className="summary-row">
+            <span className="summary-label">Phone Number:</span>
+            <span className="summary-value">{form.phone || 'Not specified'}</span>
+          </div>
+          <div className="summary-row">
+            <span className="summary-label">Email:</span>
+            <span className="summary-value">{form.email || 'Not specified'}</span>
+          </div>
+        </div>
         
-        {form.dropoff && (
-          <p><strong>Dropoff Location:</strong> {form.dropoff}</p>
-        )}
+        {/* Trip Preferences */}
+        <div className="summary-section">
+          <h3 className="summary-section-title">
+            <FaCar /> Trip Preferences
+          </h3>
+          <div className="summary-row">
+            <span className="summary-label">Vehicle Type:</span>
+            <span className="summary-value">{form.vehiclePreference || 'Not specified'}</span>
+          </div>
+          <div className="summary-row">
+            <span className="summary-label">Baby Seat:</span>
+            <span className="summary-value">{form.hasChildUnder7 ? `Yes (${form.babySeats})` : 'No'}</span>
+          </div>
+          <div className="summary-row">
+            <span className="summary-label">Booster Seat:</span>
+            <span className="summary-value">{form.hasChildUnder7 ? `Yes (${form.boosterSeats})` : 'No'}</span>
+          </div>
+          <div className="summary-row">
+            <span className="summary-label">Airport Pickup:</span>
+            <span className="summary-value">{form.serviceType === 'Airport Transfers' ? 'Yes' : 'No'}</span>
+          </div>
+          {form.serviceType === 'Airport Transfers' && (
+            <div className="summary-row">
+              <span className="summary-label">Terminal Tolls:</span>
+              <span className="summary-value">{form.terminal ? 'Included' : 'Not applicable'}</span>
+            </div>
+          )}
+        </div>
         
-        <p><strong>Date:</strong> {form.date || 'Not specified'}</p>
-        <p><strong>Time:</strong> {form.time || 'Not specified'}</p>
-        {form.distance && (
-          <p><strong>Distance:</strong> {(form.distance / 1000).toFixed(1)} km</p>
-        )}
-        {form.bookingMethod === 'distance' && (
-          <p><strong>Estimated Price:</strong> ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</p>
-        )}
-        {form.expectedEndTime && (
-          <>
-            <p><strong>Expected End Time:</strong> {form.expectedEndTime}</p>
-            <p><strong>Estimated Price:</strong> ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</p>
-          </>
-        )}
+        {/* Payment Info */}
+        <div className="summary-section">
+          <h3 className="summary-section-title">
+            <FaCreditCard /> Payment Info
+          </h3>
+          <div className="summary-row">
+            <span className="summary-label">Payment Method:</span>
+            <span className="summary-value">{form.paymentMethod}</span>
+          </div>
+        </div>
         
-        <p><strong>Vehicle Type:</strong> {form.vehiclePreference || 'Not specified'}</p>
-        <p><strong>Passengers:</strong> {form.passengers || 'Not specified'}</p>
-        <p><strong>Luggage:</strong> {form.luggage || 'Not specified'}</p>
+        {/* Estimated Total */}
+        <div className="estimated-total">
+          <h3>Estimated Total</h3>
+          <p className="total-amount">${totalFare}</p>
+        </div>
         
-        {form.hasChildUnder7 && (
-          <>
-            <p><strong>Baby Seats:</strong> {form.babySeats} (${form.babySeats * 10})</p>
-            <p><strong>Booster Seats:</strong> {form.boosterSeats} (${form.boosterSeats * 10})</p>
-          </>
-        )}
-        {form.specialInstructions && <p><strong>Special Instructions:</strong> {form.specialInstructions}</p>}
-        
-        {/* <div className="estimated-cost">
-          <p>Estimated Total: ${typeof estimatedCost === 'number' ? estimatedCost.toFixed(2) : '0.00'}</p>
-        </div> */}
-      </div>
-      
-      {/* Payment and confirmation buttons */}
-      <div className="payment-confirmation-buttons">
-        <button type="button" onClick={() => setStep(3)}>Back</button>
-        <button type="button" onClick={handleSubmit}>Confirm Booking</button>
-      </div>
-    </motion.div>
-  );
+        {/* Action Buttons */}
+        <div className="payment-confirmation-buttons">
+          <motion.button 
+            type="button" 
+            onClick={() => setStep(3)}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Back
+          </motion.button>
+          
+          <motion.button 
+            type="button" 
+            onClick={handleSubmit}
+            whileHover={{ 
+              scale: 1.05,
+              boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)"
+            }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Confirm Booking
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+  };
 
   return (
     <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>

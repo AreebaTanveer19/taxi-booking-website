@@ -43,10 +43,9 @@ function App() {
         <Route path="/about" element={<><Navbar /><AboutPage /></>} />
         <Route path="/contact" element={<><Navbar /><ContactPage /></>} />
         <Route path="/fleet" element={<><Navbar /><FleetPage /></>} />
-        {/* <Route path="/fleet/:vehicleId" element={<><Navbar /><FleetTemplate /></>} /> */}
         <Route path="/services" element={<><Navbar /><ServicesPage /></>} />
         <Route path="/services/:serviceId" element={<><Navbar /><ServiceTemplate /></>} />
-        <Route path="/access-denied" element={<AccessDenied />} />
+        <Route path="*" element={<AccessDenied />} />
       </Routes>
     </Router>
   );

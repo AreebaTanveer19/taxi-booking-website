@@ -1,0 +1,54 @@
+.access-denied-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  padding: 2rem;
+  text-align: center;
+}
+
+.access-denied-container h1 {
+  font-size: 2.5rem;
+  color: #d32f2f;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.access-denied-container p {
+  font-size: 1.2rem;
+  color: #4a5568;
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+}
+
+.return-home-btn {
+  display: inline-block;
+  padding: 0.8rem 2rem;
+  background-color: #ffb300;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.return-home-btn:hover {
+  background-color: #ffa000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+@media (max-width: 768px) {
+  .access-denied-container h1 {
+    font-size: 2rem;
+  }
+  
+  .access-denied-container p {
+    font-size: 1rem;
+  }
+}

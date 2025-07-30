@@ -212,6 +212,11 @@ export default function AdminDashboard() {
     }));
   };
 
+  const calculateFare = (booking) => {
+    // Safely convert to number with fallback to 0
+    return Number(booking.estimatedCost || booking.price || booking.totalAmount || 0);
+  };
+
   return (
     <div className="admin-dashboard">
     
@@ -363,7 +368,14 @@ export default function AdminDashboard() {
               {filteredBookings.map(booking => (
                 <div key={booking._id} className="booking-item">
                   <div className="booking-summary">
-                    <span>{booking.pickup} → {booking.dropoff}</span>
+                    <div className="trip-info">
+                      <div className="trip-flow">
+                        <p className="pickup-location">{booking.pickup || 'Not specified'}</p>
+                        <div className="trip-arrow">↓</div>
+                        <p className="dropoff-location">{booking.dropoff || 'Not specified'}</p>
+                      </div>
+                      {booking.city && <p className="city-subtitle">{booking.city}</p>}
+                    </div>
                     <span>${(Number(booking.price || booking.estimatedCost || booking.totalAmount || 0)).toFixed(2)}</span>
                     <span>{new Date(`${booking.date} ${booking.time}`).toLocaleString()}</span>
                     <button 
@@ -377,51 +389,52 @@ export default function AdminDashboard() {
                   {expandedBookings[booking._id] && (
                     <div className="booking-details">
                       <div className="details-grid">
-                        {/* Passenger & Luggage */}
+                        {/* Trip Information */}
                         <div className="details-group">
-                          <h4>Passenger & Luggage</h4>
-                          <p><strong>Name:</strong> {booking.userId?.name || booking.name}</p>
-                          <p><strong>Email:</strong> {booking.userId?.email || booking.email}</p>
-                          <p><strong>Phone:</strong> {booking.userId?.phone || booking.phone}</p>
-                          <p><strong>Passengers:</strong> {booking.passengers}</p>
-                          {booking.hasChildUnder7 && <p><strong>Child Under 7:</strong> Yes</p>}
-                          {booking.hasChildUnder7 && <p><strong>Booster Seats:</strong> {booking.boosterSeatQty}</p>}
-                          {booking.hasChildUnder7 && <p><strong>Baby Seats:</strong> {booking.babySeatQty}</p>}
-                          {booking.luggage && <p><strong>Luggage:</strong> {booking.luggage}</p>}
+                          <h4>🚖 Trip Information</h4>
+                          <p><strong>Booking Type:</strong> {booking.bookingMethod === 'distance' ? 'Distance-based' : 'Time-based'}</p>
+                          <p><strong>Service Type:</strong> {booking.serviceType || 'Not specified'}</p>
+                          <p><strong>Booking Date:</strong> {new Date(booking.createdAt || booking.date).toLocaleDateString()}</p>
+                          <p><strong>Pickup Time:</strong> {new Date(`2000-01-01T${booking.time}`).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}</p>
+                          <p><strong>Pickup Location:</strong> {booking.pickup || 'Not specified'}</p>
+                          <p><strong>Drop-off Location:</strong> {booking.dropoff || 'Not specified'}</p>
+                          {booking.city && <p><strong>City/Region:</strong> {booking.city}</p>}
+                          {booking.distance && <p><strong>Distance:</strong> {(booking.distance / 1000).toFixed(1)} km</p>}
+                          {booking.expectedEndTime && <p><strong>Expected End Time:</strong> {new Date(`2000-01-01T${booking.expectedEndTime}`).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}</p>}
+                          <p><strong>Estimated Fare:</strong> ${(calculateFare(booking)).toFixed(2)}</p>
                         </div>
 
-                        {/* Trip Details */}
+                        {/* Extra Preferences */}
                         <div className="details-group">
-                          <h4>Trip Details</h4>
-                          <p><strong>From:</strong> {booking.pickup}</p>
-                          <p><strong>To:</strong> {booking.dropoff}</p>
-                          <p><strong>Date:</strong> {new Date(`${booking.date} ${booking.time}`).toLocaleString()}</p>
-                          {booking.expectedEndTime && <p><strong>Expected End Time:</strong> {booking.expectedEndTime}</p>}
-                          <p><strong>Distance:</strong> {booking.distance} km</p>
-                          <p><strong>Vehicle:</strong> {booking.vehiclePreference}</p>
-                        </div>
-
-                        {/* Service Details */}
-                        <div className="details-group">
-                          <h4>Service Details</h4>
-                          <p><strong>Service Type:</strong> {booking.serviceType}</p>
-                          {booking.flightNumber && <p><strong>Flight Number:</strong> {booking.flightNumber}</p>}
-                          {booking.flightTime && <p><strong>Flight Time:</strong> {booking.flightTime}</p>}
-                          {booking.terminal && <p><strong>Terminal:</strong> {booking.terminal}</p>}
-                        </div>
-
-                        {/* Payment & Other */}
-                        <div className="details-group">
-                          <h4>Payment & Other</h4>
-                          <p><strong>Payment Method:</strong> {booking.paymentMethod}</p>
-                          {booking.paymentMethod === 'Card' && (
+                          <h4>🧳 Extra Preferences</h4>
+                          {booking.hasChildUnder7 && (
                             <>
-                              <p><strong>Card Type:</strong> {booking.cardType}</p>
-                              <p><strong>Name on Card:</strong> {booking.nameOnCard}</p>
+                              <p><strong>Child Under 7:</strong> Yes</p>
+                              <p><strong>Baby Seats:</strong> {booking.babySeatQty || 0}</p>
+                              <p><strong>Booster Seats:</strong> {booking.boosterSeatQty || 0}</p>
                             </>
                           )}
-                          <p><strong>Estimated Cost:</strong> ${(Number(booking.estimatedCost) || 0).toFixed(2)}</p>
-                          {booking.specialInstructions && <p><strong>Special Instructions:</strong> {booking.specialInstructions}</p>}
+                          <p><strong>Passengers:</strong> {booking.passengers || 1}</p>
+                          <p><strong>Luggage:</strong> {booking.luggage || 'None'}</p>
+                          <p><strong>Airport Pickup:</strong> {booking.serviceType === 'Airport Transfers' ? 'Yes' : 'No'}</p>
+                          {booking.serviceType === 'Airport Transfers' && (
+                            <p><strong>Includes Terminal Tolls:</strong> {booking.terminal ? 'Yes' : 'No'}</p>
+                          )}
+                        </div>
+
+                        {/* Passenger Details */}
+                        <div className="details-group">
+                          <h4>👤 Passenger Details</h4>
+                          <p><strong>Full Name:</strong> {booking.userId?.name || booking.name || 'Not provided'}</p>
+                          <p><strong>Phone Number:</strong> {booking.userId?.phone || booking.phone || 'Not provided'}</p>
+                          <p><strong>Email Address:</strong> {booking.userId?.email || booking.email || 'Not provided'}</p>
+                        </div>
+
+                        {/* Payment Information */}
+                        <div className="details-group">
+                          <h4>💳 Payment</h4>
+                          <p><strong>Payment Method:</strong> {booking.paymentMethod || 'Not specified'}</p>
+                          <p><strong>Payment Status:</strong> {booking.paymentStatus || 'Unpaid'}</p>
                         </div>
                       </div>
                       <button 

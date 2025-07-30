@@ -163,7 +163,7 @@
 }
 .navbar-topbar-right {
   display: flex;
-  align-items: center;
+  align-items: right;
   gap: 1.2vw;
 }
 .navbar-topbar-item {

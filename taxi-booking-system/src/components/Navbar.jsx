@@ -45,7 +45,7 @@ const Navbar = () => {
       {/* Top Black Bar (hidden on mobile) */}
       <div className="navbar-topbar hide-on-mobile">
         <div className="navbar-topbar-left navbar-topbar-welcome">
-          <span className="navbar-topbar-welcome-text"><b>Welcome to <span className="navbar-topbar-site">Horizon Chauffeurs</span></b>, we hope you will enjoy our services and have a good experience.</span>
+          <span className="navbar-topbar-welcome-text"><b>Welcome to <span className="navbar-topbar-site">Horizon Chauffeurs</span></b>, we hope you will enjoy our services.</span>
         </div>
         <div className="navbar-topbar-right">
           <span className="navbar-topbar-item"><span className="navbar-topbar-icon-email">✉️</span>Info@horizonchauffeurs.com.au</span>

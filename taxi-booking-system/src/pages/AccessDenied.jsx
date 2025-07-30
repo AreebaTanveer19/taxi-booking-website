@@ -1,14 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import '../styles/AccessDenied.css';
 
-const AccessDenied = () => (
-  <div style={{ textAlign: 'center', marginTop: '100px', fontFamily: 'Arial, sans-serif' }}>
-    <h1>Your access to this site has been limited by the site owner</h1>
-    <p>Your access to this service has been limited. (HTTP response code 403)</p>
-    <p>If you think you have been blocked in error, contact the owner of this site for assistance.</p>
-    <hr style={{ width: '50%' }} />
-    <p><b>Block Reason:</b> Access from your area has been temporarily limited for security reasons.</p>
-    <p style={{ color: '#888', marginTop: '40px' }}>Time: {new Date().toUTCString()}</p>
-  </div>
-);
-
-export default AccessDenied; 
+export default function AccessDenied() {
+  return (
+    <div className="access-denied-container">
+      <h1>Access Denied</h1>
+      <p>You don't have permission to view this page.</p>
+      <Link to="/" className="return-home-btn">Return to Home</Link>
+    </div>
+  );
+}
