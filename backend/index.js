@@ -10,7 +10,15 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://taxi-booking-website-production.up.railway.app',
+    'http://localhost:5000',
+    'https://your-vercel-app-url.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 // Remove duplicate json parser and add proper config
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

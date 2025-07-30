@@ -21,7 +21,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/bookings', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/bookings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/users', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
       booking.dropoff.toLowerCase().includes(searchTerm) ||
       (booking.userId?.name || '').toLowerCase().includes(searchTerm)
     );
-  });
+  });5000
 
   const filteredUsers = users.filter(user => {
     if (!userSearch) return true;
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/bookings/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/bookings/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
   const handleDeleteUser = async (userId) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
