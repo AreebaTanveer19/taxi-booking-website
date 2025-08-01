@@ -19,7 +19,7 @@ const servicesData = [
       img2,
       img3,
     ],
-    desc: 'Our premium airport transfer service ensures you arrive at your flight on time and in style. We monitor flight statuses in real-time and adjust pickup times accordingly. Our professional chauffeurs will assist with luggage and provide a comfortable ride in our luxury vehicles.',
+    desc: 'Our premium airport transfer service ensures you arrive at your flight on time and in style. Our professional chauffeurs will assist with luggage and provide a comfortable ride in our luxury vehicles.',
     detailedDesc: 'Enjoy a seamless and stress-free airport transfer experience with our executive fleet. Choose from luxury sedans, spacious SUVs, or vans tailored to your group size and preference. Our meet-and-greet service ensures a warm welcome with your chauffeur waiting in the arrivals hall holding a name sign. Flights are tracked in real-time to avoid delays. Onboard amenities include complimentary bottled water, high-speed WiFi, mobile chargers, and climate-controlled interiors. Whether you’re flying domestic or international, we ensure timely arrival and personalized attention.',
     features: [
       {

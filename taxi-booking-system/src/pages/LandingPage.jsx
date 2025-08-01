@@ -21,6 +21,7 @@ import { openWhatsApp } from '../utils/whatsapp';
 const heroImages = [hero2, hero1, hero4 , taxiImg];
 
 const services = [
+  
   {
     name: 'Corporate Transfers',
     image: corporateimg,
@@ -50,6 +51,11 @@ const services = [
     name: 'Special Events',
     image: 'https://i.pinimg.com/736x/4e/a0/a0/4ea0a0bcabce609bb88fad491994e951.jpg',
     desc: 'Premium event transportation for concerts, parties, and special occasions.'
+  },
+  {
+    name: 'Point to Point',
+    image: 'https://i.pinimg.com/1200x/9d/1c/7f/9d1c7feaadd8f701e265f04977f2a42c.jpg',
+    desc: 'Direct transfers between any two locations with professional chauffeurs.'
   }
 ];
 
@@ -82,6 +88,8 @@ const fleetItems = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  // Calculate card width percentage based on screen size (90% on mobile, 25% on desktop)
+  const cardWidth = typeof window !== 'undefined' && window.innerWidth < 768 ? 100 : 25;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -178,7 +186,7 @@ const LandingPage = () => {
         <div className="services-main-sub">Our chauffeurs are highly skilled experts who have undergone extensive training and are knowledgeable drivers.</div>
         <div className="services-slider-container">
           <div className="services-cards-img-grid" style={{
-            transform: `translateX(-${currentSlide * 25}%)`,
+            transform: `translateX(-${currentSlide * cardWidth}%)`,
             transition: currentSlide <= services.length 
               ? 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
               : 'none'
@@ -189,6 +197,8 @@ const LandingPage = () => {
                 className="services-card-img-v2" 
                 style={{ 
                   backgroundImage: `url(${service.image})`,
+                  flex: `0 0 ${cardWidth}%`,
+                  minWidth: `${cardWidth}%`,
                   transitionDelay: `${i * 0.1}s`
                 }}
               >

@@ -25,7 +25,7 @@ const Footer = () => {
           <div className="footer-contact">
             <div className="contact-item">
               <FaPhoneAlt className="contact-icon" />
-              <span>+1 (555) 123-4567</span>
+              <span>+61 416 535 987</span>
             </div>
             <div className="contact-item">
               <FaEnvelope className="contact-icon" />
@@ -33,7 +33,7 @@ const Footer = () => {
             </div>
             <div className="contact-item">
               <FaMapMarkerAlt className="contact-icon" />
-              <span>123 Premium Lane, Business District</span>
+              <span>Sydney, NSW, Australia</span>
             </div>
             <div className="contact-item">
               <FaClock className="contact-icon" />
@@ -51,12 +51,7 @@ const Footer = () => {
             <a href="#" aria-label="Instagram">
               <FaInstagram />
             </a>
-            <a href="#" aria-label="LinkedIn">
-              <FaLinkedinIn />
-            </a>
-            <a href="#" aria-label="YouTube">
-              <FaYoutube />
-            </a>
+            
           </div>
         </div>
 

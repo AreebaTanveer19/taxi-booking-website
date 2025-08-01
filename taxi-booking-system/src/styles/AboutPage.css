@@ -13,18 +13,15 @@ html, body {
 
 /* Hero Banner */
 .about-hero {
-  position: relative;
+  height: clamp(500px, 70vh, 800px);
+  min-height: 400px;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  height: 80vh;
-  min-height: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  text-align: center;
-  overflow: hidden;
+  position: relative;
 }
 
 .about-hero::before {
@@ -38,23 +35,22 @@ html, body {
 }
 
 .about-hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 800px;
-  padding: 0 20px;
+  max-width: min(90%, 800px);
+  padding: 2rem;
+  text-align: center;
 }
 
 .about-hero-title {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 700;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
   text-shadow: 0 2px 10px rgba(0,0,0,0.5);
   letter-spacing: 1px;
 }
 
 .about-hero-sub {
-  font-size: 1.5rem;
-  margin-bottom: 3rem;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  margin-bottom: clamp(2rem, 5vw, 3rem);
   line-height: 1.6;
   text-shadow: 0 1px 5px rgba(0,0,0,0.3);
 }
@@ -69,13 +65,28 @@ html, body {
   border-radius: 50px;
   cursor: pointer;
   margin: 0 10px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
 
 .about-hero-btn-secondary {
   background: transparent;
   color: white;
   border: 2px solid white;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.about-hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.about-hero-btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: #ffb300;
+  color: #ffb300;
 }
 
 .about-hero-btn-group {
@@ -83,6 +94,24 @@ html, body {
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .about-hero {
+    background-attachment: scroll;
+    background-position: 45% center;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-hero {
+    height: clamp(400px, 80vh, 600px);
+  }
+  
+  .about-hero-btn-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
 }
 
 /* Our Story */
@@ -482,20 +511,42 @@ html, body {
   margin-bottom: 24px;
 }
 .about-cta-btn {
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.about-cta-btn-primary {
   background: #ffb300;
   color: #181818;
-  font-weight: 700;
-  font-size: 1.1rem;
-  padding: 14px 44px;
-  border-radius: 18px;
   border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
 }
-.about-cta-btn:hover {
-  background: #ffd54f;
-  transform: translateY(-2px) scale(1.03);
+
+.about-cta-btn-primary:hover {
+  background: #ffc107;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 179, 0, 0.3);
+}
+
+.about-cta-btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.about-cta-btn-secondary:hover {
+  border-color: #ffb300;
+  color: #ffb300;
+  background: rgba(255, 179, 0, 0.1);
 }
 
 /* Ready to Ride CTA Section */
@@ -568,26 +619,13 @@ html, body {
   font-weight: 600;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.about-cta-btn-primary {
-  background: #ffb300;
-  color: #181818;
-  border: none;
-}
-
-.about-cta-btn-secondary {
-  background: transparent;
-  color: #fff;
-  border: 2px solid rgba(255,255,255,0.2);
-}
-
-.about-cta-btn-secondary:hover {
-  border-color: #fff;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
 
 .about-cta-btn-icon {
