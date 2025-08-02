@@ -16,6 +16,11 @@ export default function AdminDashboard() {
   });
   const [bookingSearch, setBookingSearch] = useState('');
   const [userSearch, setUserSearch] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -105,7 +110,7 @@ export default function AdminDashboard() {
       booking.dropoff.toLowerCase().includes(searchTerm) ||
       (booking.userId?.name || '').toLowerCase().includes(searchTerm)
     );
-  });5000
+  });
 
   const filteredUsers = users.filter(user => {
     if (!userSearch) return true;
@@ -219,10 +224,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
-    
-  
-      {/* Sidebar */}
-      <div className="sidebar">
+      <div className={`sidebar ${sidebarOpen ? 'active' : ''}`}>
         <div className="sidebar-header">
           <h2>Horizon chauffers</h2>
         </div>
@@ -250,9 +252,16 @@ export default function AdminDashboard() {
           </button>
         </nav>
       </div>
-
-      {/* Main Content */}
       <div className="main-content">
+        <button 
+          className="hamburger-btn" 
+          onClick={toggleSidebar}
+          aria-label="Toggle menu"
+        >
+          <div className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></div>
+          <div className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></div>
+          <div className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></div>
+        </button>
         {/* Stats Cards */}
         <div className="stats-grid">
           <div className="stat-card">
@@ -328,41 +337,48 @@ export default function AdminDashboard() {
           </div>
 
           {showUsers ? (
-            <table className="bookings-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map(u => (
-                    <tr key={u._id}>
-                      <td>{u.name}</td>
-                      <td>{u.email}</td>
-                      <td>{u.phone}</td>
-                      <td>
+            <div className="table-container">
+              <div className="table-header">
+                <h2>Users</h2>
+                <div className="search-export">
+                  <input 
+                    type="text" 
+                    placeholder="Search users..." 
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    className="search-input"
+                  />
+                </div>
+              </div>
+              
+              {loading ? (
+                <div className="loading-indicator">Loading users...</div>
+              ) : error ? (
+                <div className="error-message">{error}</div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="no-users">No users found</div>
+              ) : (
+                <div className="users-list">
+                  {filteredUsers.map(user => (
+                    <div key={user._id} className="user-item">
+                      <div className="user-info">
+                        <p><strong>Name:</strong> {user.name}</p>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        <p><strong>Phone:</strong> {user.phone || 'N/A'}</p>
+                      </div>
+                      <div className="user-actions">
                         <button 
-                          className="delete-btn" 
-                          onClick={() => handleDeleteUser(u._id)}
+                          className="delete-btn"
+                          onClick={() => handleDeleteUser(user._id)}
                         >
-                          Delete User
+                          Delete
                         </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="no-bookings">
-                      No users found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
             <div className="bookings-list">
               {filteredBookings.map(booking => (

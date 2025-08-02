@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import AccessDenied from './pages/AccessDenied';
 import AdminLogin from './pages/AdminLogin';
 import ServiceTemplate from './components/ServiceTemplate';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 // Remove process.env reference since we're using proxy
 
@@ -36,6 +37,7 @@ function App() {
       <Routes>
         <Route path="/" element={<><Navbar /><LandingPage /></>} />
         <Route path="/book" element={<><Navbar /><BookingPage /></>} />
+        <Route path="/terms-and-conditions" element={<><Navbar /><TermsAndConditions /></>} />
         <Route 
           path="/admin" 
           element={isAdminAuthenticated() ? <AdminDashboard /> : <AdminLogin />} 
