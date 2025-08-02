@@ -746,6 +746,7 @@ const BookingPage = () => {
           onClick={() => {
             setForm({ ...form, bookingMethod: "distance" });
             setSelectedOption("distance");
+            setStep(3);
           }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -764,6 +765,7 @@ const BookingPage = () => {
           onClick={() => {
             setForm({ ...form, bookingMethod: "time" });
             setSelectedOption("time");
+            setStep(3);
           }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -775,22 +777,6 @@ const BookingPage = () => {
           <p>Perfect for hourly rentals and multiple stops</p>
         </motion.div>
       </div>
-
-      {selectedOption && (
-        <motion.button
-          className="continue-btn"
-          onClick={() => setStep(2)}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          whileHover={{
-            scale: 1.05,
-            boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
-          }}
-        >
-          Continue to Booking <FaArrowRight />
-        </motion.button>
-      )}
     </motion.div>
   );
 
@@ -801,7 +787,7 @@ const BookingPage = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <h2 className="step-title">Step 02: Your Details</h2>
+      <h2 className="step-title">Step 04: Your Details</h2>
       <form className="booking-form">
         <div className="form-columns">
           <div className="form-column">
@@ -857,18 +843,18 @@ const BookingPage = () => {
           </div>
         </div>
         <div className="form-actions">
-          <button type="button" onClick={() => setStep(1)}>
+          <button type="button" onClick={() => setStep(4)}>
             Back
           </button>
           <button
             type="button"
             onClick={() => {
               if (validateStep2()) {
-                setStep(3);
+                setStep(5);
               }
             }}
           >
-            Continue to Journey Details
+            Continue to Payment Details
           </button>
         </div>
       </form>
@@ -882,7 +868,7 @@ const BookingPage = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <h2 className="step-title">Step 03: Journey Details</h2>
+      <h2 className="step-title">Step 02: Journey Details</h2>
       <form className="omni-form">
         <div className="form-grid">
           {/* Service Details */}
@@ -1381,7 +1367,7 @@ const BookingPage = () => {
           </div>
         </div>
         <div className="form-actions">
-          <button type="button" onClick={() => setStep(2)}>
+          <button type="button" onClick={() => setStep(1)}>
             Back
           </button>
           <button
@@ -1407,7 +1393,7 @@ const BookingPage = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="step-title">Step 04: Select Your Vehicle</h2>
+        <h2 className="step-title">Step 03: Select Your Vehicle</h2>
         {form.vehiclePreference &&
           ((form.bookingMethod === "distance" && form.distance) ||
             (form.bookingMethod === "time" && form.expectedEndTime)) && (
@@ -1477,6 +1463,12 @@ const BookingPage = () => {
                   <div className="vehicle-card-capacity">
                     {vehicle.capacity}
                   </div>
+                  {((form.bookingMethod === "distance" && form.distance) || 
+                    (form.bookingMethod === "time" && form.expectedEndTime)) && (
+                    <div className="vehicle-card-price">
+                      ${calculateFare({...form, vehiclePreference: vehicle.name})}
+                    </div>
+                  )}
                   {!isCompatible && (
                     <div
                       className="vehicle-card-warning"
@@ -1513,12 +1505,12 @@ const BookingPage = () => {
             type="button"
             onClick={() => {
               if (validateStep4()) {
-                setStep(5);
+                setStep(2);
               }
             }}
             disabled={!form.vehiclePreference}
           >
-            Continue to Payment
+            Continue to Personal Details
           </button>
         </div>
       </motion.div>
@@ -1656,7 +1648,7 @@ const BookingPage = () => {
         </>
       )}
       <div className="form-actions">
-        <button type="button" onClick={() => setStep(4)}>
+        <button type="button" onClick={() => setStep(2)}>
           Back
         </button>
         <button
