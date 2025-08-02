@@ -665,12 +665,14 @@ body, .landing-root {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(255, 179, 0, 0.3);
+  text-decoration: none ;
 }
 
 .fleet-show-more-btn:hover {
   background: #ffc107;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 179, 0, 0.4);
+  
 }
 
 @media (max-width: 768px) {
@@ -680,9 +682,11 @@ body, .landing-root {
   }
   
   .fleet-show-more-btn {
-    width: 100%;
-    max-width: 100px;
-    padding: 14px;
+    white-space: nowrap;
+    padding: 12px 24px;
+    min-width: 150px;
+    text-align: center;
+    text-decoration: none ;
   }
 }
 
@@ -1730,4 +1734,59 @@ body.menu-open {
 
 .car-specs-row span {
   margin-right: 12px;
+}
+
+/* Mobile Services Slider */
+@media (max-width: 768px) {
+  .services-cards-img-grid {
+    display: none;
+  }
+  
+  .mobile-services-slider {
+    display: block;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 40px;
+  }
+  
+  .mobile-slider-track {
+    display: flex;
+    transition: transform 0.4s ease;
+  }
+  
+  .mobile-slide {
+    min-width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  
+  .mobile-slider-dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .mobile-slider-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    margin: 0 5px;
+    cursor: pointer;
+  }
+  
+  .mobile-slider-dot.active {
+    background: #ff9800;
+  }
+
+  .personalized-btn {
+    font-size: 1rem;
+    padding: 1rem 2rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-services-slider {
+    display: none;
+  }
 }
