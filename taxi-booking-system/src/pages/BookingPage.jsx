@@ -746,7 +746,7 @@ const BookingPage = () => {
           onClick={() => {
             setForm({ ...form, bookingMethod: "distance" });
             setSelectedOption("distance");
-            setStep(3);
+            setStep(2);
           }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -765,7 +765,7 @@ const BookingPage = () => {
           onClick={() => {
             setForm({ ...form, bookingMethod: "time" });
             setSelectedOption("time");
-            setStep(3);
+            setStep(2);
           }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -843,7 +843,7 @@ const BookingPage = () => {
           </div>
         </div>
         <div className="form-actions">
-          <button type="button" onClick={() => setStep(4)}>
+          <button type="button" onClick={() => setStep(3)}>
             Back
           </button>
           <button
@@ -986,7 +986,7 @@ const BookingPage = () => {
           {/* Pickup & Drop-off Fields */}
           {form.bookingMethod === "distance" && (
             <>
-              <div className="form-group">
+              <div className="form-group pickup-address">
                 <label>Pickup Address</label>
                 <div className="Autocomplete">
                   <Autocomplete
@@ -1038,7 +1038,7 @@ const BookingPage = () => {
                   <div className="error-message">{errors.pickup}</div>
                 )}
               </div>
-              <div className="form-group">
+              <div className="form-group drop-off-address">
                 <label>Drop-off Address</label>
                 <div className="Autocomplete">
                   <Autocomplete
@@ -1374,7 +1374,7 @@ const BookingPage = () => {
             type="button"
             onClick={() => {
               if (validateStep3()) {
-                setStep(4);
+                setStep(3);
               }
             }}
           >
@@ -1498,14 +1498,14 @@ const BookingPage = () => {
           <div className="error-message">{errors.vehiclePreference}</div>
         )}
         <div className="form-actions">
-          <button type="button" onClick={() => setStep(3)}>
+          <button type="button" onClick={() => setStep(2)}>
             Back
           </button>
           <button
             type="button"
             onClick={() => {
               if (validateStep4()) {
-                setStep(2);
+                setStep(4);
               }
             }}
             disabled={!form.vehiclePreference}
@@ -1648,7 +1648,7 @@ const BookingPage = () => {
         </>
       )}
       <div className="form-actions">
-        <button type="button" onClick={() => setStep(2)}>
+        <button type="button" onClick={() => setStep(4)}>
           Back
         </button>
         <button
@@ -1870,9 +1870,9 @@ const BookingPage = () => {
             </div>
           </div>
           {step === 1 && renderStep1()}
-          {step === 2 && renderStep2()}
-          {step === 3 && renderStep3()}
-          {step === 4 && renderStep4()}
+          {step === 2 && renderStep3()}
+          {step === 3 && renderStep4()}
+          {step === 4 && renderStep2()}
           {step === 5 && renderStep5()}
           {step === 6 && renderStep6()}
         </div>

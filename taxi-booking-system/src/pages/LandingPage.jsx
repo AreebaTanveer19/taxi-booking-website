@@ -92,6 +92,45 @@ const LandingPage = () => {
   const cardWidth = typeof window !== 'undefined' && window.innerWidth < 768 ? 100 : 25;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 50) {
+      nextSlide();
+    }
+
+    if (touchStart - touchEnd < -50) {
+      prevSlide();
+    }
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => 
+      prev === services.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => 
+      prev === 0 ? services.length - 1 : prev - 1
+    );
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -170,7 +209,7 @@ const LandingPage = () => {
                 Book Now
               </button>
               <button 
-                className="hero-btn hero-btn-secondary" 
+                className="hero-btn hero-btn-secondary personalized-btn" 
                 onClick={() => openWhatsApp()}
               >
                 Get Personalized Quote
@@ -184,13 +223,55 @@ const LandingPage = () => {
       <div className="services-section-img">
         <h2 className="services-main-title">We are Offering Various Sydney Chauffeur Services</h2>
         <div className="services-main-sub">Our chauffeurs are highly skilled experts who have undergone extensive training and are knowledgeable drivers.</div>
+        
+        {/* Mobile Slider */}
+        <div className="mobile-services-slider">
+          <div 
+            className="mobile-slider-track"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {services.map((service, index) => (
+              <div key={`mobile-${index}`} className="mobile-slide">
+                <div className="services-card-img-v2" style={{ backgroundImage: `url(${service.image})` }}>
+                  <div className="services-card-img-overlay-v2">
+                    <div>
+                      <h3 className="services-card-img-title">{service.name}</h3>
+                      <p className="services-card-img-desc">{service.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mobile-slider-dots">
+            {services.map((_, index) => (
+              <div 
+                key={index}
+                className={`mobile-slider-dot ${index === currentSlide ? 'active' : ''}`}
+                onClick={() => setCurrentSlide(index)}
+              />
+            ))}
+          </div>
+        </div>
+        
+        {/* Desktop Grid */}
         <div className="services-slider-container">
-          <div className="services-cards-img-grid" style={{
-            transform: `translateX(-${currentSlide * cardWidth}%)`,
-            transition: currentSlide <= services.length 
-              ? 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
-              : 'none'
-          }}>
+          <div 
+            className="services-cards-img-grid" 
+            style={{
+              transform: `translateX(-${currentSlide * cardWidth}%)`,
+              transition: currentSlide <= services.length 
+                ? 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
+                : 'none'
+            }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             {extendedServices.map((service, i) => (
               <div 
                 key={i}

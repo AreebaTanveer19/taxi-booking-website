@@ -814,6 +814,14 @@ input:checked + .slider:before {
     gap: 1.5rem;
   }
 
+  .pickup-address {
+    margin-bottom: 0;
+  }
+
+  .drop-off-address {
+    margin-top: 0;
+  }
+
   .form-actions {
     flex-direction: column;
   }
