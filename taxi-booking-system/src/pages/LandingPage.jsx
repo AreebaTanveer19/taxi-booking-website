@@ -4,10 +4,9 @@ import taxiImg from '../assets/taxi1.png';
 import hero1 from '../assets/businesswoman-getting-taxi-cab.jpg';
 import hero2 from '../assets/taxi1.jpg';
 import hero4 from '../assets/pexels-pavel-danilyuk-8425035.jpg';
+import hero5 from '../assets/contact.png';
 import '../styles/LandingPage.css';
-import { FaChair, FaSnowflake, FaSuitcase, FaStar, FaCar, FaClock, FaShieldAlt, FaRegClock } from 'react-icons/fa';
-import { GiCarSeat } from 'react-icons/gi';
-import carData from '../assets/carData.json';
+import { FaChair, FaSuitcase, FaCar, FaRegClock } from 'react-icons/fa';
 import Footer from '../components/Footer/Footer';
 import A7 from '../assets/A7.png';
 import A8 from '../assets/A8.png';
@@ -18,7 +17,7 @@ import crewimg from '../assets/crew.jpeg';
 import { motion } from 'framer-motion';
 import { openWhatsApp } from '../utils/whatsapp';
 
-const heroImages = [hero2, hero1, hero4 , taxiImg];
+const heroImages = [hero5,hero2, hero1, hero4 , taxiImg];
 
 const services = [
   
@@ -68,19 +67,19 @@ const fleetImages = {
 const fleetItems = [
   {
     name: 'Executive Sedan',
-    passengers: '1-3 PAX',
+    passengers: '1-4 PAX',
     luggage: '2 Suitcases',
     imageKey: 'Executive Sedan'
   },
   {
     name: 'Premium Sedan',
-    passengers: '1-3 PAX',
+    passengers: '1-4 PAX',
     luggage: '2 Suitcases',
     imageKey: 'Premium Sedan'
   },
   {
     name: 'Premium SUV',
-    passengers: '1-4 PAX',
+    passengers: '1-6 PAX',
     luggage: '3 Suitcases ',
     imageKey: 'SUV'
   }

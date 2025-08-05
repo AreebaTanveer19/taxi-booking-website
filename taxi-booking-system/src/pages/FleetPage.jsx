@@ -35,7 +35,7 @@ export default function FleetPage() {
     {
       id: 1,
       name: 'Executive Sedan',
-      capacity: '1-3 PAX • 2 Suitcases',
+      capacity: '1-4 PAX • 2 Suitcases',
       models: 'Lexus, Mercedes E Class, BMW 5 Series',
       features: ['Air Conditioning', 'Leather Seats', 'Phone Chargers', 'Bottled Water'],
       image: 'https://i.pinimg.com/1200x/fa/9e/3d/fa9e3dbc28c719ec1caa58a73dcf261f.jpg',
@@ -45,7 +45,7 @@ export default function FleetPage() {
     {
       id: 2,
       name: 'Premium Sedan',
-      capacity: '1-3 PAX • 2 Suitcases',
+      capacity: '1-4 PAX • 2 Suitcases',
       models: 'Mercedes S Class, BMW 7 Series or Audi A8',
       features: ['Premium Sound System', 'Massage Seats', 'WiFi', 'Refreshments'],
       image: 'https://i.pinimg.com/1200x/a9/71/d0/a971d076a33b6270548439fa6c24d467.jpg',
@@ -55,7 +55,7 @@ export default function FleetPage() {
     {
       id: 3,
       name: 'Premium SUV',
-      capacity: '1-4 PAX • 3 Suitcases • 2 Carry On',
+      capacity: '1-6 PAX • 3 Suitcases • 2 Carry On',
       models: 'Audi Q7 or Similar',
       features: ['Spacious Interior', 'All-Wheel Drive', 'Child Seats Available', 'Climate Control'],
       image: 'https://i.pinimg.com/1200x/1d/d3/4a/1dd34ad755b30b3f0f00d65a1418bf1c.jpg',
@@ -65,7 +65,7 @@ export default function FleetPage() {
     {
       id: 4,
       name: 'Luxury Van',
-      capacity: '1-6 PAX • 5 Suitcases',
+      capacity: '1-7 PAX • 5 Suitcases',
       models: 'Mercedes Van or Similar',
       features: ['Ample Luggage Space', 'Comfortable Seating', 'Privacy Partitions', 'Entertainment System'],
       image: 'https://i.pinimg.com/1200x/a3/28/3c/a3283ca191f3ca879a3fe4567c513d11.jpg',

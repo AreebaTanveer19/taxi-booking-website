@@ -97,9 +97,10 @@ export default function AdminDashboard() {
   }, [bookings]);
 
   const sortedBookings = [...bookings].sort((a, b) => {
-    const dateA = new Date(`${a.date} ${a.time}`);
-    const dateB = new Date(`${b.date} ${b.time}`);
-    return dateB - dateA;
+    // Use createdAt timestamp if available, otherwise use booking date and time
+    const dateA = a.createdAt ? new Date(a.createdAt) : new Date(`${a.date} ${a.time}`);
+    const dateB = b.createdAt ? new Date(b.createdAt) : new Date(`${b.date} ${b.time}`);
+    return dateB - dateA; // Sort in descending order (newest first)
   });
 
   const filteredBookings = sortedBookings.filter(booking => {
@@ -351,33 +352,49 @@ export default function AdminDashboard() {
                 </div>
               </div>
               
-              {loading ? (
-                <div className="loading-indicator">Loading users...</div>
-              ) : error ? (
-                <div className="error-message">{error}</div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="no-users">No users found</div>
-              ) : (
-                <div className="users-list">
-                  {filteredUsers.map(user => (
-                    <div key={user._id} className="user-item">
-                      <div className="user-info">
-                        <p><strong>Name:</strong> {user.name}</p>
-                        <p><strong>Email:</strong> {user.email}</p>
-                        <p><strong>Phone:</strong> {user.phone || 'N/A'}</p>
-                      </div>
-                      <div className="user-actions">
-                        <button 
-                          className="delete-btn"
-                          onClick={() => handleDeleteUser(user._id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="users-table-container">
+                <table className="users-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="4" className="loading-indicator">Loading users...</td>
+                      </tr>
+                    ) : error ? (
+                      <tr>
+                        <td colSpan="4" className="error-message">{error}</td>
+                      </tr>
+                    ) : filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="no-users">No users found</td>
+                      </tr>
+                    ) : (
+                      filteredUsers.map(user => (
+                        <tr key={user._id} className="user-row">
+                          <td>{user.name}</td>
+                          <td>{user.email}</td>
+                          <td>{user.phone || 'N/A'}</td>
+                          <td className="user-actions">
+                            <button 
+                              className="delete-btn"
+                              onClick={() => handleDeleteUser(user._id)}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : (
             <div className="bookings-list">
@@ -420,21 +437,39 @@ export default function AdminDashboard() {
                           <p><strong>Estimated Fare:</strong> ${(calculateFare(booking)).toFixed(2)}</p>
                         </div>
 
-                        {/* Extra Preferences */}
+                        {/* Passenger & Luggage Information */}
                         <div className="details-group">
-                          <h4>🧳 Extra Preferences</h4>
-                          {booking.hasChildUnder7 && (
-                            <>
-                              <p><strong>Child Under 7:</strong> Yes</p>
-                              <p><strong>Baby Seats:</strong> {booking.babySeatQty || 0}</p>
-                              <p><strong>Booster Seats:</strong> {booking.boosterSeatQty || 0}</p>
-                            </>
-                          )}
-                          <p><strong>Passengers:</strong> {booking.passengers || 1}</p>
-                          <p><strong>Luggage:</strong> {booking.luggage || 'None'}</p>
+                          <h4>👥 Passenger & Luggage</h4>
+                          <div className="passenger-details">
+                            <div className="detail-row">
+                              <span className="detail-label">Adults:</span>
+                              <span className="detail-value">{booking.adults || 1}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label">Children (0-4):</span>
+                              <span className="detail-value">{booking.children_0_4 || 0}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label">Children (5-8):</span>
+                              <span className="detail-value">{booking.children_5_8 || 0}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label">Total Passengers:</span>
+                              <span className="detail-value">{booking.totalPassengers || booking.passengers || 1}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label">Suitcases:</span>
+                              <span className="detail-value">{booking.suitcases || 0}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label">Carry-on:</span>
+                              <span className="detail-value">{booking.carryOn || 0}</span>
+                            </div>
+
+                          </div>
                           <p><strong>Airport Pickup:</strong> {booking.serviceType === 'Airport Transfers' ? 'Yes' : 'No'}</p>
-                          {booking.serviceType === 'Airport Transfers' && (
-                            <p><strong>Includes Terminal Tolls:</strong> {booking.terminal ? 'Yes' : 'No'}</p>
+                          {booking.serviceType === 'Airport Transfers' && booking.terminal && (
+                            <p><strong>Terminal:</strong> {booking.terminal}</p>
                           )}
                         </div>
 

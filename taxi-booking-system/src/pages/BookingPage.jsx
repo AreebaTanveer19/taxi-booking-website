@@ -8,15 +8,7 @@ import {
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "../styles/BookingPage.css";
-import {
-  FaRoute,
-  FaArrowRight,
-  FaCar,
-  FaCarSide,
-  FaRegClock,
-  FaUser,
-  FaCreditCard,
-} from "react-icons/fa";
+import {FaClipboardCheck,FaRegClock,FaMapMarkerAlt} from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const BookingPage = () => {
@@ -47,7 +39,7 @@ const BookingPage = () => {
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   const [form, setForm] = useState({
-    bookingMethod: "",
+    bookingMethod: "distance",
     name: "",
     email: "",
     phone: "",
@@ -76,16 +68,18 @@ const BookingPage = () => {
     pickup: "",
     dropoff: "",
     distance: "",
-    hasChildUnder7: false,
-    babySeats: 0,
-    boosterSeats: 0,
+    adults: 1,
+    children_0_4: 0,
+    children_5_8: 0,
+    suitcases: 0,
+    carryOn: 0,
   });
 
   const fleet = [
     {
       id: 1,
       name: "Executive Sedan",
-      capacity: "1-3 PAX • 2 Suitcases",
+      capacity: "1-4 PAX • 2 Suitcases",
       models: "Lexus, Mercedes E Class, BMW 5 Series",
       features: [
         "Air Conditioning",
@@ -95,13 +89,12 @@ const BookingPage = () => {
       ],
       image:
         "https://i.pinimg.com/1200x/fa/9e/3d/fa9e3dbc28c719ec1caa58a73dcf261f.jpg",
-      // description: 'The Executive Sedan combines elegance and efficiency for professionals and travelers who value comfort and punctuality. Ideal for business executives, this vehicle ensures a smooth ride with plush interiors and advanced climate control. Whether you’re heading to a corporate meeting or the airport, this sedan reflects style and professionalism at every turn.',
       idealFor: "Business meetings, airport transfers, and special occasions",
     },
     {
       id: 2,
       name: "Premium Sedan",
-      capacity: "1-3 PAX • 2 Suitcases",
+      capacity: "1-4 PAX • 2 Suitcases",
       models: "Mercedes S Class, BMW 7 Series or Audi A8",
       features: [
         "Premium Sound System",
@@ -111,13 +104,12 @@ const BookingPage = () => {
       ],
       image:
         "https://i.pinimg.com/1200x/a9/71/d0/a971d076a33b6270548439fa6c24d467.jpg",
-      // description: 'For those who desire the pinnacle of sophistication, our Premium Sedans deliver unrivaled luxury. Featuring opulent interiors, ambient lighting, and a whisper-quiet cabin, these vehicles are designed to impress. Perfect for high-profile clients or special events, they make every journey a truly first-class experience.',
       idealFor: "Corporate events, weddings, and luxury getaways",
     },
     {
       id: 3,
       name: "Premium SUV",
-      capacity: "1-4 PAX • 3 Suitcases • 2 Carry On",
+      capacity: "1-6 PAX • 3 Suitcases • 2 Carry On",
       models: "Audi Q7 or Similar",
       features: [
         "Spacious Interior",
@@ -127,13 +119,12 @@ const BookingPage = () => {
       ],
       image:
         "https://i.pinimg.com/1200x/1d/d3/4a/1dd34ad755b30b3f0f00d65a1418bf1c.jpg",
-      // description: 'Our SUVs offer a perfect blend of luxury and versatility, ideal for families or small groups. With a spacious interior, advanced safety features, and high ground clearance, you can travel comfortably and confidently in any weather or terrain. It’s the ideal vehicle for road trips, tours, or urban commutes with extra luggage.',
       idealFor: "Family vacations, group outings, and road trips",
     },
     {
       id: 4,
       name: "Luxury Van",
-      capacity: "1-6 PAX • 5 Suitcases",
+      capacity: "1-7 PAX • 5 Suitcases",
       models: "Mercedes Van or Similar",
       features: [
         "Ample Luggage Space",
@@ -143,7 +134,6 @@ const BookingPage = () => {
       ],
       image:
         "https://i.pinimg.com/1200x/a3/28/3c/a3283ca191f3ca879a3fe4567c513d11.jpg",
-      // description: 'When traveling with a group, comfort and space are essential — and our vans deliver both in style. Equipped with privacy partitions and premium entertainment options, these vehicles ensure your group stays relaxed and entertained throughout the ride. Ideal for airport runs, private tours, or group functions.',
       idealFor: "Group transportation, parties, and events",
     },
     {
@@ -159,13 +149,12 @@ const BookingPage = () => {
       ],
       image:
         "https://i.pinimg.com/1200x/63/32/3c/63323c04621887790f91a67bb46b8ca0.jpg",
-      // description: 'Our Mini Bus is built for maximum capacity without sacrificing comfort. Whether it’s a corporate team outing, wedding party, or tourist group, the Mini Bus offers luxurious seating, ample legroom, and even an onboard restroom. It’s your mobile lounge on wheels — driven by professionals for a smooth journey.',
       idealFor: "Large groups, corporate events, and weddings",
     },
   ];
 
   const [step, setStep] = useState(1);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState("distance");
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [estimatedFare, setEstimatedFare] = useState(0);
   const [directions, setDirections] = useState(null);
@@ -192,8 +181,7 @@ const BookingPage = () => {
   const handleDropoffPlaceChanged = () => {
     const place = dropoffAutocompleteRef.current.getPlace();
     if (place && place.formatted_address) {
-      setForm((prev) => ({ ...prev, dropoff: place.formatted_address }));
-      // Clear dropoff error when valid location is selected
+      setForm((prev) => ({ ...prev, dropoff: place.formatted_address }))      // Clear dropoff error when valid location is selected
       setErrors((prevErrors) => {
         const newErrors = { ...prevErrors };
         delete newErrors.dropoff;
@@ -243,31 +231,61 @@ const BookingPage = () => {
 
   const calculateFare = (formData) => {
     let fare = 0;
+    const distanceInKm = (formData.distance || 0) / 1000; // Convert meters to kilometers
+    
     if (formData.bookingMethod === "distance") {
-      const baseFare = 5.0;
-      const perMileRate = 2.5;
-      const distanceInMiles = (formData.distance || 0) * 0.000621371;
-      fare = baseFare + distanceInMiles * perMileRate;
-    } else {
-      // Time-based calculation
-      const hourlyRates = {
-        "Executive Sedan": 100,
-        "Premium Sedan": 120,
-        "Premium SUV": 110,
-        "Luxury Van": 130,
-        Sprinter: 150,
+      // Distance-based calculation
+      const vehicleRates = {
+        "Executive Sedan": { base: 70, perKm: 3, baseDistance: 5 },
+        "Premium Sedan": { base: 125, perKm: 5.5, baseDistance: 5 },
+        "Premium SUV": { base: 80, perKm: 3, baseDistance: 5 },
+        "Luxury Van": { base: 110, perKm: 4.5, baseDistance: 5 },
+        "Sprinter": { base: 0, perKm: 0, baseDistance: 5 },
       };
-      const hours =
-        calculateDuration(formData.time, formData.expectedEndTime) / 60;
-      fare = hours * hourlyRates[formData.vehiclePreference] || 0;
+      
+      const rates = vehicleRates[formData.vehiclePreference] || vehicleRates["Executive Sedan"];
+      
+      if (distanceInKm <= rates.baseDistance) {
+        fare = rates.base;
+      } else {
+        const additionalKm = distanceInKm - rates.baseDistance;
+        fare = rates.base + (additionalKm * rates.perKm);
+      }
+    } else {
+      // Time-based calculation (using hourly rates as a fallback)
+      const hourlyRates = {
+        "Executive Sedan": 110,
+        "Premium Sedan": 120,
+        "Premium SUV": 100,
+        "Luxury Van": 130,
+        "Sprinter": 150,
+      };
+      const hours = calculateDuration(formData.time, formData.expectedEndTime) / 60;
+      fare = hours * (hourlyRates[formData.vehiclePreference] || 100);
     }
 
-    // Add seat charges
-    if (formData.hasChildUnder7) {
-      fare += formData.babySeats * 10 + formData.boosterSeats * 10;
+    // Add terminal tolls for airport transfers
+    if (formData.serviceType === "Airport Transfers" && formData.terminal) {
+      const terminalTolls = {
+        "T1 International": 15,
+        "T2 Domestic": 7,
+        "T3 Domestic": 5,
+        "T4 Domestic": 7, // No toll for T4 as per requirements
+      };
+      
+      const toll = terminalTolls[formData.terminal] || 0;
+      fare += toll;
     }
 
-    return fare.toFixed(2);
+    // Add child seat charges
+    const babySeatCharge = 15; // $15 per baby seat (0-4 years)
+    const boosterSeatCharge = 15; // $15 per booster seat (5-8 years)
+    
+    fare += (formData.children_0_4 || 0) * babySeatCharge;
+    fare += (formData.children_5_8 || 0) * boosterSeatCharge;
+
+    // Round to nearest dollar
+    return Math.round(fare);
   };
 
   const calculateRoute = async () => {
@@ -330,10 +348,12 @@ const BookingPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
+    let updatedForm = {
+      ...form,
       [name]: type === "checkbox" ? checked : value,
-    }));
+    };
+
+    setForm(updatedForm);
 
     // Clear pickup and dropoff when city changes
     if (name === "city") {
@@ -417,6 +437,27 @@ const BookingPage = () => {
         case "termsAccepted":
           if (checked) delete newErrors.termsAccepted;
           break;
+        case "passengers":
+        case "adults":
+        case "children_0_4":
+        case "children_5_8":
+          // Validate that total passengers equals sum of age groups
+          const currentForm = name === "passengers" ? { ...form, passengers: parseInt(value) || 0 } :
+                             name === "adults" ? { ...form, adults: parseInt(value) || 0 } :
+                             name === "children_0_4" ? { ...form, children_0_4: parseInt(value) || 0 } :
+                             { ...form, children_5_8: parseInt(value) || 0 };
+          
+          const totalPassengers = parseInt(currentForm.passengers) || 0;
+          const sumAgeGroups = (parseInt(currentForm.adults) || 0) + 
+                              (parseInt(currentForm.children_0_4) || 0) + 
+                              (parseInt(currentForm.children_5_8) || 0);
+          
+          if (totalPassengers !== sumAgeGroups && totalPassengers > 0 && sumAgeGroups > 0) {
+            newErrors.passengers = `Total passengers (${totalPassengers}) must equal sum of all age groups (${sumAgeGroups})`;
+          } else {
+            delete newErrors.passengers;
+          }
+          break;
         default:
           break;
       }
@@ -451,75 +492,74 @@ const BookingPage = () => {
     });
   };
 
-  const proceedToPayment = () => {
-    let cost = 0;
+  // const proceedToPayment = () => {
+  //   let cost = 0;
 
-    if (form.bookingMethod === "distance") {
-      const distance = parseFloat(form.distance) || 0;
-      if (distance <= 0) {
-        cost = 0;
-      } else if (distance <= 5) {
-        cost = 60;
-      } else if (distance <= 10) {
-        cost = 75; // 60 + 15
-      } else if (distance <= 15) {
-        cost = 90; // 75 + 15
-      } else if (distance <= 20) {
-        cost = 105; // 90 + 15
-      } else if (distance <= 25) {
-        cost = 120; // 105 + 15
-      } else if (distance <= 30) {
-        cost = 135; // 120 + 15
-      } else {
-        // distance > 30
-        const costAt30km = 135;
-        cost = costAt30km + (distance - 30) * 2;
-      }
-    } else {
-      // 'time' based booking
-      const start = new Date(`2000-01-01T${form.time}`);
-      const end = new Date(`2000-01-01T${form.expectedEndTime}`);
-      const hours = (end - start) / (1000 * 60 * 60);
-      const hourlyRates = {
-        "Executive Sedan": 60,
-        "Premium Sedan": 80,
-        "Luxury Van": 100,
-        Sprinter: 120,
-      };
-      cost = hours * hourlyRates[form.vehiclePreference] || 0;
-    }
+  //   if (form.bookingMethod === "distance") {
+  //     const distance = parseFloat(form.distance) || 0;
+  //     if (distance <= 0) {
+  //       cost = 0;
+  //     } else if (distance <= 5) {
+  //       cost = 60;
+  //     } else if (distance <= 10) {
+  //       cost = 75; // 60 + 15
+  //     } else if (distance <= 15) {
+  //       cost = 90; // 75 + 15
+  //     } else if (distance <= 20) {
+  //       cost = 105; // 90 + 15
+  //     } else if (distance <= 25) {
+  //       cost = 120; // 105 + 15
+  //     } else if (distance <= 30) {
+  //       cost = 135; // 120 + 15
+  //     } else {
+  //       // distance > 30
+  //       const costAt30km = 135;
+  //       cost = costAt30km + (distance - 30) * 2;
+  //     }
+  //   } else {
+  //     // 'time' based booking
+  //     const start = new Date(`2000-01-01T${form.time}`);
+  //     const end = new Date(`2000-01-01T${form.expectedEndTime}`);
+  //     const hours = (end - start) / (1000 * 60 * 60);
+  //     const hourlyRates = {
+  //       "Executive Sedan": 60,
+  //       "Premium Sedan": 80,
+  //       "Luxury Van": 100,
+  //       Sprinter: 120,
+  //     };
+  //     cost = hours * hourlyRates[form.vehiclePreference] || 0;
+  //   }
 
-    // Add surcharges
-    let finalCost = cost;
-    if (form.serviceType === "Airport Transfers") {
-      finalCost += 15; // Airport surcharge
-      // Add variable toll tax based on terminal
-      if (form.terminal === "T1 International") {
-        finalCost += 15;
-      } else if (form.terminal === "T2 Domestic") {
-        finalCost += 11.5;
-      } else if (form.terminal === "T3 Domestic") {
-        finalCost += 6.2;
-      } else if (form.terminal === "T4 Domestic") {
-        finalCost += 6.2;
-      }
-    }
-    if (form.hasChildUnder7) {
-      finalCost += form.babySeats * 10;
-      finalCost += form.boosterSeats * 10;
-    }
-    setEstimatedCost(finalCost.toFixed(2));
-    setStep(4); // Move to payment page (now step 4)
-  };
+  //   // Add surcharges
+  //   let finalCost = cost;
+  //   if (form.serviceType === "Airport Transfers") {
+  //     finalCost += 15; // Airport surcharge
+  //     // Add variable toll tax based on terminal
+  //     if (form.terminal === "T1 International") {
+  //       finalCost += 15;
+  //     } else if (form.terminal === "T2 Domestic") {
+  //       finalCost += 11.5;
+  //     } else if (form.terminal === "T3 Domestic") {
+  //       finalCost += 6.2;
+  //     } else if (form.terminal === "T4 Domestic") {
+  //       finalCost += 6.2;
+  //     }
+  //   }
+  //   // Add child seat charges based on age groups
+    // finalCost += (form.children_0_4 || 0) * 15; // Baby seats for kids 0-4 age group ($15 each)
+  //   finalCost += (form.children_5_8 || 0) * 15; // Booster seats for kids 5-8 age group ($15 each)
+  //   setEstimatedCost(Math.round(finalCost));
+  //   setStep(4); // Move to payment page (now step 4)
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Calculate final cost with all additional charges
     let finalCost = parseFloat(estimatedCost);
-    if (form.hasChildUnder7) {
-      finalCost += form.babySeats * 10 + form.boosterSeats * 10;
-    }
+    // Add child seat charges based on age groups
+    finalCost += (form.children_0_4 || 0) * 15; // Baby seats for kids 0-4 age group ($15 each)
+    finalCost += (form.children_5_8 || 0) * 15; // Booster seats for kids 5-8 age group ($15 each)
     if (form.serviceType === "Airport Transfers") {
       finalCost += 15; // Airport surcharge
       // Add variable toll tax based on terminal
@@ -654,8 +694,12 @@ const BookingPage = () => {
         errorMessage += `This vehicle can only accommodate up to ${vehicleCapacity.passengers} passengers. You have ${form.passengers} passengers. `;
       }
 
-      if (form.luggage > vehicleCapacity.luggage) {
-        errorMessage += `This vehicle can only carry up to ${vehicleCapacity.luggage} suitcases. You have ${form.luggage} suitcases.`;
+      // Calculate effective luggage: 2 carry-on = 1 suitcase
+      const suitcases = parseInt(form.suitcases) || 0;
+      const carryOn = parseInt(form.carryOn) || 0;
+      const effectiveLuggage = suitcases + Math.ceil(carryOn / 2);
+      if (effectiveLuggage > vehicleCapacity.luggage) {
+        errorMessage += `This vehicle can only carry up to ${vehicleCapacity.luggage} effective luggage items. You have ${suitcases} suitcases + ${carryOn} carry-on = ${effectiveLuggage} effective items (2 carry-on = 1 suitcase).`;
       }
 
       if (errorMessage) {
@@ -715,70 +759,71 @@ const BookingPage = () => {
   }, [step]);
 
   const renderStep1 = () => (
-    <motion.div
-      className="step-container"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <motion.h2
-        className="step-title welcome-title"
-        initial={{ y: -20 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.2 }}
+  <motion.div
+    className="step-container step-1-simple"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.5 }}
+  >
+    <div className="step-header">
+      <h2 className="step-title">Select Booking Type</h2>
+    </div>
+
+    <div className="booking-type-cards">
+      <motion.div
+        className={`booking-type-card distance-based ${
+          selectedOption === "distance" ? "selected" : ""
+        }`}
+        onClick={() => {
+          setForm({ ...form, bookingMethod: "distance" });
+          setSelectedOption("distance");
+          setStep(2);
+        }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
       >
-        Welcome to Horizon Chauffeurs
-      </motion.h2>
+        <h3 className="card-title">Distance Based</h3>
+        <p className="card-subtitle">Calculate cost by distance travelled</p>
+        <div className="card-icon">
+          <FaMapMarkerAlt />
+        </div>
+      </motion.div>
 
-      <div className="wave-divider">
-        <FaRoute className="wave-icon" />
-      </div>
+      <motion.div
+        className={`booking-type-card time-based ${
+          selectedOption === "time" ? "selected" : ""
+        }`}
+        onClick={() => {
+          setForm({ ...form, bookingMethod: "time" });
+          setSelectedOption("time");
+          setStep(2);
+        }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <h3 className="card-title">Time Based</h3>
+        <p className="card-subtitle">Calculate cost by duration of booking</p>
+        <div className="card-icon">
+          <FaRegClock />
+        </div>
+      </motion.div>
+    </div>
 
-      <p className="step-subtitle welcome-subtitle">
-        Choose the option that best fits your travel needs
-      </p>
-
-      <div className="booking-method-options">
-        <motion.div
-          className={`booking-method-card ${
-            selectedOption === "distance" ? "selected" : ""
-          }`}
-          onClick={() => {
-            setForm({ ...form, bookingMethod: "distance" });
-            setSelectedOption("distance");
+    <div className="step-actions">
+      <button 
+        className="next-button"
+        onClick={() => {
+          if (selectedOption) {
             setStep(2);
-          }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <div className="method-icon">
-            <FaCarSide className="animated-car" />
-          </div>
-          <h3>Distance-Based</h3>
-          <p>Ideal for single trips from point A to point B</p>
-        </motion.div>
-
-        <motion.div
-          className={`booking-method-card ${
-            selectedOption === "time" ? "selected" : ""
-          }`}
-          onClick={() => {
-            setForm({ ...form, bookingMethod: "time" });
-            setSelectedOption("time");
-            setStep(2);
-          }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <div className="method-icon">
-            <FaRegClock className="animated-clock" />
-          </div>
-          <h3>Time-Based</h3>
-          <p>Perfect for hourly rentals and multiple stops</p>
-        </motion.div>
-      </div>
-    </motion.div>
-  );
+          }
+        }}
+        disabled={!selectedOption}
+      >
+        Next
+      </button>
+    </div>
+  </motion.div>
+);  
 
   const renderStep2 = () => (
     <motion.div
@@ -789,48 +834,56 @@ const BookingPage = () => {
     >
       <h2 className="step-title">Step 04: Your Details</h2>
       <form className="booking-form">
-        <div className="form-columns">
-          <div className="form-column">
-            <div className="form-group">
-              <label>Name</label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleInputChange}
-                required
-                ref={nameRef}
-              />
-              {errors.name && (
-                <div className="error-message">{errors.name}</div>
-              )}
-            </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleInputChange}
-                required
-                ref={emailRef}
-              />
-              {errors.email && (
-                <div className="error-message">{errors.email}</div>
-              )}
-            </div>
-            <div className="form-group">
-              <label>Phone</label>
-              <PhoneInput
-                country={"au"}
-                value={form.phone}
-                onChange={handlePhoneChange}
-              />
-              {errors.phone && (
-                <div className="error-message">{errors.phone}</div>
-              )}
-            </div>
+      <div className="form-container">
+        {/* Name and Email Row */}
+        <div className="form-row">
+          <div className="form-group">
+            <label>Name</label>
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleInputChange}
+              required
+              ref={nameRef}
+            />
+            {errors.name && (
+              <div className="error-message">{errors.name}</div>
+            )}
           </div>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleInputChange}
+              required
+              ref={emailRef}
+            />
+            {errors.email && (
+              <div className="error-message">{errors.email}</div>
+            )}
+          </div>
+        </div>
+        
+        {/* Phone Row */}
+        <div className="form-row">
+          <div className="form-group full-width">
+            <label>Phone</label>
+            <PhoneInput
+              country={"au"}
+              value={form.phone}
+              onChange={handlePhoneChange}
+            />
+            {errors.phone && (
+              <div className="error-message">{errors.phone}</div>
+            )}
+          </div>
+        </div>
+        
+        {/* Special Instructions Row */}
+        <div className="form-row">
           <div className="form-group full-width">
             <label>Special Instructions (Optional)</label>
             <textarea
@@ -842,6 +895,7 @@ const BookingPage = () => {
             ></textarea>
           </div>
         </div>
+      </div>
         <div className="form-actions">
           <button type="button" onClick={() => setStep(3)}>
             Back
@@ -870,122 +924,126 @@ const BookingPage = () => {
     >
       <h2 className="step-title">Step 02: Journey Details</h2>
       <form className="omni-form">
-        <div className="form-grid">
-          {/* Service Details */}
-          <div className="form-group">
-            <label>City</label>
-            <select
-              name="city"
-              value={form.city}
-              onChange={handleInputChange}
-              ref={cityRef}
-            >
-              <option value="">----Select your city---</option>
-              <option value="Sydney">Sydney</option>
-              <option value="Melbourne">Melbourne</option>
-            </select>
-            {errors.city && <div className="error-message">{errors.city}</div>}
-          </div>
-          <div className="form-group">
-            <label>Type of Service</label>
-            <select
-              name="serviceType"
-              value={form.serviceType}
-              onChange={handleInputChange}
-              required
-              ref={serviceTypeRef}
-            >
-              <option value="">-- Select a Service --</option>
-              <option value="Corporate Transfers">Corporate Transfers</option>
-              <option value="Airport Transfers">Airport Transfers</option>
-              <option value="Wedding Car">Wedding Car</option>
-              <option value="Parcel Delivery">Parcel Delivery</option>
-              <option value="Special Events">Special Events</option>
-              <option value="Point to Point">Point to Point</option>
-            </select>
-            {errors.serviceType && (
-              <div className="error-message">{errors.serviceType}</div>
+        <div className="form-container">
+          {/* Service Details Row */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>City</label>
+              <select
+                name="city"
+                value={form.city}
+                onChange={handleInputChange}
+                ref={cityRef}
+              >
+                <option value="">----Select your city---</option>
+                <option value="Sydney">Sydney</option>
+                <option value="Melbourne">Melbourne</option>
+              </select>
+              {errors.city && <div className="error-message">{errors.city}</div>}
+            </div>
+            <div className="form-group">
+              <label>Type of Service</label>
+              <select
+                name="serviceType"
+                value={form.serviceType}
+                onChange={handleInputChange}
+                required
+                ref={serviceTypeRef}
+              >
+                <option value="">-- Select a Service --</option>
+                <option value="Corporate Transfers">Corporate Transfers</option>
+                <option value="Airport Transfers">Airport Transfers</option>
+                <option value="Wedding Car">Wedding Car</option>
+                <option value="Parcel Delivery">Parcel Delivery</option>
+                <option value="Special Events">Special Events</option>
+                <option value="Point to Point">Point to Point</option>
+              </select>
+              {errors.serviceType && (
+                <div className="error-message">{errors.serviceType}</div>
+              )}
+            </div>
+            {form.serviceType === "Airport Transfers" && (
+              <div className="form-group">
+                <label>Terminal</label>
+                <select
+                  name="terminal"
+                  value={form.terminal}
+                  onChange={handleInputChange}
+                >
+                  <option value="">-- Select Terminal --</option>
+
+                  {form.city === "Sydney" && (
+                    <>
+                      <optgroup label="Sydney Airport Terminals">
+                        <option value="T1 International">T1 International</option>
+                        <option value="T2 Domestic">T2 Domestic</option>
+                        <option value="T3 Domestic">T3 Domestic</option>
+                      </optgroup>
+                    </>
+                  )}
+
+                  {form.city === "Melbourne" && (
+                    <>
+                      <optgroup label="Melbourne Airport Terminals">
+                        <option value="T1 International">T1 International</option>
+                        <option value="T2 Domestic">T2 Domestic</option>
+                        <option value="T3 Domestic">T3 Domestic</option>
+                        <option value="T4 Domestic">T4 Domestic</option>
+                      </optgroup>
+                    </>
+                  )}
+                </select>
+              </div>
             )}
           </div>
 
           {form.serviceType === "Airport Transfers" && (
-            <div className="form-group">
-              <label>Terminal</label>
-              <select
-                name="terminal"
-                value={form.terminal}
-                onChange={handleInputChange}
-              >
-                <option value="">-- Select Terminal --</option>
-
-                {form.city === "Sydney" && (
-                  <>
-                    <optgroup label="Sydney Airport Terminals">
-                      <option value="T1 International">T1 International</option>
-                      <option value="T2 Domestic">T2 Domestic</option>
-                      <option value="T3 Domestic">T3 Domestic</option>
-                    </optgroup>
-                  </>
-                )}
-
-                {form.city === "Melbourne" && (
-                  <>
-                    <optgroup label="Melbourne Airport Terminals">
-                      <option value="T1 International">T1 International</option>
-                      <option value="T2 Domestic">T2 Domestic</option>
-                      <option value="T3 Domestic">T3 Domestic</option>
-                      <option value="T4 Domestic">T4 Domestic</option>
-                    </optgroup>
-                  </>
-                )}
-              </select>
-            </div>
-          )}
-
-          {form.serviceType === "Airport Transfers" && (
             <>
               <div className="form-section-title">Flight Details</div>
-              <div className="form-group">
-                <label>Flight Number</label>
-                <input
-                  type="text"
-                  name="flightNumber"
-                  value={form.flightDetails.flightNumber}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      flightDetails: {
-                        ...prev.flightDetails,
-                        flightNumber: e.target.value,
-                      },
-                    }))
-                  }
-                  placeholder="e.g. EK412"
-                />
-              </div>
-              <div className="form-group">
-                <label>Flight Time</label>
-                <input
-                  type="time"
-                  name="flightTime"
-                  value={form.flightDetails.flightTime}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      flightDetails: {
-                        ...prev.flightDetails,
-                        flightTime: e.target.value,
-                      },
-                    }))
-                  }
-                />
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Flight Number</label>
+                  <input
+                    type="text"
+                    name="flightNumber"
+                    value={form.flightDetails.flightNumber}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        flightDetails: {
+                          ...prev.flightDetails,
+                          flightNumber: e.target.value,
+                        },
+                      }))
+                    }
+                    placeholder="e.g. EK412"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Flight Time</label>
+                  <input
+                    type="time"
+                    name="flightTime"
+                    value={form.flightDetails.flightTime}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        flightDetails: {
+                          ...prev.flightDetails,
+                          flightTime: e.target.value,
+                        },
+                      }))
+                    }
+                    step="3600"
+                  />
+                </div>
               </div>
             </>
           )}
 
           {/* Pickup & Drop-off Fields */}
           {form.bookingMethod === "distance" && (
-            <>
+            <div className="form-row">
               <div className="form-group pickup-address">
                 <label>Pickup Address</label>
                 <div className="Autocomplete">
@@ -1093,10 +1151,10 @@ const BookingPage = () => {
                   <div className="error-message">{errors.dropoff}</div>
                 )}
               </div>
-            </>
+            </div>
           )}
           {form.bookingMethod === "time" && (
-            <>
+            <div className="form-row">
               <div className="form-group">
                 <label>Pickup Location</label>
                 <div className="Autocomplete">
@@ -1204,123 +1262,136 @@ const BookingPage = () => {
                   <div className="error-message">{errors.dropoff}</div>
                 )}
               </div>
-            </>
-          )}
-
-          {/* Child Under 7 Switch */}
-          <div className="form-group">
-            <label>Traveling with a child under 7?</label>
-            <label className="switch">
-              <input
-                type="checkbox"
-                name="hasChildUnder7"
-                checked={form.hasChildUnder7}
-                onChange={handleInputChange}
-              />
-              <span className="slider round"></span>
-            </label>
-          </div>
-
-          {/* Booster/Baby Seat Quantity Selectors */}
-          {form.hasChildUnder7 && (
-            <div className="form-group child-seats-group">
-              <div style={{ marginBottom: "10px" }}>
-                <label htmlFor="babySeats">
-                  Baby Seats Needed (Additional $10 each)
-                </label>
-                <input
-                  type="number"
-                  id="babySeats"
-                  name="babySeats"
-                  min="0"
-                  max="3"
-                  value={form.babySeats || 0}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div>
-                <label htmlFor="boosterSeats">
-                  Booster Seats Needed (Additional $10 each)
-                </label>
-                <input
-                  type="number"
-                  id="boosterSeats"
-                  name="boosterSeats"
-                  min="0"
-                  max="3"
-                  value={form.boosterSeats || 0}
-                  onChange={handleInputChange}
-                />
-              </div>
             </div>
           )}
 
-          {/* Luggage and Passengers side by side */}
-          <div className="form-group">
-            <label>Luggage (Number of Suitcases)</label>
-            <input
-              type="number"
-              name="luggage"
-              min="0"
-              max="20"
-              value={form.luggage}
-              onChange={handleInputChange}
-              placeholder="e.g., 2"
-            />
-          </div>
-          <div className="form-group">
-            <label>Passengers</label>
-            <input
-              type="number"
-              name="passengers"
-              min="1"
-              max="24"
-              value={form.passengers}
-              onChange={handleInputChange}
-            />
+          {/* Passenger Details Row */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Total Pax</label>
+              <input
+                type="number"
+                name="passengers"
+                min="1"
+                max="24"
+                value={form.passengers}
+                onChange={handleInputChange}
+              />
+              {errors.passengers && (
+                <div className="error-message">{errors.passengers}</div>
+              )}
+            </div>
+            <div className="form-group">
+              <label>Adults</label>
+              <input
+                type="number"
+                name="adults"
+                min="1"
+                max="8"
+                value={form.adults}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Kids (0-4 age)</label>
+              <input
+                type="number"
+                name="children_0_4"
+                min="0"
+                max="3"
+                value={form.children_0_4}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Kids (5-8 age)</label>
+              <input
+                type="number"
+                name="children_5_8"
+                min="0"
+                max="3"
+                value={form.children_5_8}
+                onChange={handleInputChange}
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Date</label>
-            <input
-              type="date"
-              name="date"
-              value={form.date}
-              onChange={handleInputChange}
-              required
-              ref={dateRef}
-            />
-            {errors.date && <div className="error-message">{errors.date}</div>}
+          {/* Luggage Row */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Number of Suitcases</label>
+              <input
+                type="number"
+                name="suitcases"
+                min="0"
+                max="8"
+                value={form.suitcases}
+                onChange={handleInputChange}
+                placeholder="e.g., 2"
+              />
+            </div>
+            <div className="form-group">
+              <label>Carry On</label>
+              <input
+                type="number"
+                name="carryOn"
+                min="0"
+                max="8"
+                value={form.carryOn}
+                onChange={handleInputChange}
+                placeholder="e.g., 1"
+              />
+            </div>
           </div>
-          <div className="form-group">
-            <label>Time</label>
-            <input
-              type="time"
-              name="time"
-              value={form.time}
-              onChange={handleInputChange}
-              required
-              ref={timeRef}
-            />
-            {errors.time && <div className="error-message">{errors.time}</div>}
+
+          {/* Date, Time and Expected End Time Row */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Date</label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleInputChange}
+                required
+                ref={dateRef}
+              />
+              {errors.date && <div className="error-message">{errors.date}</div>}
+            </div>
+            <div className="form-group">
+              <label>Start Time</label>
+              <input
+                type="time"
+                name="time"
+                value={form.time}
+                onChange={handleInputChange}
+                required
+                ref={timeRef}
+                step="3600"
+              />
+              {errors.time && <div className="error-message">{errors.time}</div>}
+            </div>
+            {form.bookingMethod === "time" && (
+              <div className="form-group">
+                <label>End Time</label>
+                <input
+                  type="time"
+                  name="expectedEndTime"
+                  value={form.expectedEndTime}
+                  onChange={handleInputChange}
+                  required
+                  step="3600"
+                />
+                {errors.expectedEndTime && (
+                  <div className="error-message">{errors.expectedEndTime}</div>
+                )}
+              </div>
+            )}
           </div>
           {form.bookingMethod === "distance" && form.distance && (
             <p className="distance-display">
               Distance: {(form.distance / 1000).toFixed(1)} km
             </p>
-          )}
-          {form.bookingMethod === "time" && (
-            <div className="form-group">
-              <label>Expected End Time</label>
-              <input
-                type="time"
-                name="expectedEndTime"
-                value={form.expectedEndTime}
-                onChange={handleInputChange}
-                min={form.time}
-                required
-              />
-            </div>
           )}
 
           {/* Google Map Embed */}
@@ -1401,36 +1472,53 @@ const BookingPage = () => {
               Estimated Price: ${calculateFare(form)}
             </p>
           )}
-        <div className="form-group">
-          <label>Number of Passengers: {form.passengers}</label>
-          <input
-            type="number"
-            name="passengers"
-            value={form.passengers}
-            onChange={handleInputChange}
-            min="1"
-            max="11"
-            style={{ width: "100px", marginLeft: "10px" }}
-          />
-        </div>
-        <div className="form-group">
-          <label>Number of Luggage: {form.luggage}</label>
-          <input
-            type="number"
-            name="luggage"
-            value={form.luggage}
-            onChange={handleInputChange}
-            min="0"
-            max="20"
-            style={{ width: "100px", marginLeft: "10px" }}
-          />
+        <div className="form-row">
+          <div className="form-group">
+            <label>Total Pax: {form.passengers}</label>
+            <input
+              type="number"
+              name="passengers"
+              value={form.passengers}
+              onChange={handleInputChange}
+              min="1"
+              max="11"
+              style={{ width: "100px", marginLeft: "10px" }}
+            />
+          </div>
+          <div className="form-group">
+            <label>Suitcases: {form.suitcases}</label>
+            <input
+              type="number"
+              name="suitcases"
+              value={form.suitcases}
+              onChange={handleInputChange}
+              min="0"
+              max="20"
+              style={{ width: "100px", marginLeft: "10px" }}
+            />
+          </div>
+          <div className="form-group">
+            <label>Carry On: {form.carryOn}</label>
+            <input
+              type="number"
+              name="carryOn"
+              value={form.carryOn}
+              onChange={handleInputChange}
+              min="0"
+              max="10"
+              style={{ width: "100px", marginLeft: "10px" }}
+            />
+          </div>
         </div>
         <div className="vehicle-selection-grid">
           {fleet.map((vehicle) => {
             const capacity = getVehicleCapacity(vehicle.name);
-            const isPassengerCompatible =
-              form.passengers <= capacity.passengers;
-            const isLuggageCompatible = form.luggage <= capacity.luggage;
+            const isPassengerCompatible = form.passengers <= capacity.passengers;
+            // Calculate effective luggage: 2 carry-on = 1 suitcase
+            const suitcases = parseInt(form.suitcases) || 0;
+            const carryOn = parseInt(form.carryOn) || 0;
+            const effectiveLuggage = suitcases + Math.ceil(carryOn / 2);
+            const isLuggageCompatible = effectiveLuggage <= capacity.luggage;
             const isCompatible = isPassengerCompatible && isLuggageCompatible;
             const isSelected = form.vehiclePreference === vehicle.name;
 
@@ -1449,10 +1537,42 @@ const BookingPage = () => {
                   }
                 }}
                 style={{
-                  opacity: isCompatible ? 1 : 0.5,
+                  opacity: isCompatible ? 1 : 0.6,
                   cursor: isCompatible ? "pointer" : "not-allowed",
+                  position: "relative",
                 }}
               >
+                {!isCompatible && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 10,
+                      backgroundColor: "rgba(255, 255, 255, 0.95)",
+                      borderRadius: "50%",
+                      width: "80px",
+                      height: "80px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: "3px solid #d32f2f",
+                      boxShadow: "0 4px 12px rgba(211, 47, 47, 0.3)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "2.5rem",
+                        color: "#d32f2f",
+                        fontWeight: "bold",
+                        lineHeight: 1,
+                      }}
+                    >
+                      ✕
+                    </span>
+                  </div>
+                )}
                 <img
                   src={vehicle.image}
                   alt={vehicle.name}
@@ -1463,26 +1583,31 @@ const BookingPage = () => {
                   <div className="vehicle-card-capacity">
                     {vehicle.capacity}
                   </div>
-                  {((form.bookingMethod === "distance" && form.distance) || 
+                  {isCompatible && ((form.bookingMethod === "distance" && form.distance) ||
                     (form.bookingMethod === "time" && form.expectedEndTime)) && (
                     <div className="vehicle-card-price">
-                      ${calculateFare({...form, vehiclePreference: vehicle.name})}
+                      ${calculateFare({ ...form, vehiclePreference: vehicle.name })}
                     </div>
                   )}
                   {!isCompatible && (
                     <div
-                      className="vehicle-card-warning"
+                      className="vehicle-card-error"
                       style={{
                         color: "#d32f2f",
                         fontSize: "0.9rem",
-                        marginTop: "5px",
+                        fontWeight: "bold",
+                        marginTop: "10px",
+                        padding: "8px",
+                        backgroundColor: "rgba(211, 47, 47, 0.1)",
+                        borderRadius: "4px",
+                        border: "1px solid #d32f2f",
                       }}
                     >
                       {!isPassengerCompatible &&
-                        `⚠️ Too many passengers (max: ${capacity.passengers})`}
-                      {!isPassengerCompatible && !isLuggageCompatible && " • "}
+                        `❌ Too many passengers (max: ${capacity.passengers})`}
+                      {!isPassengerCompatible && !isLuggageCompatible && <br />}
                       {!isLuggageCompatible &&
-                        `⚠️ Too much luggage (max: ${capacity.luggage})`}
+                        `❌ Too much luggage (max: ${capacity.luggage} effective, you have ${suitcases} suitcases + ${carryOn} carry-on = ${effectiveLuggage} effective)`}
                     </div>
                   )}
                   <div className="vehicle-card-models">{vehicle.models}</div>
@@ -1669,7 +1794,7 @@ const BookingPage = () => {
     // Safely calculate and format fare with fallbacks
     const rawFare = calculateFare(form);
     const fare = Number(rawFare) || 0;
-    const totalFare = fare.toFixed(2);
+    const totalFare = Math.round(fare);
 
     if (!rawFare || isNaN(fare)) {
       return (
@@ -1689,102 +1814,88 @@ const BookingPage = () => {
       <motion.div className="step-container summary-redesign">
         <div className="summary-main-card">
           <div className="summary-header">
-            <FaRoute className="summary-main-icon" />
+            <FaClipboardCheck className="summary-main-icon" />
             <h2 className="step-title" style={{ marginBottom: 0 }}>
               Booking Summary
             </h2>
           </div>
 
-          <div className="summary-total-block">
-            <div className="summary-total-label">Estimated Total</div>
-            <div className="summary-total-amount">${totalFare}</div>
-          </div>
-
           <div className="summary-section-block">
-            <div className="summary-section-title">Booking Details</div>
+            <div className="summary-section-title">📋 Trip Overview</div>
             <div className="summary-details-grid">
-              <div className="summary-label">Booking Method:</div>
-              <div className="summary-value">
-                {form.bookingMethod === "distance"
-                  ? "Distance-Based"
-                  : "Time-Based"}
-              </div>
-              <div className="summary-label">Pickup Location:</div>
+              <div className="summary-label">From:</div>
               <div className="summary-value">
                 {form.pickup || "Not specified"}
               </div>
               {form.dropoff && (
                 <>
-                  <div className="summary-label">Drop-off Location:</div>
+                  <div className="summary-label">To:</div>
                   <div className="summary-value">{form.dropoff}</div>
                 </>
               )}
-              {form.distance && (
-                <>
-                  <div className="summary-label">Distance:</div>
-                  <div className="summary-value">
-                    {(form.distance / 1000).toFixed(1)} km
-                  </div>
-                </>
-              )}
-              {form.expectedEndTime && (
-                <>
-                  <div className="summary-label">Duration:</div>
-                  <div className="summary-value">
-                    {calculateDuration(form.time, form.expectedEndTime)} minutes
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="summary-section-block">
-            <div className="summary-section-title">Passenger Details</div>
-            <div className="summary-details-grid">
-              <div className="summary-label">Full Name:</div>
+              <div className="summary-label">Date & Time:</div>
               <div className="summary-value">
-                {form.name || "Not specified"}
+                {form.date && form.time ? `${form.date} at ${form.time}` : "Not specified"}
               </div>
-              <div className="summary-label">Phone Number:</div>
-              <div className="summary-value">
-                {form.phone || "Not specified"}
-              </div>
-              <div className="summary-label">Email:</div>
-              <div className="summary-value">
-                {form.email || "Not specified"}
-              </div>
-            </div>
-          </div>
-
-          <div className="summary-section-block">
-            <div className="summary-section-title">Trip Preferences</div>
-            <div className="summary-details-grid">
-              <div className="summary-label">Vehicle Type:</div>
+              <div className="summary-label">Vehicle:</div>
               <div className="summary-value">
                 {form.vehiclePreference || "Not specified"}
               </div>
-              <div className="summary-label">Baby Seat:</div>
+            </div>
+          </div>
+
+          <div className="summary-section-block">
+            <div className="summary-section-title">👤 Contact & Passengers</div>
+            <div className="summary-details-grid">
+              <div className="summary-label">Name:</div>
               <div className="summary-value">
-                {form.hasChildUnder7 ? `Yes (${form.babySeats})` : "No"}
+                {form.name || "Not specified"}
               </div>
-              <div className="summary-label">Booster Seat:</div>
+              <div className="summary-label">Phone:</div>
               <div className="summary-value">
-                {form.hasChildUnder7 ? `Yes (${form.boosterSeats})` : "No"}
+                {form.phone || "Not specified"}
               </div>
-              <div className="summary-label">Airport Pickup:</div>
+              <div className="summary-label">Passengers:</div>
               <div className="summary-value">
-                {form.serviceType === "Airport Transfers" ? "Yes" : "No"}
+                {form.adults || 0} {form.adults === 1 ? 'adult' : 'adults'}
+                {(form.children_0_4 > 0 || form.children_5_8 > 0) && (
+                  <>, {form.children_0_4 + form.children_5_8} {form.children_0_4 + form.children_5_8 === 1 ? 'child' : 'children'}</>
+                )}
               </div>
-              {form.serviceType === "Airport Transfers" && (
+              {(form.children_0_4 > 0 || form.children_5_8 > 0) && (
                 <>
-                  <div className="summary-label">Terminal Tolls:</div>
+                  <div className="summary-label">Child Seats:</div>
                   <div className="summary-value">
-                    {form.terminal ? "Included" : "Not applicable"}
+                    {form.children_0_4 > 0 && `${form.children_0_4} baby seat${form.children_0_4 > 1 ? 's' : ''} (0-4 years)`}
+                    {form.children_0_4 > 0 && form.children_5_8 > 0 && ', '}
+                    {form.children_5_8 > 0 && `${form.children_5_8} booster seat${form.children_5_8 > 1 ? 's' : ''} (5-8 years)`}
                   </div>
+                </>
+              )}
+              <div className="summary-label">Luggage:</div>
+              <div className="summary-value">
+                {form.suitcases || 0} suitcase{form.suitcases !== 1 ? 's' : ''}, {form.carryOn || 0} carry-on
+              </div>
+            </div>
+          </div>
+
+          {form.serviceType === "Airport Transfers" && form.terminal && (
+          <div className="summary-section-block">
+            <div className="summary-section-title">✈️ Airport Details</div>
+            <div className="summary-details-grid">
+              <div className="summary-label">Service:</div>
+              <div className="summary-value">{form.serviceType}</div>
+              <div className="summary-label">Terminal:</div>
+              <div className="summary-value">{form.terminal}</div>
+              {form.flightDetails?.flightNumber && (
+                <>
+                  <div className="summary-label">Flight:</div>
+                  <div className="summary-value">{form.flightDetails.flightNumber}</div>
                 </>
               )}
             </div>
           </div>
+        )}
 
           <div className="summary-section-block">
             <div className="summary-section-title">Payment Info</div>
@@ -1795,24 +1906,30 @@ const BookingPage = () => {
           </div>
 
           <div className="summary-actions">
-            <motion.button
-              type="button"
-              className="summary-btn"
-              onClick={() => setStep(4)}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Back
-            </motion.button>
-            <motion.button
-              type="button"
-              className="summary-btn primary"
-              onClick={handleSubmit}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Confirm Booking
-            </motion.button>
+            <div className="summary-cost-display">
+              <div className="cost-label">Estimated Total</div>
+              <div className="cost-amount">${totalFare}</div>
+            </div>
+            <div className="summary-buttons">
+              <motion.button
+                type="button"
+                className="back-button"
+                onClick={() => setStep(4)}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Back
+              </motion.button>
+              <motion.button
+                type="button"
+                className="confirm-button"
+                onClick={handleSubmit}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Confirm Booking
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.div>

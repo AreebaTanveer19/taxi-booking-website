@@ -7,7 +7,8 @@ const bookingSchema = new mongoose.Schema({
   serviceType: String,
   flightNumber: String,
   flightTime: String,
-  luggage: String,
+  suitcases: { type: Number, default: 0 },
+  carryOn: { type: Number, default: 0 },
   specialInstructions: String,
   paymentMethod: String,
   nameOnCard: String,
@@ -32,7 +33,6 @@ const bookingSchema = new mongoose.Schema({
   dropoff: String,
   distance: String,
   estimatedCost: String,
-  hasChildUnder7: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Booking', bookingSchema);
