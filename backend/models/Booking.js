@@ -7,8 +7,18 @@ const bookingSchema = new mongoose.Schema({
   serviceType: String,
   flightNumber: String,
   flightTime: String,
+  
+  // Passenger information
+  passengers: { type: Number, default: 1 },
+  adults: { type: Number, default: 1 },
+  children_0_4: { type: Number, default: 0 },
+  children_5_8: { type: Number, default: 0 },
+  
+  // Luggage information
   suitcases: { type: Number, default: 0 },
   carryOn: { type: Number, default: 0 },
+  
+  // Booking details
   specialInstructions: String,
   paymentMethod: String,
   nameOnCard: String,
@@ -20,15 +30,7 @@ const bookingSchema = new mongoose.Schema({
   date: String,
   time: String,
   expectedEndTime: String,
-  passengers: Number,
-  babySeats: {
-    type: Number,
-    default: 0
-  },
-  boosterSeats: {
-    type: Number,
-    default: 0
-  },
+  
   pickup: String,
   dropoff: String,
   distance: String,

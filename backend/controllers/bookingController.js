@@ -23,8 +23,8 @@ exports.createBooking = async (req, res) => {
             // Passenger Information
             totalPassengers,
             adults,
-            children04,
-            children58,
+            children_0_4,
+            children_5_8,
             
             // Luggage Information
             suitcases,
@@ -61,7 +61,7 @@ exports.createBooking = async (req, res) => {
         }
 
         // Validate passenger counts
-        if (parseInt(adults) + parseInt(children04) + parseInt(children58) !== parseInt(totalPassengers)) {
+        if (parseInt(adults) + parseInt(children_0_4) + parseInt(children_5_8) !== parseInt(totalPassengers)) {
             return res.status(400).json({ error: 'Passenger counts do not match' });
         }
 
@@ -88,8 +88,8 @@ exports.createBooking = async (req, res) => {
             expectedEndTime,
             totalPassengers: parseInt(totalPassengers),
             adults: parseInt(adults),
-            children04: parseInt(children04) || 0,
-            children58: parseInt(children58) || 0,
+            children_0_4: parseInt(children_0_4) || 0,
+            children_5_8: parseInt(children_5_8) || 0,
             suitcases: parseInt(suitcases) || 0,
             carryOn: parseInt(carryOn) || 0,
             flightNumber: serviceType === 'Airport Transfers' ? flightNumber : undefined,
@@ -103,7 +103,7 @@ exports.createBooking = async (req, res) => {
             specialInstructions,
             termsAccepted,
             distance,
-            estimatedCost: parseFloat(estimatedCost),
+            estimatedCost: estimatedCost,
             status: 'pending'
         });
 
@@ -123,11 +123,11 @@ exports.createBooking = async (req, res) => {
             'Vehicle Type': vehicleType,
             'Total Passengers': totalPassengers,
             'Adults': adults,
-            'Children (0-4)': children04 || 0,
-            'Children (5-8)': children58 || 0,
+            'Children (0-4)': children_0_4 || 0,
+            'Children (5-8)': children_5_8 || 0,
             'Suitcases': suitcases || 0,
             'Carry-on': carryOn || 0,
-            'Estimated Cost': `$${estimatedCost.toFixed(2)}`,
+            'Estimated Cost': `$${estimatedCost}`,
             'Payment Method': paymentMethod,
             'Special Instructions': specialInstructions || 'None'
         };

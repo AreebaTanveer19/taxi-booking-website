@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  LoadScript,
-  Autocomplete,
-  GoogleMap,
-  DirectionsRenderer,
-} from "@react-google-maps/api";
+import {LoadScript,Autocomplete,GoogleMap,DirectionsRenderer} from "@react-google-maps/api";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "../styles/BookingPage.css";
@@ -229,64 +224,80 @@ const BookingPage = () => {
     return duration;
   };
 
-  const calculateFare = (formData) => {
-    let fare = 0;
-    const distanceInKm = (formData.distance || 0) / 1000; // Convert meters to kilometers
+
+
+  // Returns a breakdown of all fare components for transparency
+  const calculateFareBreakdown = (formData) => {
+    let baseFare = 0;
+    let distanceCharge = 0;
+    let timeCharge = 0;
+    let terminalToll = 0;
+    let babySeatTotal = 0;
+    let boosterSeatTotal = 0;
+    let total = 0;
+    const distanceInKm = (formData.distance || 0) / 1000;
     
     if (formData.bookingMethod === "distance") {
-      // Distance-based calculation
       const vehicleRates = {
         "Executive Sedan": { base: 70, perKm: 3, baseDistance: 5 },
         "Premium Sedan": { base: 125, perKm: 5.5, baseDistance: 5 },
         "Premium SUV": { base: 80, perKm: 3, baseDistance: 5 },
         "Luxury Van": { base: 110, perKm: 4.5, baseDistance: 5 },
-        "Sprinter": { base: 0, perKm: 0, baseDistance: 5 },
+        "Sprinter": { base: 0, perKm: 0, baseDistance: 0 },
       };
-      
       const rates = vehicleRates[formData.vehiclePreference] || vehicleRates["Executive Sedan"];
-      
-      if (distanceInKm <= rates.baseDistance) {
-        fare = rates.base;
-      } else {
-        const additionalKm = distanceInKm - rates.baseDistance;
-        fare = rates.base + (additionalKm * rates.perKm);
+      baseFare = rates.base;
+      if (distanceInKm > rates.baseDistance) {
+        distanceCharge = (distanceInKm - rates.baseDistance) * rates.perKm;
       }
+      total = baseFare + distanceCharge;
     } else {
-      // Time-based calculation (using hourly rates as a fallback)
+      // Time-based
       const hourlyRates = {
-        "Executive Sedan": 110,
+        "Executive Sedan": 100,
         "Premium Sedan": 120,
-        "Premium SUV": 100,
+        "Premium SUV": 110,
         "Luxury Van": 130,
-        "Sprinter": 150,
+        "Sprinter": 200,
       };
       const hours = calculateDuration(formData.time, formData.expectedEndTime) / 60;
-      fare = hours * (hourlyRates[formData.vehiclePreference] || 100);
+      timeCharge = hours * (hourlyRates[formData.vehiclePreference] || 100);
+      total = timeCharge;
     }
 
-    // Add terminal tolls for airport transfers
+    // Terminal tolls
     if (formData.serviceType === "Airport Transfers" && formData.terminal) {
       const terminalTolls = {
         "T1 International": 15,
         "T2 Domestic": 7,
         "T3 Domestic": 5,
-        "T4 Domestic": 7, // No toll for T4 as per requirements
+        "T4 Domestic": 7,
       };
-      
-      const toll = terminalTolls[formData.terminal] || 0;
-      fare += toll;
+      terminalToll = terminalTolls[formData.terminal] || 0;
+      total += terminalToll;
     }
 
-    // Add child seat charges
-    const babySeatCharge = 15; // $15 per baby seat (0-4 years)
-    const boosterSeatCharge = 15; // $15 per booster seat (5-8 years)
-    
-    fare += (formData.children_0_4 || 0) * babySeatCharge;
-    fare += (formData.children_5_8 || 0) * boosterSeatCharge;
+    // Child seats
+    const babySeatCharge = 15;
+    const boosterSeatCharge = 15;
+    babySeatTotal = (formData.children_0_4 || 0) * babySeatCharge;
+    boosterSeatTotal = (formData.children_5_8 || 0) * boosterSeatCharge;
+    total += babySeatTotal + boosterSeatTotal;
 
-    // Round to nearest dollar
-    return Math.round(fare);
+    return {
+      baseFare: Math.round(baseFare),
+      distanceCharge: Math.round(distanceCharge),
+      timeCharge: Math.round(timeCharge),
+      terminalToll: Math.round(terminalToll),
+      babySeatTotal: Math.round(babySeatTotal),
+      boosterSeatTotal: Math.round(boosterSeatTotal),
+      total: Math.round(total)
+    };
   };
+
+  // Legacy: used in vehicle cards
+  const calculateFare = (formData) => calculateFareBreakdown(formData).total;
+
 
   const calculateRoute = async () => {
     if (form.pickup && form.dropoff && window.google) {
@@ -350,7 +361,7 @@ const BookingPage = () => {
     const { name, value, type, checked } = e.target;
     let updatedForm = {
       ...form,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : type === "number" ? parseInt(value) || 0 : value,
     };
 
     setForm(updatedForm);
@@ -492,96 +503,67 @@ const BookingPage = () => {
     });
   };
 
-  // const proceedToPayment = () => {
-  //   let cost = 0;
-
-  //   if (form.bookingMethod === "distance") {
-  //     const distance = parseFloat(form.distance) || 0;
-  //     if (distance <= 0) {
-  //       cost = 0;
-  //     } else if (distance <= 5) {
-  //       cost = 60;
-  //     } else if (distance <= 10) {
-  //       cost = 75; // 60 + 15
-  //     } else if (distance <= 15) {
-  //       cost = 90; // 75 + 15
-  //     } else if (distance <= 20) {
-  //       cost = 105; // 90 + 15
-  //     } else if (distance <= 25) {
-  //       cost = 120; // 105 + 15
-  //     } else if (distance <= 30) {
-  //       cost = 135; // 120 + 15
-  //     } else {
-  //       // distance > 30
-  //       const costAt30km = 135;
-  //       cost = costAt30km + (distance - 30) * 2;
-  //     }
-  //   } else {
-  //     // 'time' based booking
-  //     const start = new Date(`2000-01-01T${form.time}`);
-  //     const end = new Date(`2000-01-01T${form.expectedEndTime}`);
-  //     const hours = (end - start) / (1000 * 60 * 60);
-  //     const hourlyRates = {
-  //       "Executive Sedan": 60,
-  //       "Premium Sedan": 80,
-  //       "Luxury Van": 100,
-  //       Sprinter: 120,
-  //     };
-  //     cost = hours * hourlyRates[form.vehiclePreference] || 0;
-  //   }
-
-  //   // Add surcharges
-  //   let finalCost = cost;
-  //   if (form.serviceType === "Airport Transfers") {
-  //     finalCost += 15; // Airport surcharge
-  //     // Add variable toll tax based on terminal
-  //     if (form.terminal === "T1 International") {
-  //       finalCost += 15;
-  //     } else if (form.terminal === "T2 Domestic") {
-  //       finalCost += 11.5;
-  //     } else if (form.terminal === "T3 Domestic") {
-  //       finalCost += 6.2;
-  //     } else if (form.terminal === "T4 Domestic") {
-  //       finalCost += 6.2;
-  //     }
-  //   }
-  //   // Add child seat charges based on age groups
-    // finalCost += (form.children_0_4 || 0) * 15; // Baby seats for kids 0-4 age group ($15 each)
-  //   finalCost += (form.children_5_8 || 0) * 15; // Booster seats for kids 5-8 age group ($15 each)
-  //   setEstimatedCost(Math.round(finalCost));
-  //   setStep(4); // Move to payment page (now step 4)
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Calculate final cost with all additional charges
-    let finalCost = parseFloat(estimatedCost);
-    // Add child seat charges based on age groups
-    finalCost += (form.children_0_4 || 0) * 15; // Baby seats for kids 0-4 age group ($15 each)
-    finalCost += (form.children_5_8 || 0) * 15; // Booster seats for kids 5-8 age group ($15 each)
-    if (form.serviceType === "Airport Transfers") {
-      finalCost += 15; // Airport surcharge
-      // Add variable toll tax based on terminal
-      if (form.terminal === "T1 International") {
-        finalCost += 15;
-      } else if (form.terminal === "T2 Domestic") {
-        finalCost += 11.5;
-      } else if (form.terminal === "T3 Domestic") {
-        finalCost += 6.2;
-      } else if (form.terminal === "T4 Domestic") {
-        finalCost += 6.2;
-      }
-    }
-
-    const bookingData = { ...form, estimatedCost: finalCost.toFixed(2) };
-
     try {
+      // Validate all required fields
+      if (!form.name || !form.email || !form.phone || !form.city || !form.serviceType || 
+          !form.pickup || !form.date || !form.time || !form.vehiclePreference) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      // Calculate final cost with all additional charges
+      let finalCost = calculateFare(form);
+      
+      // Add child seat charges based on age groups
+      finalCost += (parseInt(form.children_0_4) || 0) * 15; // Baby seats for kids 0-4 age group ($15 each)
+      finalCost += (parseInt(form.children_5_8) || 0) * 15; // Booster seats for kids 5-8 age group ($15 each)
+      
+      // Add airport surcharge if applicable
+      if (form.serviceType === "Airport Transfers") {
+        // Add variable toll tax based on terminal
+        if (form.terminal === "T1 International") {
+          finalCost += 15;
+        } else if (form.terminal === "T2 Domestic") {
+          finalCost += 11.5;
+        } else if (form.terminal === "T3 Domestic") {
+          finalCost += 6.2;
+        } else if (form.terminal === "T4 Domestic") {
+          finalCost += 6.2;
+        }
+      }
+
+      // Prepare the booking data with all necessary fields
+      const bookingData = {
+        ...form,
+        // Calculate total passengers
+        totalPassengers: parseInt(form.adults || 0) + parseInt(form.children_0_4 || 0) + parseInt(form.children_5_8 || 0),
+        // Ensure numeric values
+        adults: parseInt(form.adults || 0),
+        children_0_4: parseInt(form.children_0_4 || 0),
+        children_5_8: parseInt(form.children_5_8 || 0),
+        suitcases: parseInt(form.suitcases || 0),
+        carryOn: parseInt(form.carryOn || 0),
+        // Set the final calculated fare
+        estimatedCost: Math.round(finalCost),
+        // Add timestamp and status
+        createdAt: new Date().toISOString(),
+        status: 'pending' // Initial status
+      };
+
+      // Log the data being sent for debugging
+      console.log('Submitting booking:', bookingData);
+
+      // Send the booking data to the backend
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/bookings/book`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(bookingData),
         }
       );
@@ -900,16 +882,47 @@ const BookingPage = () => {
           <button type="button" onClick={() => setStep(3)}>
             Back
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (validateStep2()) {
-                setStep(5);
-              }
-            }}
-          >
-            Continue to Payment Details
-          </button>
+          {(['Airport Transfers', 'Point to Point', 'Crew Transfer'].includes(form.serviceType) && form.vehiclePreference !== 'Sprinter') ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (validateStep2()) {
+                  setStep(5);
+                }
+              }}
+            >
+              Continue to Payment Details
+            </button>
+          ) : (
+            <button
+              type="button"
+              style={{ background: '#25D366', color: '#fff', fontWeight: 600 }}
+              onClick={() => {
+                const phone = '61416535987'; // Replace with your real WhatsApp number
+                const details = [
+                  `*Booking Inquiry*`,
+                  `Name: ${form.name}`,
+                  `Phone: ${form.phone}`,
+                  `Pickup: ${form.pickup}`,
+                  `Drop-off: ${form.dropoff}`,
+                  `Date: ${form.date}`,
+                  `Time: ${form.time}`,
+                  `Passengers: ${form.passengers}`,
+                  `Adults: ${form.adults}`,
+                  `Kids 0-4: ${form.children_0_4}`,
+                  `Kids 5-8: ${form.children_5_8}`,
+                  `Car: ${form.vehiclePreference || 'Not selected'}`,
+                  form.specialInstructions ? `Notes: ${form.specialInstructions}` : '',
+                  '',
+                  'Our team will contact you for quote once you fill your details.'
+                ].filter(Boolean).join('\n');
+                const url = `https://wa.me/${phone}?text=${encodeURIComponent(details)}`;
+                window.open(url, '_blank');
+              }}
+            >
+              Get Quote on WhatsApp
+            </button>
+          )}
         </div>
       </form>
     </motion.div>
@@ -1266,7 +1279,7 @@ const BookingPage = () => {
           )}
 
           {/* Passenger Details Row */}
-          <div className="form-row">
+          <div className="passenger-row">
             <div className="form-group">
               <label>Total Pax</label>
               <input
@@ -1465,13 +1478,19 @@ const BookingPage = () => {
         transition={{ duration: 0.5 }}
       >
         <h2 className="step-title">Step 03: Select Your Vehicle</h2>
-        {form.vehiclePreference &&
-          ((form.bookingMethod === "distance" && form.distance) ||
-            (form.bookingMethod === "time" && form.expectedEndTime)) && (
-            <p className="fare-estimate">
-              Estimated Price: ${calculateFare(form)}
-            </p>
-          )}
+        {(form.vehiclePreference &&
+        ((form.bookingMethod === "distance" && form.distance) ||
+          (form.bookingMethod === "time" && form.expectedEndTime))) && (
+        (["Airport Transfers", "Point to Point", "Crew Transfer"].includes(form.serviceType) && form.vehiclePreference !== 'Sprinter') ? (
+          <p className="fare-estimate">
+            Estimated Price: ${calculateFare(form)}
+          </p>
+        ) : (
+          <p className="fare-estimate" style={{ color: '#1976d2', fontWeight: 500 }}>
+            Our team will contact you once you fill your details.
+          </p>
+        )
+      )}
         <div className="form-row">
           <div className="form-group">
             <label>Total Pax: {form.passengers}</label>
@@ -1585,9 +1604,15 @@ const BookingPage = () => {
                   </div>
                   {isCompatible && ((form.bookingMethod === "distance" && form.distance) ||
                     (form.bookingMethod === "time" && form.expectedEndTime)) && (
-                    <div className="vehicle-card-price">
-                      ${calculateFare({ ...form, vehiclePreference: vehicle.name })}
-                    </div>
+                    (["Airport Transfers", "Point to Point", "Crew Transfer"].includes(form.serviceType) && vehicle.name !== 'Sprinter') ? (
+                      <div className="vehicle-card-price">
+                        ${calculateFare({ ...form, vehiclePreference: vehicle.name })}
+                      </div>
+                    ) : (
+                      <div className="vehicle-card-price" style={{ color: '#1976d2', fontWeight: 500 }}>
+                        Our team will contact you for fare once you fill your details.
+                      </div>
+                    )
                   )}
                   {!isCompatible && (
                     <div
@@ -1791,12 +1816,10 @@ const BookingPage = () => {
   );
 
   const renderStep6 = () => {
-    // Safely calculate and format fare with fallbacks
-    const rawFare = calculateFare(form);
-    const fare = Number(rawFare) || 0;
-    const totalFare = Math.round(fare);
+    // Use breakdown object for all fare display
+    const breakdown = calculateFareBreakdown(form);
 
-    if (!rawFare || isNaN(fare)) {
+    if (!breakdown.total || isNaN(breakdown.total)) {
       return (
         <motion.div className="step-container">
           <h2 className="step-title">Booking Summary</h2>
@@ -1898,6 +1921,46 @@ const BookingPage = () => {
         )}
 
           <div className="summary-section-block">
+            <div className="summary-section-title">Fare Breakdown</div>
+            <div className="fare-breakdown-grid">
+              {form.bookingMethod === "distance" && (
+                <>
+                  <div className="breakdown-label">Base Fare:</div>
+                  <div className="breakdown-value">${breakdown.baseFare}</div>
+                  <div className="breakdown-label">Distance Charge:</div>
+                  <div className="breakdown-value">${breakdown.distanceCharge}</div>
+                </>
+              )}
+              {form.bookingMethod === "time" && (
+                <>
+                  <div className="breakdown-label">Time Charge:</div>
+                  <div className="breakdown-value">${breakdown.timeCharge}</div>
+                </>
+              )}
+              {breakdown.babySeatTotal > 0 && (
+                <>
+                  <div className="breakdown-label">Baby Seat(s) Fee:</div>
+                  <div className="breakdown-value">${breakdown.babySeatTotal}</div>
+                </>
+              )}
+              {breakdown.boosterSeatTotal > 0 && (
+                <>
+                  <div className="breakdown-label">Booster Seat(s) Fee:</div>
+                  <div className="breakdown-value">${breakdown.boosterSeatTotal}</div>
+                </>
+              )}
+              {breakdown.terminalToll > 0 && (
+                <>
+                  <div className="breakdown-label">Terminal Toll:</div>
+                  <div className="breakdown-value">${breakdown.terminalToll}</div>
+                </>
+              )}
+              <div className="breakdown-label breakdown-total">Grand Total:</div>
+              <div className="breakdown-value breakdown-total">${breakdown.total}</div>
+            </div>
+          </div>
+
+          <div className="summary-section-block">
             <div className="summary-section-title">Payment Info</div>
             <div className="summary-details-grid">
               <div className="summary-label">Payment Method:</div>
@@ -1906,10 +1969,10 @@ const BookingPage = () => {
           </div>
 
           <div className="summary-actions">
-            <div className="summary-cost-display">
+            {/* <div className="summary-cost-display">
               <div className="cost-label">Estimated Total</div>
-              <div className="cost-amount">${totalFare}</div>
-            </div>
+              <div className="cost-amount">${breakdown.total}</div>
+            </div> */}
             <div className="summary-buttons">
               <motion.button
                 type="button"

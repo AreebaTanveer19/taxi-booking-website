@@ -434,6 +434,7 @@ export default function AdminDashboard() {
                           {booking.city && <p><strong>City/Region:</strong> {booking.city}</p>}
                           {booking.distance && <p><strong>Distance:</strong> {(booking.distance / 1000).toFixed(1)} km</p>}
                           {booking.expectedEndTime && <p><strong>Expected End Time:</strong> {new Date(`2000-01-01T${booking.expectedEndTime}`).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}</p>}
+                          <p><strong>Selected Vehicle:</strong> {booking.vehiclePreference || 'Not specified'}</p>
                           <p><strong>Estimated Fare:</strong> ${(calculateFare(booking)).toFixed(2)}</p>
                         </div>
 

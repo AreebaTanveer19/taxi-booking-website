@@ -52,6 +52,30 @@
   --brand-accent: #f5ebe0; /* Light brown tint */
 }
 
+/* Passenger Details Row */
+.passenger-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  align-items: flex-end;
+}
+.passenger-row .form-group {
+  flex: 1 1 120px;
+  min-width: 110px;
+  max-width: 180px;
+}
+@media (max-width: 700px) {
+  .passenger-row {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .passenger-row .form-group {
+    max-width: 100%;
+    min-width: 80px;
+  }
+}
+
 /* Base Styles */
 * {
   box-sizing: border-box;
@@ -749,6 +773,19 @@ input:checked + .slider:before {
   background: #f9fafb !important;
 }
 
+.distance-display {
+  font-weight: 800;
+  font-size: 1.45rem;
+  color: #d32f2f;
+  margin-bottom: 1.1rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+  background: #fff0f0;
+  border-radius: 8px;
+  padding: 0.7rem 0;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.06);
+}
+
 /* Autocomplete Styling */
 .Autocomplete input {
   width: 100%;
@@ -1201,6 +1238,161 @@ input:checked + .slider:before {
 /* Form Elements - Optimized Two Column Layout */
 .form-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 1rem;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  /* Make all form groups full width on mobile */
+  .form-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .form-group {
+    width: 100%;
+    min-width: 100%;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Adjust spacing for better mobile display */
+  .step-container {
+    padding: 1.5rem 1rem;
+  }
+  
+  /* Make buttons full width on mobile */
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions button {
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+  
+  /* Adjust progress indicator for mobile */
+  .progress-indicator {
+    padding: 0.75rem 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .progress-step {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.65rem;
+  }
+  
+  .progress-bar {
+    flex: 0 0 1rem;
+  }
+  
+  /* Adjust step titles for better mobile display */
+  .step-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .step-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Adjust input and select fields for mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+  
+  /* Adjust vehicle cards for mobile */
+  .vehicle-option {
+    padding: 1rem;
+  }
+  
+  .vehicle-details {
+    flex-direction: column;
+  }
+  
+  .vehicle-image {
+    width: 100%;
+    height: 180px;
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .vehicle-info {
+    width: 100%;
+  }
+  
+  /* Summary section adjustments */
+  .summary-section {
+    padding: 1rem;
+  }
+  
+  .summary-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .summary-label {
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Payment section adjustments */
+  .payment-methods {
+    flex-direction: column;
+  }
+  
+  .payment-method {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  /* Card form adjustments */
+  .card-form {
+    padding: 1rem;
+  }
+  
+  .card-form-row {
+    flex-direction: column;
+  }
+  
+  .card-form-group {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  /* Confirmation section */
+  .confirmation-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  .confirmation-details {
+    padding: 1rem;
+  }
+}
+
+.form-group.full-width {
+  width: 100%;
+  margin-bottom: 1.2rem;
+}
+
+/* Form Elements - Optimized Two Column Layout */
+.form-row {
+  display: flex;
   gap: 1rem;
   margin-bottom: 1.2rem;
 }
@@ -1586,6 +1778,54 @@ input:checked + .slider:before {
 }
 
 /* Enhanced Summary Page Styles */
+
+/* Fare Breakdown Section */
+.fare-breakdown-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 20px;
+  padding: 10px 0 0 0;
+  margin-bottom: 10px;
+  background: #fcf8f3;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.breakdown-label {
+  color: #8B5A2B;
+  font-weight: 500;
+  padding: 6px 0 6px 6px;
+  border-left: 3px solid #e8d8c3;
+  background: transparent;
+  border-radius: 4px 0 0 4px;
+  align-self: center;
+}
+
+.breakdown-value {
+  color: #333;
+  font-weight: 600;
+  background: #f7f3ec;
+  padding: 6px 14px;
+  border-radius: 0 6px 6px 0;
+  text-align: right;
+  min-width: 70px;
+  align-self: center;
+}
+
+.breakdown-total {
+  color: #fff !important;
+  background: #8B5A2B !important;
+  font-size: 1.15rem;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  padding: 10px 16px !important;
+  box-shadow: 0 2px 8px rgba(139,90,43,0.07);
+  border: none !important;
+  margin-top: 10px;
+  grid-column: 1 / 3;
+  text-align: center;
+}
+
 .summary-redesign {
   background: #f8f5f0;
   min-height: 100vh;
