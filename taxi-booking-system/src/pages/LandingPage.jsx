@@ -42,11 +42,6 @@ const services = [
     desc: 'Efficient crew transport solutions for the business teams and professionals.'
   },
   {
-    name: 'Parcel Delivery',
-    image: 'https://i.pinimg.com/736x/0a/eb/3e/0aeb3ea13895bf06694135173b017f18.jpg',
-    desc: 'Swift and secure parcel delivery services across Sydney with safety measures.'
-  },
-  {
     name: 'Special Events',
     image: 'https://i.pinimg.com/736x/4e/a0/a0/4ea0a0bcabce609bb88fad491994e951.jpg',
     desc: 'Premium event transportation for concerts, parties, and special occasions.'
@@ -192,29 +187,31 @@ const LandingPage = () => {
           ))}
         </div>
         <div className="hero-container">
-          <div className="hero-text">
-            <span className="hero-tagline hide-on-mobile-hero">Travel securely with us !</span>
-            <h1 className="hero-headline">
-              Book your ride from<br />anywhere today!
-            </h1>
-            <p className="hero-subtext hide-on-mobile-hero">
-              Enjoy fast, reliable, and comfortable rides with our professional drivers. Book your ride in seconds and travel anywhere, anytime—24/7. Your journey, your way, with safety and convenience guaranteed.
-            </p>
-            <div className="hero-btn-group hero-btn-group-row">
-              <button className="hero-btn hero-btn-primary" onClick={() => {
-                window.scrollTo(0, 0);
-                navigate('/book');
-              }}>
-                Book Now
-              </button>
-              <button 
-                className="hero-btn hero-btn-secondary personalized-btn" 
-                onClick={() => openWhatsApp()}
-              >
-                Get Personalized Quote
-              </button>
+          {currentImageIndex !== 0 && (
+            <div className="hero-text">
+              <span className="hero-tagline hide-on-mobile-hero">Travel securely with us !</span>
+              <h1 className="hero-headline">
+                Book your ride from<br />anywhere today!
+              </h1>
+              <p className="hero-subtext hide-on-mobile-hero">
+                Enjoy fast, reliable, and comfortable rides with our professional drivers. Book your ride in seconds and travel anywhere, anytime—24/7. Your journey, your way, with safety and convenience guaranteed.
+              </p>
+              <div className="hero-btn-group hero-btn-group-row">
+                <button className="hero-btn hero-btn-primary" onClick={() => {
+                  window.scrollTo(0, 0);
+                  navigate('/book');
+                }}>
+                  Book Now
+                </button>
+                <button 
+                  className="hero-btn hero-btn-secondary personalized-btn" 
+                  onClick={() => openWhatsApp()}
+                >
+                  Get Personalized Quote
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 

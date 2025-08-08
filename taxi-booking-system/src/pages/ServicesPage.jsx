@@ -81,7 +81,7 @@ const ServicesPage = () => {
         variants={containerVariants}
       >
         <div className="services-grid">
-          {services.map((service, index) => (
+          {services.filter(service => service.name !== 'Parcel Transfer').map((service, index) => (
             <Link 
               key={index} 
               to={`/services/${service.id}`}

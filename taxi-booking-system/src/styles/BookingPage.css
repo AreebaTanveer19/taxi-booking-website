@@ -911,8 +911,27 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 480px) {
+  .form-row {
+    gap: 1.1rem;
+    margin-bottom: 1.1rem;
+  }
+  .form-group {
+    margin-bottom: 1.1rem;
+    padding: 0.15rem 0.1rem 0.7rem 0.1rem;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 1.08rem;
+    padding: 0.95rem 0.8rem;
+    border-radius: 9px;
+  }
+  .passenger-row {
+    gap: 0.4rem;
+    margin-bottom: 1.1rem;
+  }
   .step-container {
-    padding: 1.5rem 1rem;
+    padding: 1.1rem 0.4rem;
 }
 
   .booking-method-card {
@@ -925,6 +944,30 @@ input:checked + .slider:before {
 
   .step-title {
     font-size: 1.75rem;
+  }
+}
+
+/* Passenger Row Error Styling */
+.passenger-row-error {
+  /* grid-column: 1 / -1; */
+  width: 100%;
+  background: #fff0f0;
+  color: #d32f2f;
+  border-left: 4px solid #d32f2f;
+  padding: 0.7rem 1rem;
+  margin-top: 0.2rem;
+  margin-bottom: 0.7rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  display: block;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .passenger-row-error {
+    font-size: 0.98rem;
+    padding: 0.6rem 0.6rem;
+    margin-bottom: 0.5rem;
   }
 }
 
@@ -1254,36 +1297,45 @@ input:checked + .slider:before {
   /* Make all form groups full width on mobile */
   .form-row {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
   }
-  
   .form-group {
     width: 100%;
     min-width: 100%;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.2rem;
+    padding: 0.2rem 0.2rem 0.7rem 0.2rem;
+    box-sizing: border-box;
   }
-  
-  /* Adjust spacing for better mobile display */
+  .passenger-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
   .step-container {
-    padding: 1.5rem 1rem;
+    padding: 1.2rem 0.5rem;
   }
-  
-  /* Make buttons full width on mobile */
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 1.1rem;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.2rem;
+    border-radius: 8px;
+  }
   .form-actions {
     flex-direction: column;
   }
-  
   .form-actions button {
     width: 100%;
-    margin: 0.25rem 0;
+    margin: 0.4rem 0;
+    font-size: 1.1rem;
+    padding: 1rem 0;
   }
-  
-  /* Adjust progress indicator for mobile */
   .progress-indicator {
     padding: 0.75rem 0.5rem;
     flex-wrap: wrap;
   }
-  
   .progress-step {
     width: 1.75rem;
     height: 1.75rem;

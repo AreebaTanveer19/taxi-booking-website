@@ -51,6 +51,12 @@ body, .landing-root {
   opacity: 1;
 }
 
+.hero-bg-image.active:first-child {
+  background-position: 45% center !important;
+ 
+  z-index: 2;
+}
+
 .hero-container {
   position: relative;
   z-index: 2;

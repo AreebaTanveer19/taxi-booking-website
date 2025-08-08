@@ -107,38 +107,6 @@ const servicesData = [
     ]
   },
   {
-    id: 'parcel-transfer',
-    name: 'Parcel Transfer',
-    icon: <LocalShippingIcon fontSize="large" />,
-    images: [
-      'https://i.pinimg.com/736x/0a/eb/3e/0aeb3ea13895bf06694135173b017f18.jpg',
-      'https://i.pinimg.com/1200x/a3/28/3c/a3283ca191f3ca879a3fe4567c513d11.jpg',
-      'https://i.pinimg.com/1200x/63/32/3c/63323c04621887790f91a67bb46b8ca0.jpg'
-    ],
-    desc: 'Reliable and secure parcel delivery service for time-sensitive packages across the city.',
-    detailedDesc: 'Our fast and secure parcel transfer service is ideal for businesses and individuals who value reliability and speed. Whether you\'re delivering confidential documents, valuable items, or urgent packages, we ensure door-to-door delivery with full transparency. Track your parcel in real-time and receive instant updates via SMS or email. We offer options for same-day, express, and after-hours deliveries. With trained drivers and sealed, secure compartments, your delivery is always in safe hands.',
-    features: [
-      {
-        title: 'Real-Time Tracking',
-        description: 'Track your package in real-time'
-      },
-      {
-        title: 'Flexible Pickup/Delivery',
-        description: 'We accommodate your schedule'
-      },
-      {
-        title: 'Secure Delivery',
-        description: 'Your packages are handled with care'
-      }
-    ],
-    useCases: [
-      'Document Delivery',
-      'Time-Sensitive Packages',
-      'Business Deliveries',
-      'Same-Day Shipping'
-    ]
-  },
-  {
     id: 'special-events',
     name: 'Special Events',
     icon: <DirectionsCarIcon fontSize="large" />,

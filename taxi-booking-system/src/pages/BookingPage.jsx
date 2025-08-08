@@ -6,7 +6,10 @@ import "../styles/BookingPage.css";
 import {FaClipboardCheck,FaRegClock,FaMapMarkerAlt} from "react-icons/fa";
 import { motion } from "framer-motion";
 
+
 const BookingPage = () => {
+  // ...existing state
+  const [showThankYouModal, setShowThankYouModal] = useState(false);
   const pickupAutocompleteRef = useRef(null);
   const dropoffAutocompleteRef = useRef(null);
   const phoneInputRef = useRef();
@@ -514,26 +517,8 @@ const BookingPage = () => {
         return;
       }
 
-      // Calculate final cost with all additional charges
-      let finalCost = calculateFare(form);
-      
-      // Add child seat charges based on age groups
-      finalCost += (parseInt(form.children_0_4) || 0) * 15; // Baby seats for kids 0-4 age group ($15 each)
-      finalCost += (parseInt(form.children_5_8) || 0) * 15; // Booster seats for kids 5-8 age group ($15 each)
-      
-      // Add airport surcharge if applicable
-      if (form.serviceType === "Airport Transfers") {
-        // Add variable toll tax based on terminal
-        if (form.terminal === "T1 International") {
-          finalCost += 15;
-        } else if (form.terminal === "T2 Domestic") {
-          finalCost += 11.5;
-        } else if (form.terminal === "T3 Domestic") {
-          finalCost += 6.2;
-        } else if (form.terminal === "T4 Domestic") {
-          finalCost += 6.2;
-        }
-      }
+      // Calculate final cost (already includes all charges)
+    let finalCost = calculateFare(form);
 
       // Prepare the booking data with all necessary fields
       const bookingData = {
@@ -571,8 +556,8 @@ const BookingPage = () => {
       const result = await response.json();
 
       if (result.success) {
-        alert("Booking submitted! Admin has been notified.");
-        setStep(1); // Optional: Reset form or redirect
+        setShowThankYouModal(true);
+        // Optionally reset form or step, but keep user on summary so they see the modal
       } else {
         alert("Booking failed. Please try again later.");
       }
@@ -914,7 +899,7 @@ const BookingPage = () => {
                   `Car: ${form.vehiclePreference || 'Not selected'}`,
                   form.specialInstructions ? `Notes: ${form.specialInstructions}` : '',
                   '',
-                  'Our team will contact you for quote once you fill your details.'
+                  'Hi give me fare details.'
                 ].filter(Boolean).join('\n');
                 const url = `https://wa.me/${phone}?text=${encodeURIComponent(details)}`;
                 window.open(url, '_blank');
@@ -967,7 +952,7 @@ const BookingPage = () => {
                 <option value="Corporate Transfers">Corporate Transfers</option>
                 <option value="Airport Transfers">Airport Transfers</option>
                 <option value="Wedding Car">Wedding Car</option>
-                <option value="Parcel Delivery">Parcel Delivery</option>
+                <option value="Crew Transfer">Crew Transfer</option>
                 <option value="Special Events">Special Events</option>
                 <option value="Point to Point">Point to Point</option>
               </select>
@@ -1529,6 +1514,9 @@ const BookingPage = () => {
             />
           </div>
         </div>
+        {errors.passengers && (
+          <div className="passenger-row-error">{errors.passengers}</div>
+        )}
         <div className="vehicle-selection-grid">
           {fleet.map((vehicle) => {
             const capacity = getVehicleCapacity(vehicle.name);
@@ -1923,38 +1911,35 @@ const BookingPage = () => {
           <div className="summary-section-block">
             <div className="summary-section-title">Fare Breakdown</div>
             <div className="fare-breakdown-grid">
-              {form.bookingMethod === "distance" && (
+              <div className="breakdown-label">Fare (no extras):</div>
+              <div className="breakdown-value">
+                ${breakdown.baseFare + (breakdown.distanceCharge || breakdown.timeCharge || 0)}
+              </div>
+
+              {(breakdown.terminalToll > 0 || breakdown.babySeatTotal > 0 || breakdown.boosterSeatTotal > 0) && (
                 <>
-                  <div className="breakdown-label">Base Fare:</div>
-                  <div className="breakdown-value">${breakdown.baseFare}</div>
-                  <div className="breakdown-label">Distance Charge:</div>
-                  <div className="breakdown-value">${breakdown.distanceCharge}</div>
+                  <div className="breakdown-label" style={{ gridColumn: '1 / -1', fontWeight: 500, color: '#444', marginTop: 8 }}>Extra Charges</div>
+                  {breakdown.terminalToll > 0 && (
+                    <>
+                      <div className="breakdown-label">Terminal Toll:</div>
+                      <div className="breakdown-value">${breakdown.terminalToll}</div>
+                    </>
+                  )}
+                  {breakdown.babySeatTotal > 0 && (
+                    <>
+                      <div className="breakdown-label">Baby Seat(s) Fee:</div>
+                      <div className="breakdown-value">${breakdown.babySeatTotal}</div>
+                    </>
+                  )}
+                  {breakdown.boosterSeatTotal > 0 && (
+                    <>
+                      <div className="breakdown-label">Booster Seat(s) Fee:</div>
+                      <div className="breakdown-value">${breakdown.boosterSeatTotal}</div>
+                    </>
+                  )}
                 </>
               )}
-              {form.bookingMethod === "time" && (
-                <>
-                  <div className="breakdown-label">Time Charge:</div>
-                  <div className="breakdown-value">${breakdown.timeCharge}</div>
-                </>
-              )}
-              {breakdown.babySeatTotal > 0 && (
-                <>
-                  <div className="breakdown-label">Baby Seat(s) Fee:</div>
-                  <div className="breakdown-value">${breakdown.babySeatTotal}</div>
-                </>
-              )}
-              {breakdown.boosterSeatTotal > 0 && (
-                <>
-                  <div className="breakdown-label">Booster Seat(s) Fee:</div>
-                  <div className="breakdown-value">${breakdown.boosterSeatTotal}</div>
-                </>
-              )}
-              {breakdown.terminalToll > 0 && (
-                <>
-                  <div className="breakdown-label">Terminal Toll:</div>
-                  <div className="breakdown-value">${breakdown.terminalToll}</div>
-                </>
-              )}
+
               <div className="breakdown-label breakdown-total">Grand Total:</div>
               <div className="breakdown-value breakdown-total">${breakdown.total}</div>
             </div>
@@ -2002,6 +1987,92 @@ const BookingPage = () => {
   return (
     <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
       <div className="booking-page-root">
+        {showThankYouModal && (
+          <>
+            <style>{`
+              .thank-you-modal-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100vw; height: 100vh;
+                background: rgba(30,32,50,0.55);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 2000; animation: fadeIn 0.3s;
+              }
+              @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+              .thank-you-modal {
+                background: linear-gradient(135deg, #fff 70%, #e0e7ff 100%);
+                border-radius: 18px; box-shadow: 0 6px 32px rgba(50,60,120,0.18);
+                padding: 2.5rem 2.2rem 2rem 2.2rem; max-width: 380px; width: 90vw;
+                text-align: center; animation: modalPopUp 0.4s cubic-bezier(.6,-0.28,.74,.05);
+              }
+              @keyframes modalPopUp { from { transform: scale(0.9) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+              .thank-you-modal h2 { color: #3b2f7f; font-size: 2rem; margin-bottom: 0.5rem; font-weight: 700; letter-spacing: 0.01em; }
+              .thank-you-modal p { color: #444; font-size: 1.1rem; margin-bottom: 1.4rem; margin-top: 0.5rem; }
+              .thank-you-modal .thank-you-emoji { font-size: 2.5rem; margin-bottom: 0.7rem; animation: pulse 1.5s infinite; }
+              @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.13); } 100% { transform: scale(1); } }
+              .thank-you-modal button {
+                background: linear-gradient(90deg, #5b67e8 60%, #8f6be8 100%);
+                color: #fff; border: none; border-radius: 8px; padding: 0.7rem 2.2rem;
+                font-size: 1.1rem; font-weight: 600; cursor: pointer;
+                box-shadow: 0 2px 8px rgba(91,103,232,0.08);
+                transition: background 0.2s, transform 0.2s;
+              }
+              .thank-you-modal button:hover {
+                background: linear-gradient(90deg, #8f6be8 60%, #5b67e8 100%);
+                transform: scale(1.03);
+              }
+            `}</style>
+            <div className="thank-you-modal-overlay">
+              <div className="thank-you-modal">
+                <div className="thank-you-emoji">🎉</div>
+                <h2>Thank You!</h2>
+                <p>We have received your booking.<br />Our team will contact you soon.</p>
+                <button
+  style={{ marginTop: '0.8rem', background: 'linear-gradient(90deg, #5b67e8 60%, #8f6be8 100%)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.7rem 2.2rem', fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(91,103,232,0.08)', transition: 'background 0.2s, transform 0.2s' }}
+  onClick={() => {
+    setShowThankYouModal(false);
+    setStep(1);
+    setForm({
+      bookingMethod: "distance",
+      name: "",
+      email: "",
+      phone: "",
+      city: "",
+      serviceType: "",
+      flightDetails: { flightNumber: "", flightTime: "" },
+      terminal: "",
+      luggage: "",
+      specialInstructions: "",
+      paymentMethod: "Card",
+      nameOnCard: "",
+      cardNumber: "",
+      cardType: "Visa",
+      expiryMonth: "",
+      expiryYear: "",
+      cvc: "",
+      termsAccepted: false,
+      vehiclePreference: "",
+      date: "",
+      time: "",
+      expectedEndTime: "",
+      passengers: 1,
+      pickup: "",
+      dropoff: "",
+      distance: "",
+      adults: 1,
+      children_0_4: 0,
+      children_5_8: 0,
+      suitcases: 0,
+      carryOn: 0,
+    });
+    setErrors({});
+  }}
+>
+  Close
+</button>
+              </div>
+            </div>
+          </>
+        )}
         <div className="booking-form-container" ref={formContainerRef}>
           {/* Progress Indicator */}
           <div className="progress-indicator">

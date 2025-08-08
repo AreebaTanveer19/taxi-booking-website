@@ -435,7 +435,7 @@ export default function AdminDashboard() {
                           {booking.distance && <p><strong>Distance:</strong> {(booking.distance / 1000).toFixed(1)} km</p>}
                           {booking.expectedEndTime && <p><strong>Expected End Time:</strong> {new Date(`2000-01-01T${booking.expectedEndTime}`).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}</p>}
                           <p><strong>Selected Vehicle:</strong> {booking.vehiclePreference || 'Not specified'}</p>
-                          <p><strong>Estimated Fare:</strong> ${(calculateFare(booking)).toFixed(2)}</p>
+                          <p><strong>Estimated Fare:</strong> ${booking.estimatedCost}</p>
                         </div>
 
                         {/* Passenger & Luggage Information */}
@@ -481,6 +481,14 @@ export default function AdminDashboard() {
                           <p><strong>Phone Number:</strong> {booking.userId?.phone || booking.phone || 'Not provided'}</p>
                           <p><strong>Email Address:</strong> {booking.userId?.email || booking.email || 'Not provided'}</p>
                         </div>
+
+                        {/* Special Instructions */}
+                        {booking.specialInstructions && (
+                          <div className="details-group">
+                            <h4>📝 Special Instructions</h4>
+                            <p style={{ whiteSpace: 'pre-line' }}>{booking.specialInstructions}</p>
+                          </div>
+                        )}
 
                         {/* Payment Information */}
                         <div className="details-group">
