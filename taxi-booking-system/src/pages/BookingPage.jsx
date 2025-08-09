@@ -65,6 +65,7 @@ const BookingPage = () => {
     passengers: 1,
     pickup: "",
     dropoff: "",
+    additionalStop: "",
     distance: "",
     adults: 1,
     children_0_4: 0,
@@ -72,6 +73,8 @@ const BookingPage = () => {
     suitcases: 0,
     carryOn: 0,
   });
+  
+  const additionalStopAutocompleteRef = useRef(null);
 
   const fleet = [
     {
@@ -89,23 +92,9 @@ const BookingPage = () => {
         "https://i.pinimg.com/1200x/fa/9e/3d/fa9e3dbc28c719ec1caa58a73dcf261f.jpg",
       idealFor: "Business meetings, airport transfers, and special occasions",
     },
+    
     {
       id: 2,
-      name: "Premium Sedan",
-      capacity: "1-4 PAX • 2 Suitcases",
-      models: "Mercedes S Class, BMW 7 Series or Audi A8",
-      features: [
-        "Premium Sound System",
-        "Massage Seats",
-        "WiFi",
-        "Refreshments",
-      ],
-      image:
-        "https://i.pinimg.com/1200x/a9/71/d0/a971d076a33b6270548439fa6c24d467.jpg",
-      idealFor: "Corporate events, weddings, and luxury getaways",
-    },
-    {
-      id: 3,
       name: "Premium SUV",
       capacity: "1-6 PAX • 3 Suitcases • 2 Carry On",
       models: "Audi Q7 or Similar",
@@ -118,6 +107,21 @@ const BookingPage = () => {
       image:
         "https://i.pinimg.com/1200x/1d/d3/4a/1dd34ad755b30b3f0f00d65a1418bf1c.jpg",
       idealFor: "Family vacations, group outings, and road trips",
+    },
+    {
+      id: 3,
+      name: "Premium Sedan",
+      capacity: "1-4 PAX • 2 Suitcases",
+      models: "Mercedes S Class, BMW 7 Series or Audi A8",
+      features: [
+        "Premium Sound System",
+        "Massage Seats",
+        "WiFi",
+        "Refreshments",
+      ],
+      image:
+        "https://i.pinimg.com/1200x/a9/71/d0/a971d076a33b6270548439fa6c24d467.jpg",
+      idealFor: "Corporate events, weddings, and luxury getaways",
     },
     {
       id: 4,
@@ -179,7 +183,7 @@ const BookingPage = () => {
   const handleDropoffPlaceChanged = () => {
     const place = dropoffAutocompleteRef.current.getPlace();
     if (place && place.formatted_address) {
-      setForm((prev) => ({ ...prev, dropoff: place.formatted_address }))      // Clear dropoff error when valid location is selected
+      setForm((prev) => ({ ...prev, dropoff: place.formatted_address }));      // Clear dropoff error when valid location is selected
       setErrors((prevErrors) => {
         const newErrors = { ...prevErrors };
         delete newErrors.dropoff;
@@ -188,31 +192,84 @@ const BookingPage = () => {
     }
   };
 
-  // Calculate distance when both pickup and dropoff are set
+  // Handler for additional stop autocomplete
+  const handleAdditionalStopPlaceChanged = () => {
+    const place = additionalStopAutocompleteRef.current.getPlace();
+    if (place && place.formatted_address) {
+      setForm((prev) => ({ ...prev, additionalStop: place.formatted_address }));
+      setErrors((prevErrors) => {
+        const newErrors = { ...prevErrors };
+        delete newErrors.additionalStop;
+        return newErrors;
+      });
+    }
+  };
+
+  // Calculate distance when pickup, dropoff, or additional stop changes
   useEffect(() => {
     const calculateDistance = async () => {
-      if (form.pickup && form.dropoff && form.bookingMethod === "distance") {
-        setDistanceLoading(true);
-        try {
-          const service = new window.google.maps.DistanceMatrixService();
-          const results = await service.getDistanceMatrix({
+      if (!form.pickup || !form.dropoff || form.bookingMethod !== "distance") {
+        return;
+      }
+      
+      setDistanceLoading(true);
+      try {
+        const service = new window.google.maps.DistanceMatrixService();
+        let totalDistance = 0;
+        
+        // Calculate distance from pickup to additional stop if provided
+        if (form.additionalStop) {
+          const leg1 = await service.getDistanceMatrix({
+            origins: [form.pickup],
+            destinations: [form.additionalStop],
+            travelMode: "DRIVING",
+          });
+          totalDistance += leg1.rows[0].elements[0].distance.value;
+          
+          // Calculate distance from additional stop to dropoff
+          const leg2 = await service.getDistanceMatrix({
+            origins: [form.additionalStop],
+            destinations: [form.dropoff],
+            travelMode: "DRIVING",
+          });
+          totalDistance += leg2.rows[0].elements[0].distance.value;
+        } else {
+          // Direct route if no additional stop
+          const result = await service.getDistanceMatrix({
             origins: [form.pickup],
             destinations: [form.dropoff],
             travelMode: "DRIVING",
           });
-          const distance = results.rows[0].elements[0].distance.value;
-          setForm((prev) => ({ ...prev, distance }));
-          setEstimatedFare(calculateFare(prev));
-        } catch (error) {
-          setDistanceError("Failed to calculate distance");
-        } finally {
-          setDistanceLoading(false);
+          totalDistance = result.rows[0].elements[0].distance.value;
         }
+        
+        setForm(prev => ({
+          ...prev,
+          distance: totalDistance
+        }));
+        
+        // Recalculate fare with new distance
+        setEstimatedFare(calculateFare({
+          ...form,
+          distance: totalDistance
+        }));
+        
+      } catch (error) {
+        console.error("Error calculating distance:", error);
+        setDistanceError("Failed to calculate distance. Please check the addresses and try again.");
+      } finally {
+        setDistanceLoading(false);
       }
     };
-    calculateDistance();
+    
+    // Add a small debounce to prevent too many API calls
+    const timer = setTimeout(() => {
+      calculateDistance();
+    }, 500);
+    
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.pickup, form.dropoff, form.bookingMethod]);
+  }, [form.pickup, form.dropoff, form.additionalStop, form.bookingMethod]);
 
   const calculateDuration = (startTime, endTime) => {
     const [startHours, startMinutes] = startTime.split(":").map(Number);
@@ -242,9 +299,9 @@ const BookingPage = () => {
     
     if (formData.bookingMethod === "distance") {
       const vehicleRates = {
-        "Executive Sedan": { base: 70, perKm: 3, baseDistance: 5 },
+        "Executive Sedan": { base: 70, perKm: 2.5, baseDistance: 1 },
         "Premium Sedan": { base: 125, perKm: 5.5, baseDistance: 5 },
-        "Premium SUV": { base: 80, perKm: 3, baseDistance: 5 },
+        "Premium SUV": { base: 80, perKm: 3, baseDistance: 1 },
         "Luxury Van": { base: 110, perKm: 4.5, baseDistance: 5 },
         "Sprinter": { base: 0, perKm: 0, baseDistance: 0 },
       };
@@ -280,12 +337,15 @@ const BookingPage = () => {
       total += terminalToll;
     }
 
+    // Additional stop charge
+    const additionalStopCharge = formData.additionalStop ? 10 : 0;
+
     // Child seats
     const babySeatCharge = 15;
     const boosterSeatCharge = 15;
     babySeatTotal = (formData.children_0_4 || 0) * babySeatCharge;
     boosterSeatTotal = (formData.children_5_8 || 0) * boosterSeatCharge;
-    total += babySeatTotal + boosterSeatTotal;
+    total += babySeatTotal + boosterSeatTotal + additionalStopCharge;
 
     return {
       baseFare: Math.round(baseFare),
@@ -294,6 +354,7 @@ const BookingPage = () => {
       terminalToll: Math.round(terminalToll),
       babySeatTotal: Math.round(babySeatTotal),
       boosterSeatTotal: Math.round(boosterSeatTotal),
+      additionalStopCharge: Math.round(additionalStopCharge),
       total: Math.round(total)
     };
   };
@@ -306,18 +367,30 @@ const BookingPage = () => {
     if (form.pickup && form.dropoff && window.google) {
       try {
         const directionsService = new window.google.maps.DirectionsService();
+        const waypoints = [];
+        
+        // Add additional stop as a waypoint if provided
+        if (form.additionalStop) {
+          waypoints.push({
+            location: form.additionalStop,
+            stopover: true
+          });
+        }
 
         const result = await new Promise((resolve, reject) => {
           directionsService.route(
             {
               origin: form.pickup,
               destination: form.dropoff,
+              waypoints: waypoints,
+              optimizeWaypoints: true,
               travelMode: window.google.maps.TravelMode.DRIVING,
             },
             (result, status) => {
               if (status === "OK") {
                 resolve(result);
               } else {
+                console.error("Directions request failed due to ", status);
                 reject(status);
               }
             }
@@ -327,6 +400,8 @@ const BookingPage = () => {
         setDirections(result);
       } catch (error) {
         console.error("Error calculating route:", error);
+        // Optionally set an error state to show to the user
+        setDistanceError("Unable to calculate route. Please check the addresses and try again.");
       }
     }
   };
@@ -488,23 +563,23 @@ const BookingPage = () => {
     });
   };
 
-  const handleVehicleChange = (e) => {
-    const { value } = e.target;
-    setForm((prev) => {
-      const updatedForm = { ...prev, vehiclePreference: value };
-      // Recalculate fare immediately after vehicle change
-      if (updatedForm.bookingMethod === "distance" && updatedForm.distance) {
-        setEstimatedFare(calculateFare(updatedForm));
-      } else if (
-        updatedForm.bookingMethod === "time" &&
-        updatedForm.time &&
-        updatedForm.expectedEndTime
-      ) {
-        setEstimatedFare(calculateFare(updatedForm));
-      }
-      return updatedForm;
-    });
-  };
+  // const handleVehicleChange = (e) => {
+  //   const { value } = e.target;
+  //   setForm((prev) => {
+  //     const updatedForm = { ...prev, vehiclePreference: value };
+  //     // Recalculate fare immediately after vehicle change
+  //     if (updatedForm.bookingMethod === "distance" && updatedForm.distance) {
+  //       setEstimatedFare(calculateFare(updatedForm));
+  //     } else if (
+  //       updatedForm.bookingMethod === "time" &&
+  //       updatedForm.time &&
+  //       updatedForm.expectedEndTime
+  //     ) {
+  //       setEstimatedFare(calculateFare(updatedForm));
+  //     }
+  //     return updatedForm;
+  //   });
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -890,6 +965,7 @@ const BookingPage = () => {
                   `Phone: ${form.phone}`,
                   `Pickup: ${form.pickup}`,
                   `Drop-off: ${form.dropoff}`,
+                  `Additional Stop: ${form.additionalStop}`,
                   `Date: ${form.date}`,
                   `Time: ${form.time}`,
                   `Passengers: ${form.passengers}`,
@@ -1149,6 +1225,56 @@ const BookingPage = () => {
                   <div className="error-message">{errors.dropoff}</div>
                 )}
               </div>
+              <div className="form-group additional-stop-address">
+                <label>Additional Stop </label>
+                <div className="Autocomplete">
+                  <Autocomplete
+                    onLoad={(autocomplete) => {
+                      additionalStopAutocompleteRef.current = autocomplete;
+                      if (form.city === "Sydney") {
+                        autocomplete.setComponentRestrictions({
+                          country: "au",
+                        });
+                        autocomplete.setBounds(
+                          new window.google.maps.LatLngBounds(
+                            new window.google.maps.LatLng(-34.0, 150.5), // SW Sydney
+                            new window.google.maps.LatLng(-33.7, 151.3) // NE Sydney
+                          )
+                        );
+                      } else if (form.city === "Melbourne") {
+                        autocomplete.setComponentRestrictions({
+                          country: "au",
+                        });
+                        autocomplete.setBounds(
+                          new window.google.maps.LatLngBounds(
+                            new window.google.maps.LatLng(-38.0, 144.5), // SW Melbourne
+                            new window.google.maps.LatLng(-37.6, 145.2) // NE Melbourne
+                          )
+                        );
+                      } else {
+                        autocomplete.setComponentRestrictions({
+                          country: "au",
+                        });
+                      }
+                    }}
+                    onPlaceChanged={handleAdditionalStopPlaceChanged}
+                  >
+                    <input
+                      type="text"
+                      placeholder={`Additional stop in ${
+                        form.city || "selected city"
+                      } (optional)`}
+                      value={form.additionalStop}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          additionalStop: e.target.value,
+                        }))
+                      }
+                    />
+                  </Autocomplete>
+                </div>
+              </div>
             </div>
           )}
           {form.bookingMethod === "time" && (
@@ -1260,25 +1386,61 @@ const BookingPage = () => {
                   <div className="error-message">{errors.dropoff}</div>
                 )}
               </div>
+              <div className="form-group additional-stop-address">
+                <label>Additional Stop </label>
+                <div className="Autocomplete">
+                  <Autocomplete
+                    onLoad={(autocomplete) => {
+                      additionalStopAutocompleteRef.current = autocomplete;
+                      if (form.city === "Sydney") {
+                        autocomplete.setComponentRestrictions({
+                          country: "au",
+                        });
+                        autocomplete.setBounds(
+                          new window.google.maps.LatLngBounds(
+                            new window.google.maps.LatLng(-34.0, 150.5), // SW Sydney
+                            new window.google.maps.LatLng(-33.7, 151.3) // NE Sydney
+                          )
+                        );
+                      } else if (form.city === "Melbourne") {
+                        autocomplete.setComponentRestrictions({
+                          country: "au",
+                        });
+                        autocomplete.setBounds(
+                          new window.google.maps.LatLngBounds(
+                            new window.google.maps.LatLng(-38.0, 144.5), // SW Melbourne
+                            new window.google.maps.LatLng(-37.6, 145.2) // NE Melbourne
+                          )
+                        );
+                      } else {
+                        autocomplete.setComponentRestrictions({
+                          country: "au",
+                        });
+                      }
+                    }}
+                    onPlaceChanged={handleAdditionalStopPlaceChanged}
+                  >
+                    <input
+                      type="text"
+                      placeholder={`Additional stop in ${
+                        form.city || "selected city"
+                      } (optional)`}
+                      value={form.additionalStop}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          additionalStop: e.target.value,
+                        }))
+                      }
+                    />
+                  </Autocomplete>
+                </div>
+              </div>
             </div>
           )}
 
           {/* Passenger Details Row */}
           <div className="passenger-row">
-            <div className="form-group">
-              <label>Total Pax</label>
-              <input
-                type="number"
-                name="passengers"
-                min="1"
-                max="24"
-                value={form.passengers}
-                onChange={handleInputChange}
-              />
-              {errors.passengers && (
-                <div className="error-message">{errors.passengers}</div>
-              )}
-            </div>
             <div className="form-group">
               <label>Adults</label>
               <input
@@ -1287,30 +1449,66 @@ const BookingPage = () => {
                 min="1"
                 max="8"
                 value={form.adults}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const newAdults = parseInt(e.target.value) || 0;
+                  setForm(prev => ({
+                    ...prev,
+                    adults: newAdults,
+                    passengers: newAdults + (parseInt(prev.children_0_4) || 0) + (parseInt(prev.children_5_8) || 0)
+                  }));
+                }}
               />
             </div>
             <div className="form-group">
-              <label>Kids (0-4 age)</label>
+              <label>Kids {'<'} 4 age</label>
               <input
                 type="number"
                 name="children_0_4"
                 min="0"
                 max="3"
                 value={form.children_0_4}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const newKids04 = parseInt(e.target.value) || 0;
+                  setForm(prev => ({
+                    ...prev,
+                    children_0_4: newKids04,
+                    passengers: (parseInt(prev.adults) || 0) + newKids04 + (parseInt(prev.children_5_8) || 0)
+                  }));
+                }}
               />
             </div>
             <div className="form-group">
-              <label>Kids (5-8 age)</label>
+              <label>Kids (4-8 age)</label>
               <input
                 type="number"
                 name="children_5_8"
                 min="0"
                 max="3"
                 value={form.children_5_8}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const newKids58 = parseInt(e.target.value) || 0;
+                  setForm(prev => ({
+                    ...prev,
+                    children_5_8: newKids58,
+                    passengers: (parseInt(prev.adults) || 0) + (parseInt(prev.children_0_4) || 0) + newKids58
+                  }));
+                }}
               />
+            </div>
+            <div className="form-group">
+              <label>Total Pax</label>
+              <input
+                type="number"
+                name="passengers"
+                min="1"
+                max="24"
+                value={form.passengers}
+                readOnly
+                className="readonly-input"
+              />
+              {errors.passengers && (
+                <div className="error-message">{errors.passengers}</div>
+              )}
             </div>
           </div>
 
@@ -1357,7 +1555,7 @@ const BookingPage = () => {
               {errors.date && <div className="error-message">{errors.date}</div>}
             </div>
             <div className="form-group">
-              <label>Start Time</label>
+              <label>PICKUP Time</label>
               <input
                 type="time"
                 name="time"
@@ -1842,6 +2040,8 @@ const BookingPage = () => {
                 <>
                   <div className="summary-label">To:</div>
                   <div className="summary-value">{form.dropoff}</div>
+                  <div className="summary-label">Additional Stop:</div>
+                  <div className="summary-value">{form.additionalStop || "Not specified"}</div>
                 </>
               )}
               <div className="summary-label">Date & Time:</div>
@@ -1916,13 +2116,19 @@ const BookingPage = () => {
                 ${breakdown.baseFare + (breakdown.distanceCharge || breakdown.timeCharge || 0)}
               </div>
 
-              {(breakdown.terminalToll > 0 || breakdown.babySeatTotal > 0 || breakdown.boosterSeatTotal > 0) && (
+              {(breakdown.terminalToll > 0 || breakdown.babySeatTotal > 0 || breakdown.boosterSeatTotal > 0 || breakdown.additionalStopCharge > 0) && (
                 <>
                   <div className="breakdown-label" style={{ gridColumn: '1 / -1', fontWeight: 500, color: '#444', marginTop: 8 }}>Extra Charges</div>
                   {breakdown.terminalToll > 0 && (
                     <>
-                      <div className="breakdown-label">Terminal Toll:</div>
+                      <div className="breakdown-label">Airport Terminal Toll:</div>
                       <div className="breakdown-value">${breakdown.terminalToll}</div>
+                    </>
+                  )}
+                  {breakdown.additionalStopCharge > 0 && (
+                    <>
+                      <div className="breakdown-label">Additional Stop:</div>
+                      <div className="breakdown-value">${breakdown.additionalStopCharge}</div>
                     </>
                   )}
                   {breakdown.babySeatTotal > 0 && (

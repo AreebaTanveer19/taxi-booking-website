@@ -410,7 +410,14 @@ export default function AdminDashboard() {
                       {booking.city && <p className="city-subtitle">{booking.city}</p>}
                     </div>
                     <span>${(Number(booking.price || booking.estimatedCost || booking.totalAmount || 0)).toFixed(2)}</span>
-                    <span>{new Date(`${booking.date} ${booking.time}`).toLocaleString()}</span>
+                    <span>{new Date(`${booking.date}T${booking.time}`).toLocaleString('en-GB', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    }).replace(',', '')}</span>
                     <button 
                       onClick={() => toggleBookingDetails(booking._id)}
                       className="details-btn"
@@ -428,14 +435,16 @@ export default function AdminDashboard() {
                           <p><strong>Booking Type:</strong> {booking.bookingMethod === 'distance' ? 'Distance-based' : 'Time-based'}</p>
                           <p><strong>Service Type:</strong> {booking.serviceType || 'Not specified'}</p>
                           <p><strong>Booking Date:</strong> {new Date(booking.createdAt || booking.date).toLocaleDateString()}</p>
-                          <p><strong>Pickup Time:</strong> {new Date(`2000-01-01T${booking.time}`).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}</p>
+                          <p><strong>Pickup Time:</strong> {new Date(`2000-01-01T${booking.time}`).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', hour12: false})}</p>
                           <p><strong>Pickup Location:</strong> {booking.pickup || 'Not specified'}</p>
                           <p><strong>Drop-off Location:</strong> {booking.dropoff || 'Not specified'}</p>
+                          {booking.additionalStop && (
+                            <p><strong>Additional Stop:</strong> {booking.additionalStop}</p>
+                          )}
                           {booking.city && <p><strong>City/Region:</strong> {booking.city}</p>}
                           {booking.distance && <p><strong>Distance:</strong> {(booking.distance / 1000).toFixed(1)} km</p>}
-                          {booking.expectedEndTime && <p><strong>Expected End Time:</strong> {new Date(`2000-01-01T${booking.expectedEndTime}`).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}</p>}
-                          <p><strong>Selected Vehicle:</strong> {booking.vehiclePreference || 'Not specified'}</p>
-                          <p><strong>Estimated Fare:</strong> ${booking.estimatedCost}</p>
+                          {booking.expectedEndTime && <p><strong>Expected End Time:</strong> {new Date(`2000-01-01T${booking.expectedEndTime}`).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', hour12: false})}</p>}
+                          
                         </div>
 
                         {/* Passenger & Luggage Information */}
@@ -443,28 +452,24 @@ export default function AdminDashboard() {
                           <h4>👥 Passenger & Luggage</h4>
                           <div className="passenger-details">
                             <div className="detail-row">
-                              <span className="detail-label">Adults:</span>
-                              <span className="detail-value">{booking.adults || 1}</span>
+                              <span className="detail-label"><strong>Adults:</strong> {booking.adults || 1}</span>
                             </div>
                             <div className="detail-row">
-                              <span className="detail-label">Children (0-4):</span>
-                              <span className="detail-value">{booking.children_0_4 || 0}</span>
+                              <span className="detail-label"><strong>Children less than 4:</strong> {booking.children_0_4 || 0}</span>
                             </div>
                             <div className="detail-row">
-                              <span className="detail-label">Children (5-8):</span>
-                              <span className="detail-value">{booking.children_5_8 || 0}</span>
+                              <span className="detail-label"><strong>Children (5-8):</strong> {booking.children_5_8 || 0}</span>
                             </div>
                             <div className="detail-row">
-                              <span className="detail-label">Total Passengers:</span>
-                              <span className="detail-value">{booking.totalPassengers || booking.passengers || 1}</span>
+                              <span className="detail-label"><strong>Total Passengers:</strong> {booking.totalPassengers || booking.passengers || 1}</span>
                             </div>
                             <div className="detail-row">
-                              <span className="detail-label">Suitcases:</span>
-                              <span className="detail-value">{booking.suitcases || 0}</span>
+                              <span className="detail-label"><strong>Suitcases:</strong> {booking.suitcases || 0}</span>
                             </div>
                             <div className="detail-row">
-                              <span className="detail-label">Carry-on:</span>
-                              <span className="detail-value">{booking.carryOn || 0}</span>
+                              <span className="detail-label"><strong>Carry-on:</strong> {booking.carryOn || 0}</span>
+                              <p><strong>Selected Vehicle:</strong> {booking.vehiclePreference || 'Not specified'}</p>
+                          <p><strong>Estimated Fare:</strong> ${booking.estimatedCost}</p>
                             </div>
 
                           </div>
@@ -480,22 +485,12 @@ export default function AdminDashboard() {
                           <p><strong>Full Name:</strong> {booking.userId?.name || booking.name || 'Not provided'}</p>
                           <p><strong>Phone Number:</strong> {booking.userId?.phone || booking.phone || 'Not provided'}</p>
                           <p><strong>Email Address:</strong> {booking.userId?.email || booking.email || 'Not provided'}</p>
-                        </div>
-
-                        {/* Special Instructions */}
-                        {booking.specialInstructions && (
-                          <div className="details-group">
-                            <h4>📝 Special Instructions</h4>
-                            <p style={{ whiteSpace: 'pre-line' }}>{booking.specialInstructions}</p>
-                          </div>
-                        )}
-
-                        {/* Payment Information */}
-                        <div className="details-group">
-                          <h4>💳 Payment</h4>
                           <p><strong>Payment Method:</strong> {booking.paymentMethod || 'Not specified'}</p>
-                          <p><strong>Payment Status:</strong> {booking.paymentStatus || 'Unpaid'}</p>
+                          <h4>📝 Special Instructions</h4>
+                            <p >{booking.specialInstructions}</p>
                         </div>
+
+                        
                       </div>
                       <button 
                         className="delete-btn" 

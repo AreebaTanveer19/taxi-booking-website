@@ -33,6 +33,7 @@ const bookingSchema = new mongoose.Schema({
   
   pickup: String,
   dropoff: String,
+  additionalStop: String,
   distance: String,
   estimatedCost: String,
 }, { timestamps: true });
