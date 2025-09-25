@@ -1,7 +1,7 @@
 // Email service for sending quote requests using nodemailer backend
 export const sendQuoteEmail = async (formData) => {
   try {
-    const response = await fetch('http://localhost:5000/api/email/send-quote-email', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-quote-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

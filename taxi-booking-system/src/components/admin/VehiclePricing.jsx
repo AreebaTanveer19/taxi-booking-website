@@ -13,7 +13,7 @@ const VehiclePricing = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/vehicle-prices', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/vehicle-prices`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
