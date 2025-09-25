@@ -80,15 +80,23 @@ const Footer = () => {
             </li>
             <li className="service-item">
               <FaCrown className="service-icon" />
-              <span>VIP Transportation</span>
+              <span>Corporate Transfers</span>
             </li>
             <li className="service-item">
               <FaShieldAlt className="service-icon" />
-              <span>Executive Services</span>
+              <span>Wedding Transfers</span>
             </li>
             <li className="service-item">
               <FaHeadset className="service-icon" />
-              <span>24/7 Support</span>
+              <span>Crew Transfers</span>
+            </li>
+            <li className="service-item">
+              <FaHeadset className="service-icon" />
+              <span>Point to Point</span>
+            </li>
+            <li className="service-item">
+              <FaHeadset className="service-icon" />
+              <span>Special Events</span>
             </li>
           </ul>
         </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import services from '../components/data/servicesData';
+import services from '../components/data/serviceData';
 import Footer from '../components/Footer/Footer';
 import '../styles/ServicesPage.css';
 

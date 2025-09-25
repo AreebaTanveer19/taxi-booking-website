@@ -4,10 +4,27 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const bookingRoutes = require('./routes/bookings');
 const adminRoutes = require('./routes/admin');
+const emailRoutes = require('./routes/email');
+const VehiclePrice = require('./models/VehiclePrice');
 
-
+// Load environment variables
 dotenv.config();
+
+// Connect to MongoDB
 connectDB();
+
+// Initialize default vehicle prices
+const initializeDefaultPrices = async () => {
+  try {
+    await VehiclePrice.initializeDefaults();
+    console.log('Default vehicle prices initialized');
+  } catch (error) {
+    console.error('Error initializing default vehicle prices:', error);
+  }
+};
+
+// Call the initialization function
+initializeDefaultPrices();
 
 const app = express();
 const allowedOrigins = [
@@ -37,6 +54,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/email', emailRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

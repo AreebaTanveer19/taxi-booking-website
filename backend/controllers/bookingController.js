@@ -14,6 +14,7 @@ exports.createBooking = async (req, res) => {
             city,
             serviceType,
             terminal,
+            airportDirection,
             pickup,
             dropoff,
             additionalStop,
@@ -82,6 +83,7 @@ exports.createBooking = async (req, res) => {
             city,
             serviceType,
             terminal: serviceType === 'Airport Transfers' ? terminal : undefined,
+            airportDirection: serviceType === 'Airport Transfers' ? airportDirection : undefined,
             pickup,
             dropoff,
             additionalStop,
@@ -136,6 +138,7 @@ exports.createBooking = async (req, res) => {
 
         if (serviceType === 'Airport Transfers') {
             bookingDetails['Terminal'] = terminal;
+            bookingDetails['Direction'] = airportDirection === 'to' ? 'To Airport' : 'From Airport';
             bookingDetails['Flight Number'] = flightNumber;
             bookingDetails['Flight Time'] = flightTime;
         }

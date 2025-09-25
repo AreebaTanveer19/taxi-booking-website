@@ -16,6 +16,8 @@ import corporateimg from '../assets/corporate.jpeg';
 import crewimg from '../assets/crew.jpeg';
 import { motion } from 'framer-motion';
 import { openWhatsApp } from '../utils/whatsapp';
+import QuoteForm from '../components/QuoteForm/QuoteForm';
+import { sendQuoteEmail, logQuoteData } from '../utils/emailService';
 
 const heroImages = [hero5,hero2, hero1, hero4 , taxiImg];
 
@@ -88,6 +90,7 @@ const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false);
 
   const handleTouchStart = (e) => {
     setTouchStart(e.targetTouches[0].clientX);
@@ -151,6 +154,27 @@ const LandingPage = () => {
 
   const extendedServices = [...services, ...services.slice(0, 4)];
 
+  // Quote form handlers
+  const openQuoteForm = () => {
+    setIsQuoteFormOpen(true);
+  };
+
+  const closeQuoteForm = () => {
+    setIsQuoteFormOpen(false);
+  };
+
+  const handleQuoteSubmit = async (formData) => {
+    try {
+      // Send quote email to both admin and user
+      await sendQuoteEmail(formData);
+      
+      alert('Quote request submitted successfully! We will get back to you soon. A confirmation email has been sent to your inbox.');
+    } catch (error) {
+      console.error('Error submitting quote:', error);
+      alert('There was an error submitting your quote. Please try again.');
+    }
+  };
+
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -187,7 +211,11 @@ const LandingPage = () => {
           ))}
         </div>
         <div className="hero-container">
-          {currentImageIndex !== 0 && (
+          {currentImageIndex === 0 ? (
+            <div className="hero-text hero-text-empty">
+              {/* Empty - no text or buttons for first image */}
+            </div>
+          ) : (
             <div className="hero-text">
               <span className="hero-tagline hide-on-mobile-hero">Travel securely with us !</span>
               <h1 className="hero-headline">
@@ -205,7 +233,7 @@ const LandingPage = () => {
                 </button>
                 <button 
                   className="hero-btn hero-btn-secondary personalized-btn" 
-                  onClick={() => openWhatsApp()}
+                  onClick={openQuoteForm}
                 >
                   Get Personalized Quote
                 </button>
@@ -360,6 +388,13 @@ const LandingPage = () => {
 
       {/* Footer */}
       <Footer />
+      
+      {/* Quote Form Popup */}
+      <QuoteForm 
+        isOpen={isQuoteFormOpen}
+        onClose={closeQuoteForm}
+        onSubmit={handleQuoteSubmit}
+      />
     </>
   );
 };

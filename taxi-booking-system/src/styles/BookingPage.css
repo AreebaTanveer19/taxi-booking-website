@@ -1,4 +1,4 @@
-/* Modern Design System for Booking Page - Matching Horizon Chauffeurs Design */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -51,6 +51,138 @@
   --brand-secondary: #f8fafc;
   --brand-accent: #f5ebe0; /* Light brown tint */
 }
+/* Modern Design System for Booking Page - Matching Horizon Chauffeurs Design */
+
+/* Date and Time Pickers */
+.react-datepicker-wrapper,
+.react-datepicker__input-container {
+  display: block;
+  width: 100%;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--foreground);
+  background-color: var(--input-background);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  height: 40px;
+}
+
+.react-datepicker__input-container input:focus {
+  border-color: var(--brand-primary);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.1);
+}
+
+.react-datepicker {
+  font-family: 'Inter', sans-serif;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  font-size: 0.875rem;
+}
+
+.react-datepicker__header {
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  padding-top: 8px;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+  color: var(--foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name {
+  color: var(--foreground);
+  width: 2rem;
+  line-height: 2rem;
+  margin: 0.166rem;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: var(--brand-primary);
+  color: white;
+  border-radius: 50%;
+}
+
+.react-datepicker__day:hover {
+  background-color: var(--accent);
+  border-radius: 50%;
+}
+
+.react-datepicker__time-container {
+  width: 120px;
+  border-left: 1px solid var(--border);
+}
+
+.react-datepicker__time-box {
+  width: 100% !important;
+}
+
+.react-datepicker__time-list-item {
+  padding: 5px 10px;
+  color: var(--foreground);
+}
+
+.react-datepicker__time-list-item--selected {
+  background-color: var(--brand-primary) !important;
+  color: white;
+  font-weight: var(--font-weight-normal);
+}
+
+.react-datepicker__navigation {
+  top: 8px;
+  line-height: 1.7rem;
+  border: 0.45rem solid transparent;
+}
+
+.react-datepicker__navigation--previous {
+  border-right-color: var(--muted-foreground);
+  left: 10px;
+}
+
+.react-datepicker__navigation--next {
+  border-left-color: var(--muted-foreground);
+  right: 10px;
+}
+
+.react-datepicker__navigation:hover {
+  border-right-color: var(--brand-primary);
+  border-left-color: var(--brand-primary);
+  background: none;
+}
+
+/* Time Picker Specific */
+.react-datepicker__time-container .react-datepicker__time {
+  background: white;
+  border-bottom-right-radius: var(--radius);
+}
+
+.react-datepicker__time-container .react-datepicker__time-box ul.react-datepicker__time-list {
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Form overrides */
+.form-group .react-datepicker-wrapper {
+  margin-top: 0.25rem;
+}
+
 
 /* Passenger Details Row */
 .passenger-row {
@@ -490,18 +622,29 @@ input:checked + .slider:before {
 }
 
 .form-actions button:first-child {
-  background: var(--secondary);
-  color: var(--secondary-foreground);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
 }
 
 .form-actions button:first-child:hover {
-  background: var(--accent);
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .form-actions button:last-child {
   background: var(--brand-primary);
   color: var(--primary-foreground);
+  transition: all 0.2s ease;
+}
+
+.form-actions button:last-child:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: #9CA3AF;
+  transform: none;
+  box-shadow: none;
 }
 
 .form-actions button:last-child:hover {
@@ -1516,6 +1659,28 @@ input:checked + .slider:before {
   background-position: right 12px center;
   background-size: 16px;
   cursor: pointer;
+}
+
+/* Booking Notice */
+.booking-notice {
+  padding: 12px 16px;
+  margin: 0 0 20px 0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.booking-notice.error {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+  border-left: 4px solid #DC2626;
+}
+
+.booking-notice p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Buttons */

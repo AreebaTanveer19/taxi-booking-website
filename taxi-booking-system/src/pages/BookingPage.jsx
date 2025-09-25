@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import {LoadScript,Autocomplete,GoogleMap,DirectionsRenderer} from "@react-google-maps/api";
+import { LoadScript, Autocomplete, GoogleMap, DirectionsRenderer } from "@react-google-maps/api";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "../styles/BookingPage.css";
-import {FaClipboardCheck,FaRegClock,FaMapMarkerAlt} from "react-icons/fa";
+import { FaClipboardCheck, FaRegClock, FaMapMarkerAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { registerLocale, setDefaultLocale } from "react-datepicker";
+import enGB from 'date-fns/locale/en-GB';
+
+// Register the UK locale for 24-hour time format
+registerLocale('en-GB', enGB);
 
 
 const BookingPage = () => {
@@ -24,6 +31,7 @@ const BookingPage = () => {
   const dropoffRef = useRef();
   const dateRef = useRef();
   const timeRef = useRef();
+  const expectedEndTimeRef = useRef();
   const vehicleRef = useRef();
   const nameOnCardRef = useRef();
   const cardNumberRef = useRef();
@@ -35,6 +43,9 @@ const BookingPage = () => {
   const [distanceError, setDistanceError] = useState("");
   const [errors, setErrors] = useState({});
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isBookingTooSoon, setIsBookingTooSoon] = useState(false);
 
   const [form, setForm] = useState({
     bookingMethod: "distance",
@@ -43,6 +54,7 @@ const BookingPage = () => {
     phone: "",
     city: "",
     serviceType: "",
+    airportDirection: "", // New field for airport direction (to/from)
     flightDetails: {
       flightNumber: "",
       flightTime: "",
@@ -59,9 +71,9 @@ const BookingPage = () => {
     cvc: "",
     termsAccepted: false,
     vehiclePreference: "",
-    date: "",
-    time: "",
-    expectedEndTime: "",
+    date: null,
+    time: null,
+    expectedEndTime: null,
     passengers: 1,
     pickup: "",
     dropoff: "",
@@ -155,6 +167,21 @@ const BookingPage = () => {
     },
   ];
 
+  // Airport terminal addresses for auto-filling pickup/dropoff locations
+  const airportTerminalAddresses = {
+    Sydney: {
+      "T1 International": "Sydney Airport Terminal 1, International Terminal, Sydney NSW 2020, Australia",
+      "T2 Domestic": "Sydney Airport Terminal 2, Domestic Terminal, Sydney NSW 2020, Australia",
+      "T3 Domestic": "Sydney Airport Terminal 3, Domestic Terminal, Sydney NSW 2020, Australia"
+    },
+    Melbourne: {
+      "T1 International": "Melbourne Airport Terminal 1, Departure Dr, Melbourne Airport VIC 3045, Australia",
+      "T2 Domestic": "Melbourne Airport Terminal 2, Departure Dr, Melbourne Airport VIC 3045, Australia",
+      "T3 Domestic": "Melbourne Airport Terminal 3, Departure Dr, Melbourne Airport VIC 3045, Australia",
+      "T4 Domestic": "Melbourne Airport Terminal 4, Departure Dr, Melbourne Airport VIC 3045, Australia"
+    }
+  };
+
   const [step, setStep] = useState(1);
   const [selectedOption, setSelectedOption] = useState("distance");
   const [estimatedCost, setEstimatedCost] = useState(0);
@@ -203,6 +230,52 @@ const BookingPage = () => {
         return newErrors;
       });
     }
+  };
+
+  // Handler for airport direction change
+  const handleAirportDirectionChange = (direction) => {
+    setForm((prev) => {
+      const updatedForm = { ...prev, airportDirection: direction };
+      
+      // Auto-fill pickup or dropoff based on direction and terminal
+      if (direction && prev.terminal && prev.city) {
+        const terminalAddress = airportTerminalAddresses[prev.city]?.[prev.terminal];
+        if (terminalAddress) {
+          if (direction === "to") {
+            // Going TO airport: dropoff should be the terminal
+            updatedForm.dropoff = terminalAddress;
+          } else if (direction === "from") {
+            // Coming FROM airport: pickup should be the terminal
+            updatedForm.pickup = terminalAddress;
+          }
+        }
+      }
+      
+      return updatedForm;
+    });
+  };
+
+  // Handler for terminal change with auto-fill logic
+  const handleTerminalChange = (terminal) => {
+    setForm((prev) => {
+      const updatedForm = { ...prev, terminal };
+      
+      // Auto-fill pickup or dropoff based on direction and new terminal
+      if (terminal && prev.airportDirection && prev.city) {
+        const terminalAddress = airportTerminalAddresses[prev.city]?.[terminal];
+        if (terminalAddress) {
+          if (prev.airportDirection === "to") {
+            // Going TO airport: dropoff should be the terminal
+            updatedForm.dropoff = terminalAddress;
+          } else if (prev.airportDirection === "from") {
+            // Coming FROM airport: pickup should be the terminal
+            updatedForm.pickup = terminalAddress;
+          }
+        }
+      }
+      
+      return updatedForm;
+    });
   };
 
   // Calculate distance when pickup, dropoff, or additional stop changes
@@ -272,19 +345,79 @@ const BookingPage = () => {
   }, [form.pickup, form.dropoff, form.additionalStop, form.bookingMethod]);
 
   const calculateDuration = (startTime, endTime) => {
-    const [startHours, startMinutes] = startTime.split(":").map(Number);
-    const [endHours, endMinutes] = endTime.split(":").map(Number);
-    const totalStartMinutes = startHours * 60 + startMinutes;
-    const totalEndMinutes = endHours * 60 + endMinutes;
-
-    let duration = totalEndMinutes - totalStartMinutes;
-    if (duration < 0) {
-      duration += 24 * 60; // Add 24 hours for next day
+    // Handle both Date objects and string time formats
+    let startDate, endDate;
+    
+    if (startTime instanceof Date) {
+      startDate = startTime;
+    } else {
+      const [startHours, startMinutes] = startTime.split(":").map(Number);
+      startDate = new Date();
+      startDate.setHours(startHours, startMinutes, 0, 0);
     }
-    return duration;
+    
+    if (endTime instanceof Date) {
+      endDate = endTime;
+    } else {
+      const [endHours, endMinutes] = endTime.split(":").map(Number);
+      endDate = new Date();
+      endDate.setHours(endHours, endMinutes, 0, 0);
+    }
+    
+    // Handle overnight bookings (if end time is before start time, it's the next day)
+    if (endDate < startDate) {
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    // Calculate difference in minutes
+    const diffMs = endDate - startDate;
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    return diffMins;
   };
 
 
+
+  // State for vehicle prices
+  const [vehiclePrices, setVehiclePrices] = useState({});
+  const [pricesLoading, setPricesLoading] = useState(true);
+
+  // Fetch vehicle prices on component mount
+  useEffect(() => {
+    const fetchVehiclePrices = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/vehicle-prices`);
+        const data = await response.json();
+        if (data.success) {
+          // Convert array to object for easier access
+          const pricesObj = {};
+          data.data.forEach(price => {
+            pricesObj[price.vehicleType] = {
+              baseFare: price.baseFare,
+              perKmRate: price.perKmRate,
+              hourlyRate: price.hourlyRate,
+              baseDistance: price.baseDistance
+            };
+          });
+          setVehiclePrices(pricesObj);
+        }
+      } catch (error) {
+        console.error('Error fetching vehicle prices:', error);
+        // Fallback to default prices if API fails
+        setVehiclePrices({
+          "Executive Sedan": { baseFare: 70, perKmRate: 2.5, hourlyRate: 100, baseDistance: 1 },
+          "Premium Sedan": { baseFare: 125, perKmRate: 5.5, hourlyRate: 120, baseDistance: 5 },
+          "Premium SUV": { baseFare: 80, perKmRate: 3, hourlyRate: 110, baseDistance: 1 },
+          "Luxury Van": { baseFare: 110, perKmRate: 4.5, hourlyRate: 130, baseDistance: 5 },
+          "Sprinter": { baseFare: 150, perKmRate: 6, hourlyRate: 200, baseDistance: 10 }
+        });
+      } finally {
+        setPricesLoading(false);
+      }
+    };
+
+    fetchVehiclePrices();
+  }, []);
 
   // Returns a breakdown of all fare components for transparency
   const calculateFareBreakdown = (formData) => {
@@ -297,31 +430,36 @@ const BookingPage = () => {
     let total = 0;
     const distanceInKm = (formData.distance || 0) / 1000;
     
-    if (formData.bookingMethod === "distance") {
-      const vehicleRates = {
-        "Executive Sedan": { base: 70, perKm: 2.5, baseDistance: 1 },
-        "Premium Sedan": { base: 125, perKm: 5.5, baseDistance: 5 },
-        "Premium SUV": { base: 80, perKm: 3, baseDistance: 1 },
-        "Luxury Van": { base: 110, perKm: 4.5, baseDistance: 5 },
-        "Sprinter": { base: 0, perKm: 0, baseDistance: 0 },
+    if (pricesLoading) {
+      // Return a loading state with all zeros if prices are still loading
+      return {
+        baseFare: 0,
+        distanceCharge: 0,
+        timeCharge: 0,
+        terminalToll: 0,
+        babySeatTotal: 0,
+        boosterSeatTotal: 0,
+        additionalStopCharge: 0,
+        total: 0,
+        loading: true
       };
-      const rates = vehicleRates[formData.vehiclePreference] || vehicleRates["Executive Sedan"];
-      baseFare = rates.base;
+    }
+    
+    if (formData.bookingMethod === "distance") {
+      const rates = vehiclePrices[formData.vehiclePreference] || vehiclePrices["Executive Sedan"] || 
+        { baseFare: 70, perKmRate: 2.5, baseDistance: 1 };
+      
+      baseFare = rates.baseFare;
       if (distanceInKm > rates.baseDistance) {
-        distanceCharge = (distanceInKm - rates.baseDistance) * rates.perKm;
+        distanceCharge = (distanceInKm - rates.baseDistance) * rates.perKmRate;
       }
       total = baseFare + distanceCharge;
     } else {
       // Time-based
-      const hourlyRates = {
-        "Executive Sedan": 100,
-        "Premium Sedan": 120,
-        "Premium SUV": 110,
-        "Luxury Van": 130,
-        "Sprinter": 200,
-      };
+      const rates = vehiclePrices[formData.vehiclePreference] || vehiclePrices["Executive Sedan"] || 
+        { hourlyRate: 100 };
       const hours = calculateDuration(formData.time, formData.expectedEndTime) / 60;
-      timeCharge = hours * (hourlyRates[formData.vehiclePreference] || 100);
+      timeCharge = hours * rates.hourlyRate;
       total = timeCharge;
     }
 
@@ -341,8 +479,8 @@ const BookingPage = () => {
     const additionalStopCharge = formData.additionalStop ? 10 : 0;
 
     // Child seats
-    const babySeatCharge = 15;
-    const boosterSeatCharge = 15;
+    const babySeatCharge = 10;
+    const boosterSeatCharge = 10;
     babySeatTotal = (formData.children_0_4 || 0) * babySeatCharge;
     boosterSeatTotal = (formData.children_5_8 || 0) * boosterSeatCharge;
     total += babySeatTotal + boosterSeatTotal + additionalStopCharge;
@@ -435,13 +573,107 @@ const BookingPage = () => {
     console.error("Google Maps API key is missing");
   }
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    let updatedForm = {
-      ...form,
-      [name]: type === "checkbox" ? checked : type === "number" ? parseInt(value) || 0 : value,
-    };
+  const checkBookingTime = (date, time) => {
+    if (!date || !time) return false;
+    
+    // Create a new date object for the booking time
+    const bookingDateTime = new Date(date);
+    
+    // If time is a string (HH:MM), parse it
+    if (typeof time === 'string') {
+      const [hours, minutes] = time.split(':');
+      bookingDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+    } else if (time instanceof Date) {
+      // If time is a Date object, use it directly
+      bookingDateTime.setHours(time.getHours(), time.getMinutes(), 0, 0);
+    } else {
+      return false;
+    }
+    
+    const now = new Date();
+    const eightHoursFromNow = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    
+    return bookingDateTime < eightHoursFromNow;
+  };
 
+  // Handler for date and time changes
+  const handleDateTimeChange = (date, field) => {
+    if (!date) return;
+    
+    setForm(prev => {
+      const newForm = { ...prev };
+      let isTooSoon = false;
+      
+      if (field === 'date') {
+        newForm.date = date;
+        // Check if the selected time with the new date is too soon
+        if (newForm.time) {
+          isTooSoon = checkBookingTime(date, newForm.time);
+        }
+      } else if (field === 'time') {
+        // Store the time as a Date object
+        newForm.time = date;
+        
+        // Check if the selected time is too soon
+        if (newForm.date) {
+          isTooSoon = checkBookingTime(newForm.date, date);
+        }
+        
+        // Clear the expectedEndTime error when start time is changed
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          expectedEndTime: undefined
+        }));
+      } else if (field === 'expectedEndTime') {
+        // Store the end time as a Date object
+        newForm.expectedEndTime = date;
+        
+        // Clear the expectedEndTime error when end time is changed
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          expectedEndTime: undefined
+        }));
+      }
+      
+      // Update the isBookingTooSoon state
+      setIsBookingTooSoon(isTooSoon);
+      
+      return newForm;
+    })
+  };
+
+  const handleInputChange = (e) => {
+    if (!e || !e.target) {
+      return; // Skip if no event or target
+    }
+    const { name, value, type, checked } = e.target;
+    
+    // Create updated form data
+    const updatedForm = {
+      ...form,
+      [name]: type === 'checkbox' ? checked : value,
+    };
+    
+    // Check if the booking is too soon when date or time changes
+    if (name === 'date' || name === 'time') {
+      const isTooSoon = checkBookingTime(
+        name === 'date' ? value : updatedForm.date,
+        name === 'time' ? value : updatedForm.time
+      );
+      setIsBookingTooSoon(isTooSoon);
+    }
+    
+    // Handle airport direction and terminal changes with auto-fill logic
+    if (name === 'airportDirection') {
+      handleAirportDirectionChange(value);
+      return;
+    }
+    
+    if (name === 'terminal') {
+      handleTerminalChange(value);
+      return;
+    }
+    
     setForm(updatedForm);
 
     // Clear pickup and dropoff when city changes
@@ -451,6 +683,19 @@ const BookingPage = () => {
         [name]: value,
         pickup: "",
         dropoff: "",
+        // Also clear terminal and direction when city changes
+        terminal: "",
+        airportDirection: ""
+      }));
+    }
+
+    // Clear terminal and direction when service type changes (if not airport transfers)
+    if (name === "serviceType" && value !== "Airport Transfers") {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value,
+        terminal: "",
+        airportDirection: ""
       }));
     }
 
@@ -563,24 +808,6 @@ const BookingPage = () => {
     });
   };
 
-  // const handleVehicleChange = (e) => {
-  //   const { value } = e.target;
-  //   setForm((prev) => {
-  //     const updatedForm = { ...prev, vehiclePreference: value };
-  //     // Recalculate fare immediately after vehicle change
-  //     if (updatedForm.bookingMethod === "distance" && updatedForm.distance) {
-  //       setEstimatedFare(calculateFare(updatedForm));
-  //     } else if (
-  //       updatedForm.bookingMethod === "time" &&
-  //       updatedForm.time &&
-  //       updatedForm.expectedEndTime
-  //     ) {
-  //       setEstimatedFare(calculateFare(updatedForm));
-  //     }
-  //     return updatedForm;
-  //   });
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -592,25 +819,72 @@ const BookingPage = () => {
         return;
       }
 
-      // Calculate final cost (already includes all charges)
-    let finalCost = calculateFare(form);
+      // Check if booking is too soon
+      if (checkBookingTime(form.date, form.time)) {
+        setIsBookingTooSoon(true);
+        alert('Bookings must be made at least 8 hours in advance. Please select a later time.');
+        return;
+      }
 
-      // Prepare the booking data with all necessary fields
+      // Format dates for submission
+      const formatDate = (date) => {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toISOString().split('T')[0];
+      };
+
+      const formatTime = (date) => {
+        if (!date) return '';
+        if (typeof date === 'string') return date; // Already in HH:MM format
+        const d = new Date(date);
+        return d.toTimeString().slice(0, 5); // Returns HH:MM
+      };
+
+      // Calculate final cost (already includes all charges)
+      let finalCost = calculateFare(form);
+
+      // Create a clean booking data object with only the fields we want to send
       const bookingData = {
-        ...form,
-        // Calculate total passengers
+        // Basic info
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        city: form.city,
+        serviceType: form.serviceType,
+        
+        // Location info
+        pickup: form.pickup,
+        dropoff: form.dropoff || '',
+        additionalStop: form.additionalStop || '',
+        terminal: form.terminal || '',
+        airportDirection: form.airportDirection || '',
+        
+        // Date and time
+        date: formatDate(form.date),
+        time: formatTime(form.time),
+        expectedEndTime: form.expectedEndTime ? formatTime(form.expectedEndTime) : '',
+        bookingMethod: form.bookingMethod || 'distance',
+        
+        // Passenger and luggage info
         totalPassengers: parseInt(form.adults || 0) + parseInt(form.children_0_4 || 0) + parseInt(form.children_5_8 || 0),
-        // Ensure numeric values
         adults: parseInt(form.adults || 0),
         children_0_4: parseInt(form.children_0_4 || 0),
         children_5_8: parseInt(form.children_5_8 || 0),
         suitcases: parseInt(form.suitcases || 0),
         carryOn: parseInt(form.carryOn || 0),
-        // Set the final calculated fare
+        
+        // Vehicle and pricing
+        vehiclePreference: form.vehiclePreference,
         estimatedCost: Math.round(finalCost),
-        // Add timestamp and status
+        
+        // System fields
+        status: 'pending',
         createdAt: new Date().toISOString(),
-        status: 'pending' // Initial status
+        
+        // Optional fields
+        specialInstructions: form.specialInstructions || '',
+        flightNumber: form.flightNumber || '',
+        flightTime: form.flightTime || ''
       };
 
       // Log the data being sent for debugging
@@ -618,7 +892,7 @@ const BookingPage = () => {
 
       // Send the booking data to the backend
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/bookings/book`,
+        `${import.meta.env.VITE_API_URL}/api/bookings`,
         {
           method: 'POST',
           headers: {
@@ -628,17 +902,22 @@ const BookingPage = () => {
         }
       );
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Server error:', errorData);
+        throw new Error(errorData.message || 'Failed to submit booking');
+      }
+
       const result = await response.json();
 
       if (result.success) {
         setShowThankYouModal(true);
-        // Optionally reset form or step, but keep user on summary so they see the modal
       } else {
-        alert("Booking failed. Please try again later.");
+        throw new Error(result.message || 'Booking failed');
       }
     } catch (error) {
       console.error("Booking error:", error);
-      alert("Something went wrong. Try again later.");
+      alert(`Booking failed: ${error.message || 'Please check your details and try again'}`);
     }
   };
 
@@ -690,23 +969,6 @@ const BookingPage = () => {
     return true;
   };
 
-  // Step 3: Journey Details
-  const validateStep3 = () => {
-    const newErrors = {};
-    if (!form.city) newErrors.city = "City is required";
-    if (!form.serviceType) newErrors.serviceType = "Service type is required";
-    if (!form.pickup) newErrors.pickup = "Pickup location is required";
-    if (!form.dropoff) newErrors.dropoff = "Drop-off location is required";
-    if (!form.date) newErrors.date = "Date is required";
-    if (!form.time) newErrors.time = "Time is required";
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      scrollToFirstError(Object.keys(newErrors));
-      return false;
-    }
-    return true;
-  };
-
   // Helper function to get vehicle capacity
   const getVehicleCapacity = (vehicleName) => {
     const vehicle = fleet.find((v) => v.name === vehicleName);
@@ -721,6 +983,103 @@ const BookingPage = () => {
     const maxLuggage = luggageMatch ? parseInt(luggageMatch[1]) : 0;
 
     return { passengers: maxPassengers, luggage: maxLuggage };
+  };
+
+  // Step 3: Booking Details Validation
+  const validateStep3 = () => {
+    const newErrors = {};
+    let isValid = true;
+    
+    // Check if pickup location is set
+    if (!form.pickup) {
+      newErrors.pickup = "Pickup location is required";
+      isValid = false;
+    }
+    
+    // Check if dropoff location is set
+    if (!form.dropoff) {
+      newErrors.dropoff = "Dropoff location is required";
+      isValid = false;
+    }
+    
+    // Check if date is set
+    if (!form.date) {
+      newErrors.date = "Date is required";
+      isValid = false;
+    }
+    
+    // Check if time is set
+    if (!form.time) {
+      newErrors.time = "Time is required";
+      isValid = false;
+    }
+    
+    // Check if booking method is selected
+    if (!form.bookingMethod) {
+      newErrors.bookingMethod = "Please select a booking method";
+      isValid = false;
+    }
+    
+    // For airport transfers, check if direction is selected
+    if (form.serviceType === "Airport Transfers" && !form.airportDirection) {
+      newErrors.airportDirection = "Please select airport direction";
+      isValid = false;
+    }
+    
+    // For distance-based bookings, ensure distance is calculated
+    if (form.bookingMethod === 'distance' && (!form.distance || form.distance <= 0)) {
+      newErrors.distance = "Please calculate the distance first";
+      isValid = false;
+    }
+    
+    // For time-based bookings, ensure end time is set
+    if (form.bookingMethod === 'time' && !form.expectedEndTime) {
+      newErrors.expectedEndTime = "End time is required for time-based booking";
+      isValid = false;
+    }
+    
+    // For time-based bookings, ensure minimum 2-hour duration
+    if (form.bookingMethod === 'time' && form.time && form.expectedEndTime) {
+      // Create Date objects for today with the selected times
+      const today = new Date();
+      const startTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                               form.time.getHours(), form.time.getMinutes());
+      const endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                             form.expectedEndTime.getHours(), form.expectedEndTime.getMinutes());
+      
+      // Handle case where end time is on the next day
+      if (endTime <= startTime) {
+        endTime.setDate(endTime.getDate() + 1);
+      }
+      
+      const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+      
+      if (durationHours < 2) {
+        newErrors.expectedEndTime = "Minimum booking duration is 2 hours";
+        isValid = false;
+      }
+    }
+    
+    // Update errors state
+    setErrors(prev => ({ ...prev, ...newErrors }));
+    
+    // Scroll to first error if any
+    if (!isValid) {
+      const firstErrorKey = Object.keys(newErrors)[0];
+      const errorRef = firstErrorKey === 'pickup' ? pickupRef :
+                     firstErrorKey === 'dropoff' ? dropoffRef :
+                     firstErrorKey === 'date' ? dateRef :
+                     firstErrorKey === 'time' ? timeRef :
+                     firstErrorKey === 'bookingMethod' ? bookingMethodRef :
+                     firstErrorKey === 'airportDirection' ? serviceTypeRef :
+                     firstErrorKey === 'expectedEndTime' ? expectedEndTimeRef : null;
+      
+      if (errorRef && errorRef.current) {
+        errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    
+    return isValid;
   };
 
   // Step 4: Vehicle Selection
@@ -1025,12 +1384,13 @@ const BookingPage = () => {
                 ref={serviceTypeRef}
               >
                 <option value="">-- Select a Service --</option>
-                <option value="Corporate Transfers">Corporate Transfers</option>
                 <option value="Airport Transfers">Airport Transfers</option>
+                <option value="Point to Point">Point to Point</option>
+                <option value="Corporate Transfers">Corporate Transfers</option>
                 <option value="Wedding Car">Wedding Car</option>
                 <option value="Crew Transfer">Crew Transfer</option>
                 <option value="Special Events">Special Events</option>
-                <option value="Point to Point">Point to Point</option>
+                
               </select>
               {errors.serviceType && (
                 <div className="error-message">{errors.serviceType}</div>
@@ -1038,35 +1398,19 @@ const BookingPage = () => {
             </div>
             {form.serviceType === "Airport Transfers" && (
               <div className="form-group">
-                <label>Terminal</label>
+                <label>Direction</label>
                 <select
-                  name="terminal"
-                  value={form.terminal}
+                  name="airportDirection"
+                  value={form.airportDirection}
                   onChange={handleInputChange}
                 >
-                  <option value="">-- Select Terminal --</option>
-
-                  {form.city === "Sydney" && (
-                    <>
-                      <optgroup label="Sydney Airport Terminals">
-                        <option value="T1 International">T1 International</option>
-                        <option value="T2 Domestic">T2 Domestic</option>
-                        <option value="T3 Domestic">T3 Domestic</option>
-                      </optgroup>
-                    </>
-                  )}
-
-                  {form.city === "Melbourne" && (
-                    <>
-                      <optgroup label="Melbourne Airport Terminals">
-                        <option value="T1 International">T1 International</option>
-                        <option value="T2 Domestic">T2 Domestic</option>
-                        <option value="T3 Domestic">T3 Domestic</option>
-                        <option value="T4 Domestic">T4 Domestic</option>
-                      </optgroup>
-                    </>
-                  )}
+                  <option value="">-- Select Direction --</option>
+                  <option value="to">To Airport</option>
+                  <option value="from">From Airport</option>
                 </select>
+                {errors.airportDirection && (
+                  <div className="error-message">{errors.airportDirection}</div>
+                )}
               </div>
             )}
           </div>
@@ -1075,6 +1419,37 @@ const BookingPage = () => {
             <>
               <div className="form-section-title">Flight Details</div>
               <div className="form-row">
+                <div className="form-group">
+                  <label>Terminal</label>
+                  <select
+                    name="terminal"
+                    value={form.terminal}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">-- Select Terminal --</option>
+
+                    {form.city === "Sydney" && (
+                      <>
+                        <optgroup label="Sydney Airport Terminals">
+                          <option value="T1 International">T1 International</option>
+                          <option value="T2 Domestic">T2 Domestic</option>
+                          <option value="T3 Domestic">T3 Domestic</option>
+                        </optgroup>
+                      </>
+                    )}
+
+                    {form.city === "Melbourne" && (
+                      <>
+                        <optgroup label="Melbourne Airport Terminals">
+                          <option value="T1 International">T1 International</option>
+                          <option value="T2 Domestic">T2 Domestic</option>
+                          <option value="T3 Domestic">T3 Domestic</option>
+                          <option value="T4 Domestic">T4 Domestic</option>
+                        </optgroup>
+                      </>
+                    )}
+                  </select>
+                </div>
                 <div className="form-group">
                   <label>Flight Number</label>
                   <input
@@ -1095,20 +1470,27 @@ const BookingPage = () => {
                 </div>
                 <div className="form-group">
                   <label>Flight Time</label>
-                  <input
-                    type="time"
-                    name="flightTime"
-                    value={form.flightDetails.flightTime}
-                    onChange={(e) =>
+                  <DatePicker
+                    selected={form.flightDetails.flightTime}
+                    onChange={(date) => {
                       setForm((prev) => ({
                         ...prev,
                         flightDetails: {
                           ...prev.flightDetails,
-                          flightTime: e.target.value,
+                          flightTime: date,
                         },
                       }))
-                    }
-                    step="3600"
+                    }}
+                    showTimeSelect
+                    showTimeSelectOnly
+                    timeIntervals={1}
+                    timeCaption="Time"
+                    dateFormat="HH:mm"
+                    timeFormat="HH:mm"
+                    placeholderText="hh:mm"
+                    className="form-control time-picker"
+                    locale="en-GB"
+                    required
                   />
                 </div>
               </div>
@@ -1540,50 +1922,76 @@ const BookingPage = () => {
             </div>
           </div>
 
+          {/* Booking Time Restriction Notice */}
+          {isBookingTooSoon && (
+            <div className="booking-notice error">
+              <p>⚠️ Bookings must be made at least 8 hours in advance. Please select a later time.</p>
+            </div>
+          )}
+          
           {/* Date, Time and Expected End Time Row */}
           <div className="form-row">
             <div className="form-group">
               <label>Date</label>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleInputChange}
+              <DatePicker
+                selected={form.date}
+                onChange={(date) => handleDateTimeChange(date, 'date')}
+                minDate={new Date()}
+                dateFormat="dd-MM-yyyy"
+                placeholderText="dd-mm-yyyy"
+                className="form-control date-picker"
                 required
-                ref={dateRef}
               />
               {errors.date && <div className="error-message">{errors.date}</div>}
             </div>
             <div className="form-group">
               <label>PICKUP Time</label>
-              <input
-                type="time"
-                name="time"
-                value={form.time}
-                onChange={handleInputChange}
+              <DatePicker
+                selected={form.time}
+                onChange={(date) => handleDateTimeChange(date, 'time')}
+                showTimeSelect
+                showTimeSelectOnly
+                timeIntervals={1}
+                timeCaption="Time"
+                dateFormat="HH:mm"
+                timeFormat="HH:mm"
+                placeholderText="hh:mm"
+                className="form-control time-picker"
+                locale="en-GB"
                 required
-                ref={timeRef}
-                step="3600"
               />
               {errors.time && <div className="error-message">{errors.time}</div>}
             </div>
             {form.bookingMethod === "time" && (
               <div className="form-group">
                 <label>End Time</label>
-                <input
-                  type="time"
-                  name="expectedEndTime"
-                  value={form.expectedEndTime}
-                  onChange={handleInputChange}
+                <DatePicker
+                  selected={form.expectedEndTime}
+                  onChange={(date) => handleDateTimeChange(date, 'expectedEndTime')}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeIntervals={1}
+                  timeCaption="Time"
+                  dateFormat="HH:mm"
+                  timeFormat="HH:mm"
+                  placeholderText="hh:mm"
+                  className="form-control time-picker"
+                  locale="en-GB"
                   required
-                  step="3600"
+                  ref={expectedEndTimeRef}
                 />
-                {errors.expectedEndTime && (
-                  <div className="error-message">{errors.expectedEndTime}</div>
-                )}
               </div>
             )}
           </div>
+          
+          {/* Full row error message for expected end time */}
+          {form.bookingMethod === "time" && errors.expectedEndTime && (
+            <div className="form-row">
+              <div className="form-group full-width-error">
+                <div className="error-message">{errors.expectedEndTime}</div>
+              </div>
+            </div>
+          )}
           {form.bookingMethod === "distance" && form.distance && (
             <p className="distance-display">
               Distance: {(form.distance / 1000).toFixed(1)} km
@@ -1641,11 +2049,13 @@ const BookingPage = () => {
             type="button"
             onClick={() => {
               if (validateStep3()) {
-                setStep(3);
+                setStep(3); // Move to Vehicle Details (Step 4)
               }
             }}
+            disabled={isBookingTooSoon}
+            className={isBookingTooSoon ? 'disabled-button' : 'primary-button'}
           >
-            Continue Vehicle Selection
+            {isBookingTooSoon ? 'Please select a later time (min 8 hours ahead)' : 'Continue to Vehicle Selection'}
           </button>
         </div>
       </form>
@@ -1666,7 +2076,7 @@ const BookingPage = () => {
           (form.bookingMethod === "time" && form.expectedEndTime))) && (
         (["Airport Transfers", "Point to Point", "Crew Transfer"].includes(form.serviceType) && form.vehiclePreference !== 'Sprinter') ? (
           <p className="fare-estimate">
-            Estimated Price: ${calculateFare(form)}
+            Estimated Price: AUD ${calculateFare(form)}
           </p>
         ) : (
           <p className="fare-estimate" style={{ color: '#1976d2', fontWeight: 500 }}>
@@ -1792,7 +2202,10 @@ const BookingPage = () => {
                     (form.bookingMethod === "time" && form.expectedEndTime)) && (
                     (["Airport Transfers", "Point to Point", "Crew Transfer"].includes(form.serviceType) && vehicle.name !== 'Sprinter') ? (
                       <div className="vehicle-card-price">
-                        ${calculateFare({ ...form, vehiclePreference: vehicle.name })}
+                        AUD ${calculateFare({ ...form, vehiclePreference: vehicle.name })}
+                        <div className="gst-note" style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+                          *Prices include GST
+                        </div>
                       </div>
                     ) : (
                       <div className="vehicle-card-price" style={{ color: '#1976d2', fontWeight: 500 }}>

@@ -13,12 +13,13 @@ const navLinks = [
     path: '/services',
     dropdown: [
       { label: 'Airport Transfers', path: '/services/airport-transfers' },
+      { label: 'Point to Point', path: '/services/point-to-point' },
       { label: 'Corporate Transfers', path: '/services/corporate-transfers' },
       { label: 'Wedding Services', path: '/services/wedding-services' },
 
       { label: 'Special Events', path: '/services/special-events' },
-      { label: 'Crew Transfers', path: '/services/crew-transfers' },
-      { label: 'Point to Point', path: '/services/point-to-point' }
+      { label: 'Crew Transfers', path: '/services/crew-transfers' }
+      
     ]
   },
   { 

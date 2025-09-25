@@ -19,11 +19,11 @@ All materials are provided "as is" without warranties of any kind. Horizon Chauf
 <br></br>
 If you are dissatisfied with this site or any materials, your sole remedy is to discontinue use.
 <br></br>             
-By agreeing to these terms, you consent to us using your personal information for direct marketing. You may opt out at any time by contacting us at info@horizonchauffeurs.com.au.
+By agreeing to these terms, you consent to us using your personal information for direct marketing. You may opt out at any time by contacting us at <a href="mailto:info@horizonchauffeurs.com.au">info@horizonchauffeurs.com.au</a>.
 <br></br>
 This agreement is governed by the laws of New South Wales, Australia. Any disputes must be brought exclusively in the courts of New South Wales. If any part of this agreement is found invalid, the rest remains in effect.
 <br></br>
----
+
 
 <strong>Ground Transportation</strong>
 <br></br>
@@ -32,8 +32,9 @@ This agreement is governed by the laws of New South Wales, Australia. Any disput
 We recommend booking your chauffeur service in advance to ensure availability. Please allow ample time for time-sensitive journeys. Pickup times are a guide only; Horizon Chauffeurs and its partners are not liable for delays or missed pickups.
 <br></br>
 Online reservations made at least 12 hours in advance and confirmed by us are guaranteed, provided all booking details and payment information are correct. We cannot guarantee availability for last-minute bookings or without confirmation.
-<br></br>
+<br></br><br />
 Horizon Chauffeurs reserves the right to decline bookings if vehicles or drivers are unavailable. If we cannot fulfill a confirmed booking, we will notify you at least 12 hours in advance.
+<br></br>
 <br></br>
 <strong>No Shows:</strong>
 If you do not see your driver at the pickup location, please call our dispatch at [your phone number]. If you leave without calling, you will be charged the full fare. The driver will wait up to 15 minutes (regular pickups) or up to 60 minutes (airport pickups). After this, if we cannot reach you, the ride will be released and you will be billed as a no-show.

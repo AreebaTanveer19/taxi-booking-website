@@ -156,7 +156,7 @@ const AboutPage = () => {
             <img src={team1} alt="Founder" className="about-story-founder-img" />
             <blockquote>
               “Luxury is not just about the car—it’s about how you feel from the moment you book to the moment you arrive.”
-              <span className="about-story-founder">— Aman Singh, Founder</span>
+              <span className="about-story-founder">— Syed Ahmed Sheraz, Founder</span>
             </blockquote>
           </div>
         </motion.div>

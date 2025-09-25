@@ -1,25 +1,64 @@
 import React, { useState, useEffect } from 'react';
+import { FaUsers, FaMoneyBillWave, FaClipboardList, FaSignOutAlt, FaCar } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import VehiclePricing from '../components/admin/VehiclePricing';
 import '../styles/AdminDashboard.css';
+import '../styles/VehiclePricing.css';
 
 export default function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const [users, setUsers] = useState([]);
-  const [search, setSearch] = useState('');
-  const [showUsers, setShowUsers] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedBookings, setExpandedBookings] = useState({});
-  const [stats, setStats] = useState({
-    totalRevenue: 0,
-    airportTransfers: 0,
-    totalBookings: 0
-  });
   const [bookingSearch, setBookingSearch] = useState('');
   const [userSearch, setUserSearch] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
+  const [activeTab, setActiveTab] = useState('bookings');
+  const navigate = useNavigate();
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const sidebar = document.querySelector('.sidebar');
+      const menuButton = document.querySelector('.menu-btn');
+      
+      if (sidebarOpen && window.innerWidth <= 1024 && 
+          !sidebar.contains(event.target) && 
+          !menuButton.contains(event.target)) {
+        setSidebarOpen(false);
+      }
+    };
+
+    // Add event listener for window resize
+    const handleResize = () => {
+      if (window.innerWidth > 1024) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [sidebarOpen]);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    // Close sidebar on mobile after selecting a tab
+    if (window.innerWidth <= 1024) {
+      setSidebarOpen(false);
+    }
+  };
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    setSidebarOpen(prev => !prev);
   };
 
   const fetchBookings = async () => {
@@ -74,27 +113,6 @@ export default function AdminDashboard() {
     fetchBookings();
     fetchUsers();
   }, []);
-
-  useEffect(() => {
-    if (bookings.length > 0) {
-      const revenue = bookings.reduce((sum, booking) => {
-        // Try multiple possible price fields and handle different formats
-        const price = booking.price || booking.estimatedCost || booking.totalAmount || 0;
-        return sum + (Number(price) || 0);
-      }, 0);
-      
-      const airportTransfers = bookings.filter(booking => {
-        return booking.pickup.toLowerCase().includes('airport') || 
-               booking.dropoff.toLowerCase().includes('airport');
-      }).length;
-      
-      setStats({
-        totalRevenue: revenue,
-        airportTransfers,
-        totalBookings: bookings.length
-      });
-    }
-  }, [bookings]);
 
   const sortedBookings = [...bookings].sort((a, b) => {
     // Use createdAt timestamp if available, otherwise use booking date and time
@@ -156,58 +174,10 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleExport = () => {
-    const csvRows = [
-      [
-        'Name', 'Email', 'Phone',
-        'Booking Method', 'City', 'Service Type', 'Flight Number', 'Flight Time', 'Luggage', 'Special Instructions',
-        'Payment Method', 'Name On Card', 'Card Type', 'Expiry Month', 'Expiry Year', 'Terms Accepted',
-        'Vehicle Preference', 'Date', 'Time', 'Passengers', 'Child Under 7', 'Booster Seats', 'Baby Seats',
-        'Pickup', 'Dropoff', 'Distance', 'Estimated Cost', 'Status'
-      ],
-      ...filteredBookings.map(b => [
-        b.userId?.name || '',
-        b.userId?.email || '',
-        b.userId?.phone || '',
-        b.bookingMethod,
-        b.city,
-        b.serviceType,
-        b.flightNumber,
-        b.flightTime,
-        b.luggage,
-        b.specialInstructions,
-        b.paymentMethod,
-        b.nameOnCard,
-        b.cardType,
-        b.expiryMonth,
-        b.expiryYear,
-        b.termsAccepted ? 'Yes' : 'No',
-        b.vehiclePreference,
-        b.date,
-        b.time,
-        b.passengers,
-        b.hasChildUnder7 ? 'Yes' : 'No',
-        b.boosterSeatQty || 0,
-        b.babySeatQty || 0,
-        b.pickup,
-        b.dropoff,
-        b.distance,
-        b.estimatedCost,
-        b.status || 'Confirmed',
-      ]),
-    ];
-    const csvContent = csvRows.map(e => e.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'bookings.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
+    // Ensure we're redirecting to the admin login page
     window.location.href = '/admin';
   };
 
@@ -218,129 +188,76 @@ export default function AdminDashboard() {
     }));
   };
 
-  const calculateFare = (booking) => {
-    // Safely convert to number with fallback to 0
-    return Number(booking.estimatedCost || booking.price || booking.totalAmount || 0);
-  };
-
+ 
   return (
     <div className="admin-dashboard">
-      <div className={`sidebar ${sidebarOpen ? 'active' : ''}`}>
+      {/* Sidebar */}
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h2>Horizon chauffers</h2>
+          <h2>Horizon Chauffeurs</h2>
+          <button onClick={toggleSidebar} className="close-btn">×</button>
         </div>
-        <nav className="sidebar-nav">
-          <button 
-            className={`nav-btn ${!showUsers ? 'active' : ''}`}
-            onClick={() => {
-              fetchBookings();
-              setShowUsers(false);
-            }}
+        <ul className="sidebar-menu">
+          <li 
+            className={activeTab === 'bookings' ? 'active' : ''} 
+            onClick={() => handleTabChange('bookings')}
           >
-            Bookings
-          </button>
-          <button 
-            className={`nav-btn ${showUsers ? 'active' : ''}`}
-            onClick={() => {
-              fetchUsers();
-              setShowUsers(true);
-            }}
+            <FaClipboardList className="icon" />
+            <span>Bookings</span>
+          </li>
+          <li 
+            className={activeTab === 'users' ? 'active' : ''}
+            onClick={() => handleTabChange('users')}
           >
-            Users
-          </button>
-          <button className="nav-btn logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
-        </nav>
+            <FaUsers className="icon" />
+            <span>Users</span>
+          </li>
+          <li 
+            className={activeTab === 'pricing' ? 'active' : ''}
+            onClick={() => handleTabChange('pricing')}
+          >
+            <FaMoneyBillWave className="icon" />
+            <span>Pricing</span>
+          </li>
+          <li className="logout-item">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLogout();
+              }}
+              className="logout-button"
+            >
+              <FaSignOutAlt className="icon" />
+              <span>Logout</span>
+            </button>
+          </li>
+        </ul>
       </div>
-      <div className="main-content">
-        <button 
-          className="hamburger-btn" 
-          onClick={toggleSidebar}
-          aria-label="Toggle menu"
-        >
-          <div className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></div>
-          <div className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></div>
-          <div className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></div>
-        </button>
-        {/* Stats Cards */}
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-header">
-              <h3>Total Bookings</h3>
-              <div className="stat-icon">📅</div>
-            </div>
-            <p className="stat-value">{stats.totalBookings}</p>
-            <p className="stat-change">+12% from last week</p>
-          </div>
-          
-          <div className="stat-card">
-            <div className="stat-header">
-              <h3>Revenue</h3>
-              <div className="stat-icon">💰</div>
-            </div>
-            <p className="stat-value">
-              ${stats.totalRevenue.toFixed(2)}
-            </p>
-            <p className="stat-change">+8% from last week</p>
-          </div>
 
-          <div className="stat-card">
-            <div className="stat-header">
-              <h3>Airport Transfers</h3>
-              <div className="stat-icon">✈️</div>
-            </div>
-            <p className="stat-value">
-              {stats.airportTransfers}
-            </p>
-            <p className="stat-change">+15% from last week</p>
+      {/* Main Content */}
+      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
+        <header className="header">
+          <button onClick={toggleSidebar} className="menu-btn">☰</button>
+          <h1>
+            {activeTab === 'bookings' && 'Bookings'}
+            {activeTab === 'users' && 'Users'}
+            {activeTab === 'pricing' && 'Pricing Management'}
+          </h1>
+          <div className="user-info">
+            <span>Admin</span>
+            <div className="avatar">A</div>
           </div>
-        </div>
+        </header>
 
-        {/* Search Filters */}
-        <div className="search-filters">
-          {showUsers ? (
-            <div className="search-group">
-              <label>Search Users by Name:</label>
-              <input 
-                type="text" 
-                placeholder="Enter user name..."
-                value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                className="search-input"
-              />
-            </div>
-          ) : (
-            <div className="search-group">
-              <label>Search Bookings by Location:</label>
-              <input 
-                type="text" 
-                placeholder="Enter pickup/dropoff location..."
-                value={bookingSearch}
-                onChange={(e) => setBookingSearch(e.target.value)}
-                className="search-input"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Bookings/Users Table */}
-        <div className="table-container">
-          <div className="table-header">
-            <h2>{showUsers ? 'Users' : 'Recent Bookings'}</h2>
-            <div className="search-export">
-              {!showUsers && (
-                <button className="export-btn" onClick={handleExport}>
-                  Export CSV
-                </button>
-              )}
-            </div>
+        {activeTab === 'pricing' ? (
+          <div className="content">
+            <VehiclePricing />
           </div>
-
-          {showUsers ? (
+        ) : activeTab === 'users' ? (
+          <div className="content">
             <div className="table-container">
               <div className="table-header">
-                <h2>Users</h2>
+                {/* <h2>Users</h2> */}
                 <div className="search-export">
                   <input 
                     type="text" 
@@ -396,9 +313,11 @@ export default function AdminDashboard() {
                 </table>
               </div>
             </div>
-          ) : (
-            <div className="bookings-list">
-              {filteredBookings.map(booking => (
+          </div>
+        ) : (
+            <div className="content">
+              <div className="bookings-list">
+                {filteredBookings.map(booking => (
                 <div key={booking._id} className="booking-item">
                   <div className="booking-summary">
                     <div className="trip-info">
@@ -468,14 +387,21 @@ export default function AdminDashboard() {
                             </div>
                             <div className="detail-row">
                               <span className="detail-label"><strong>Carry-on:</strong> {booking.carryOn || 0}</span>
-                              <p><strong>Selected Vehicle:</strong> {booking.vehiclePreference || 'Not specified'}</p>
-                          <p><strong>Estimated Fare:</strong> ${booking.estimatedCost}</p>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label"><strong>Selected Vehicle:</strong> {booking.vehiclePreference || 'Not specified'}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label"><strong>Estimated Fare:</strong> ${booking.estimatedCost}</span>
                             </div>
 
                           </div>
                           <p><strong>Airport Pickup:</strong> {booking.serviceType === 'Airport Transfers' ? 'Yes' : 'No'}</p>
                           {booking.serviceType === 'Airport Transfers' && booking.terminal && (
-                            <p><strong>Terminal:</strong> {booking.terminal}</p>
+                            <>
+                              <p><strong>Direction:</strong> {booking.airportDirection === 'to' ? 'To Airport' : booking.airportDirection === 'from' ? 'From Airport' : 'Not specified'}</p>
+                              <p><strong>Terminal:</strong> {booking.terminal}</p>
+                            </>
                           )}
                         </div>
 
@@ -487,7 +413,7 @@ export default function AdminDashboard() {
                           <p><strong>Email Address:</strong> {booking.userId?.email || booking.email || 'Not provided'}</p>
                           <p><strong>Payment Method:</strong> {booking.paymentMethod || 'Not specified'}</p>
                           <h4>📝 Special Instructions</h4>
-                            <p >{booking.specialInstructions}</p>
+                            <p>{booking.specialInstructions || 'No special instructions'}</p>
                         </div>
 
                         
@@ -503,23 +429,25 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+            </div>
+          )}
+          
+          {/* Error Message */}
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+          
+          {/* Loading Indicator */}
+          {loading && (
+            <div className="loading-indicator">
+              Loading...
+            </div>
           )}
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
-        
-        {/* Loading Indicator */}
-        {loading && (
-          <div className="loading-indicator">
-            Loading...
-          </div>
-        )}
       </div>
-    </div>
+   
   );
 }
+

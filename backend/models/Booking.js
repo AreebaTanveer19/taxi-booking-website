@@ -5,6 +5,8 @@ const bookingSchema = new mongoose.Schema({
   bookingMethod: String,
   city: String,
   serviceType: String,
+  terminal: String,
+  airportDirection: String,
   flightNumber: String,
   flightTime: String,
   

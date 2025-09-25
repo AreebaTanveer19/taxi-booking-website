@@ -3,6 +3,8 @@ const router = express.Router();
 const adminOnly = require('../utils/auth');
 const Booking = require('../models/Booking');
 const User = require('../models/Users');
+const VehiclePrice = require('../models/VehiclePrice');
+const vehiclePriceController = require('../controllers/vehiclePriceController');
 const jwt = require('jsonwebtoken');
 
 // Admin verification endpoint
@@ -100,5 +102,10 @@ router.delete('/users/:id', adminOnly, async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error deleting user' });
   }
 });
+
+// Vehicle Price Routes
+router.get('/vehicle-prices', vehiclePriceController.getVehiclePrices);
+router.put('/vehicle-prices/:vehicleType', vehiclePriceController.updateVehiclePrice);
+router.post('/vehicle-prices/initialize', vehiclePriceController.initializeDefaultPrices);
 
 module.exports = router;
