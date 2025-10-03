@@ -52,6 +52,7 @@ const BookingPage = () => {
   const [error, setError] = useState(null);
   const [isBookingTooSoon, setIsBookingTooSoon] = useState(false);
   const [quoteRequested, setQuoteRequested] = useState(false);
+  const [showQuoteConfirmation, setShowQuoteConfirmation] = useState(false);
 
   const [form, setForm] = useState({
     bookingMethod: "distance",
@@ -1349,52 +1350,7 @@ const BookingPage = () => {
               <button
                 type="button"
                 style={{ background: '#8b5a2b', color: '#fff', fontWeight: 600 }}
-                onClick={async () => {
-                  try {
-                    // Prepare quote data
-                    const quoteData = {
-                      name: form.name,
-                      phone: form.phone,
-                      email: form.email,
-                      pickup: form.pickup,
-                      dropoff: form.dropoff,
-                      additionalStop: form.additionalStop,
-                      date: form.date,
-                      time: form.time,
-                      passengers: form.passengers,
-                      adults: form.adults,
-                      children_0_4: form.children_0_4,
-                      children_5_8: form.children_5_8,
-                      vehiclePreference: form.vehiclePreference || 'Not selected',
-                      specialInstructions: form.specialInstructions || '',
-                      type: 'quote_request'
-                    };
-
-                    // Send quote request to the server
-                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-quote-request`, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify(quoteData),
-                    });
-
-                    if (!response.ok) {
-                      throw new Error('Failed to send quote request');
-                    }
-
-                    // Show success message
-                    setQuoteRequested(true);
-                    
-                    // Reset the message after 5 seconds
-                    setTimeout(() => {
-                      setQuoteRequested(false);
-                    }, 5000);
-                  } catch (error) {
-                    console.error('Error sending quote request:', error);
-                    alert('Failed to send quote request. Please try again.');
-                  }
-                }}
+                onClick={() => setShowQuoteConfirmation(true)}
                 disabled={quoteRequested}
               >
                 {quoteRequested ? 'Request Sent!' : 'Get Quote from our Team'}
@@ -1403,6 +1359,113 @@ const BookingPage = () => {
                 <p style={{ color: '#4CAF50', marginTop: '10px', fontSize: '0.9rem' }}>
                   Thank you! Our team will contact you soon with your quote.
                 </p>
+              )}
+              
+              {/* Quote Confirmation Modal */}
+              {showQuoteConfirmation && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1000,
+                }}>
+                  <div style={{
+                    backgroundColor: 'white',
+                    padding: '2rem',
+                    borderRadius: '8px',
+                    maxWidth: '500px',
+                    width: '90%',
+                    textAlign: 'center',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <h3 style={{ marginTop: 0, color: '#333' }}>Confirm Quote Request</h3>
+                    <p>Are you sure you want to request a quote for your trip?</p>
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <button
+                        onClick={async () => {
+                          setShowQuoteConfirmation(false);
+                          try {
+                            // Prepare quote data
+                            const quoteData = {
+                              name: form.name,
+                              phone: form.phone,
+                              email: form.email,
+                              pickup: form.pickup,
+                              dropoff: form.dropoff,
+                              additionalStop: form.additionalStop,
+                              date: form.date,
+                              time: form.time,
+                              passengers: form.passengers,
+                              adults: form.adults,
+                              children_0_4: form.children_0_4,
+                              children_5_8: form.children_5_8,
+                              vehiclePreference: form.vehiclePreference || 'Not selected',
+                              specialInstructions: form.specialInstructions || '',
+                              type: 'quote_request'
+                            };
+
+                            // Send quote request to the server
+                            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-quote-request`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify(quoteData),
+                            });
+
+                            if (!response.ok) {
+                              throw new Error('Failed to send quote request');
+                            }
+
+                            // Show success message
+                            setQuoteRequested(true);
+                            
+                            // Reset the message after 5 seconds
+                            setTimeout(() => {
+                              setQuoteRequested(false);
+                            }, 5000);
+                          } catch (error) {
+                            console.error('Error sending quote request:', error);
+                            alert('Failed to send quote request. Please try again.');
+                          }
+                        }}
+                        style={{
+                          backgroundColor: '#8b5a2b',
+                          color: 'white',
+                          border: 'none',
+                          padding: '0.6rem 1.5rem',
+                          borderRadius: '4px',
+                          margin: '0 0.5rem',
+                          cursor: 'pointer',
+                          fontWeight: 600
+                        }}
+                      >
+                        Yes, Get Quote
+                      </button>
+                      <button
+                        onClick={() => setShowQuoteConfirmation(false)}
+                        style={{
+                          backgroundColor: '#f0f0f0',
+                          color: '#333',
+                          border: '1px solid #ddd',
+                          padding: '0.6rem 1.5rem',
+                          borderRadius: '4px',
+                          margin: '0 0.5rem',
+                          cursor: 'pointer',
+                          fontWeight: 500
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
             </>
           )}
