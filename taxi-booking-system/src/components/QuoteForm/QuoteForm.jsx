@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { LoadScript, Autocomplete } from '@react-google-maps/api';
 import '../QuoteForm/QuoteForm.css';
 
+const libraries = ['places'];
+
 const QuoteForm = ({ isOpen, onClose, onSubmit }) => {
+  const pickupAutocompleteRef = useRef(null);
+  const dropoffAutocompleteRef = useRef(null);
+  const [autocomplete, setAutocomplete] = useState({
+    pickup: null,
+    dropoff: null
+  });
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const [formData, setFormData] = useState({
     // Personal Info
     name: '',
@@ -37,6 +47,25 @@ const QuoteForm = ({ isOpen, onClose, onSubmit }) => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const onLoad = (autocomplete, field) => {
+    setAutocomplete(prev => ({
+      ...prev,
+      [field]: autocomplete
+    }));
+  };
+
+  const onPlaceChanged = (field) => {
+    if (autocomplete[field]) {
+      const place = autocomplete[field].getPlace();
+      if (place && place.formatted_address) {
+        setFormData(prev => ({
+          ...prev,
+          [`${field}Location`]: place.formatted_address
+        }));
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -79,7 +108,12 @@ const QuoteForm = ({ isOpen, onClose, onSubmit }) => {
           <button className="close-btn" onClick={onClose}>&times;</button>
         </div>
         
-        <form onSubmit={handleSubmit} className="quote-form">
+        <LoadScript
+          googleMapsApiKey={googleMapsApiKey}
+          libraries={libraries}
+          loadingElement={<div>Loading...</div>}
+        >
+          <form onSubmit={handleSubmit} className="quote-form">
           {/* Personal Information */}
           <div className="form-section">
             <h3>Personal Information</h3>
@@ -128,27 +162,51 @@ const QuoteForm = ({ isOpen, onClose, onSubmit }) => {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="pickupLocation">Pickup Location *</label>
-                <input
-                  type="text"
-                  id="pickupLocation"
-                  name="pickupLocation"
-                  value={formData.pickupLocation}
-                  onChange={handleChange}
-                  required
-                  placeholder="Enter pickup address"
-                />
+                <Autocomplete
+                  onLoad={(autocomplete) => onLoad(autocomplete, 'pickup')}
+                  onPlaceChanged={() => onPlaceChanged('pickup')}
+                  options={{
+                    componentRestrictions: { country: 'au' },
+                    fields: ['formatted_address', 'geometry', 'name'],
+                    types: ['address']
+                  }}
+                >
+                  <input
+                    type="text"
+                    id="pickupLocation"
+                    name="pickupLocation"
+                    value={formData.pickupLocation}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter pickup address"
+                    className="autocomplete-input"
+                    ref={pickupAutocompleteRef}
+                  />
+                </Autocomplete>
               </div>
               <div className="form-group">
                 <label htmlFor="dropoffLocation">Drop-off Location *</label>
-                <input
-                  type="text"
-                  id="dropoffLocation"
-                  name="dropoffLocation"
-                  value={formData.dropoffLocation}
-                  onChange={handleChange}
-                  required
-                  placeholder="Enter drop-off address"
-                />
+                <Autocomplete
+                  onLoad={(autocomplete) => onLoad(autocomplete, 'dropoff')}
+                  onPlaceChanged={() => onPlaceChanged('dropoff')}
+                  options={{
+                    componentRestrictions: { country: 'au' },
+                    fields: ['formatted_address', 'geometry', 'name'],
+                    types: ['address']
+                  }}
+                >
+                  <input
+                    type="text"
+                    id="dropoffLocation"
+                    name="dropoffLocation"
+                    value={formData.dropoffLocation}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter drop-off address"
+                    className="autocomplete-input"
+                    ref={dropoffAutocompleteRef}
+                  />
+                </Autocomplete>
               </div>
             </div>
           </div>
@@ -281,7 +339,8 @@ const QuoteForm = ({ isOpen, onClose, onSubmit }) => {
               {isSubmitting ? 'Submitting...' : 'Get Quote'}
             </button>
           </div>
-        </form>
+          </form>
+        </LoadScript>
       </div>
     </div>
   );
