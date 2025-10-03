@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import '../styles/AboutPage.css';
 import { FaRegHeart, FaCarSide, FaShieldAlt, FaBolt } from 'react-icons/fa';
@@ -10,6 +10,9 @@ const team3 = 'https://i.pinimg.com/736x/f6/2c/31/f62c31c18a9bfbec1f0e7b80977fa7
 
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer/Footer';
+import QuoteForm from '../components/QuoteForm/QuoteForm';
+import ConfirmationPopup from '../components/ConfirmationPopup/ConfirmationPopup';
+import { sendQuoteEmail, logQuoteData } from '../utils/emailService';
 
 const values = [
   {
@@ -86,6 +89,51 @@ const testimonials = [
 
 const AboutPage = () => {
   const navigate = useNavigate();
+  const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [confirmationData, setConfirmationData] = useState({
+    title: '',
+    message: '',
+    type: 'success'
+  });
+
+  // Quote form handlers
+  const openQuoteForm = () => {
+    setIsQuoteFormOpen(true);
+  };
+
+  const closeQuoteForm = () => {
+    setIsQuoteFormOpen(false);
+  };
+
+  const handleQuoteSubmit = async (formData) => {
+    try {
+      // Send quote email to both admin and user
+      await sendQuoteEmail(formData);
+      
+      // Show success confirmation popup
+      setConfirmationData({
+        title: 'Quote Submitted Successfully!',
+        message: 'We will get back to you soon. A confirmation email has been sent to your inbox.',
+        type: 'success'
+      });
+      setIsConfirmationOpen(true);
+    } catch (error) {
+      console.error('Error submitting quote:', error);
+      
+      // Show error confirmation popup
+      setConfirmationData({
+        title: 'Submission Error',
+        message: 'There was an error submitting your quote. Please try again.',
+        type: 'error'
+      });
+      setIsConfirmationOpen(true);
+    }
+  };
+
+  const closeConfirmation = () => {
+    setIsConfirmationOpen(false);
+  };
   return (
     <>
     <div className="about-root">
@@ -137,7 +185,7 @@ const AboutPage = () => {
                 boxShadow: "0 5px 15px rgba(255, 255, 255, 0.2)"
               }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => openWhatsApp("About Page Hero")}
+              onClick={openQuoteForm}
             >
               Get Personalized Quote
             </motion.button>
@@ -301,7 +349,7 @@ const AboutPage = () => {
                 boxShadow: "0 5px 15px rgba(255, 255, 255, 0.2)"
               }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => openWhatsApp("About Page")}
+              onClick={openQuoteForm}
             >
               Get a Personalized Quote
               <span className="about-cta-btn-icon">→</span>
@@ -312,6 +360,22 @@ const AboutPage = () => {
     </div>
     {/* Footer */}
     <Footer />
+    
+    {/* Quote Form Popup */}
+    <QuoteForm 
+      isOpen={isQuoteFormOpen}
+      onClose={closeQuoteForm}
+      onSubmit={handleQuoteSubmit}
+    />
+    
+    {/* Confirmation Popup */}
+    <ConfirmationPopup
+      isOpen={isConfirmationOpen}
+      onClose={closeConfirmation}
+      title={confirmationData.title}
+      message={confirmationData.message}
+      type={confirmationData.type}
+    />
     </>
   );
 };

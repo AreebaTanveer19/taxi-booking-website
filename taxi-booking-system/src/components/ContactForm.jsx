@@ -5,6 +5,7 @@ import 'react-phone-input-2/lib/style.css';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { sendContactEmail } from '../utils/emailService';
 
 const schema = yup.object().shape({
   name: yup.string().required('Full Name is required.'),
@@ -21,10 +22,27 @@ const ContactForm = () => {
 
   const onSubmit = async (data) => {
     setToast(null);
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setToast({ type: 'success', message: 'Message sent successfully!' });
-    setTimeout(() => setToast(null), 3000);
+    
+    try {
+      // Send contact email
+      const result = await sendContactEmail(data);
+      setToast({ type: 'success', message: 'Message sent successfully! We\'ll get back to you soon.' });
+      
+      // Reset form after successful submission
+      setTimeout(() => {
+        setToast(null);
+        // You can reset the form here if needed
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error sending contact message:', error);
+      setToast({ 
+        type: 'error', 
+        message: 'Failed to send message. Please try again or call us directly.' 
+      });
+      
+      setTimeout(() => setToast(null), 5000);
+    }
   };
 
   return (

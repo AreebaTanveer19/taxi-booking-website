@@ -9,14 +9,19 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
 import enGB from 'date-fns/locale/en-GB';
+import { sendBookingConfirmationEmail } from '../utils/emailService';
 
 // Register the UK locale for 24-hour time format
 registerLocale('en-GB', enGB);
 
 
 const BookingPage = () => {
-  // ...existing state
-  const [showThankYouModal, setShowThankYouModal] = useState(false);
+  // State for thank you modal
+  const [thankYouModal, setThankYouModal] = useState({
+    show: false,
+    isSpecialVehicle: false,
+    vehicleType: ''
+  });
   const pickupAutocompleteRef = useRef(null);
   const dropoffAutocompleteRef = useRef(null);
   const phoneInputRef = useRef();
@@ -46,6 +51,7 @@ const BookingPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isBookingTooSoon, setIsBookingTooSoon] = useState(false);
+  const [quoteRequested, setQuoteRequested] = useState(false);
 
   const [form, setForm] = useState({
     bookingMethod: "distance",
@@ -911,7 +917,33 @@ const BookingPage = () => {
       const result = await response.json();
 
       if (result.success) {
-        setShowThankYouModal(true);
+        // Add the booking ID from the response to the booking data
+        const bookingDataWithId = {
+          ...bookingData,
+          _id: result.data?._id || result.bookingId || 'Pending'
+        };
+        
+        // Check if this is a Sprinter or non-standard vehicle booking
+        const isSpecialVehicle = form.vehiclePreference === 'Sprinter' || 
+                             !['Airport Transfers', 'Point to Point', 'Crew Transfer'].includes(form.serviceType);
+        
+        // Send booking confirmation email with special flag for Sprinter/non-standard bookings
+        try {
+          await sendBookingConfirmationEmail({
+            ...bookingData,
+            bookingId: data.bookingId || 'N/A',
+            isSpecialVehicle: isSpecialVehicle
+          });
+        } catch (emailError) {
+          console.error('Error sending confirmation email:', emailError);
+          // Don't fail the booking if email fails
+        }
+
+        setThankYouModal({
+          show: true,
+          isSpecialVehicle: isSpecialVehicle,
+          vehicleType: form.vehiclePreference
+        });
       } else {
         throw new Error(result.message || 'Booking failed');
       }
@@ -1313,35 +1345,66 @@ const BookingPage = () => {
               Continue to Payment Details
             </button>
           ) : (
-            <button
-              type="button"
-              style={{ background: '#25D366', color: '#fff', fontWeight: 600 }}
-              onClick={() => {
-                const phone = '61416535987'; // Replace with your real WhatsApp number
-                const details = [
-                  `*Booking Inquiry*`,
-                  `Name: ${form.name}`,
-                  `Phone: ${form.phone}`,
-                  `Pickup: ${form.pickup}`,
-                  `Drop-off: ${form.dropoff}`,
-                  `Additional Stop: ${form.additionalStop}`,
-                  `Date: ${form.date}`,
-                  `Time: ${form.time}`,
-                  `Passengers: ${form.passengers}`,
-                  `Adults: ${form.adults}`,
-                  `Kids 0-4: ${form.children_0_4}`,
-                  `Kids 5-8: ${form.children_5_8}`,
-                  `Car: ${form.vehiclePreference || 'Not selected'}`,
-                  form.specialInstructions ? `Notes: ${form.specialInstructions}` : '',
-                  '',
-                  'Hi give me fare details.'
-                ].filter(Boolean).join('\n');
-                const url = `https://wa.me/${phone}?text=${encodeURIComponent(details)}`;
-                window.open(url, '_blank');
-              }}
-            >
-              Get Quote on WhatsApp
-            </button>
+            <>
+              <button
+                type="button"
+                style={{ background: '#8b5a2b', color: '#fff', fontWeight: 600 }}
+                onClick={async () => {
+                  try {
+                    // Prepare quote data
+                    const quoteData = {
+                      name: form.name,
+                      phone: form.phone,
+                      email: form.email,
+                      pickup: form.pickup,
+                      dropoff: form.dropoff,
+                      additionalStop: form.additionalStop,
+                      date: form.date,
+                      time: form.time,
+                      passengers: form.passengers,
+                      adults: form.adults,
+                      children_0_4: form.children_0_4,
+                      children_5_8: form.children_5_8,
+                      vehiclePreference: form.vehiclePreference || 'Not selected',
+                      specialInstructions: form.specialInstructions || '',
+                      type: 'quote_request'
+                    };
+
+                    // Send quote request to the server
+                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-quote-request`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(quoteData),
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Failed to send quote request');
+                    }
+
+                    // Show success message
+                    setQuoteRequested(true);
+                    
+                    // Reset the message after 5 seconds
+                    setTimeout(() => {
+                      setQuoteRequested(false);
+                    }, 5000);
+                  } catch (error) {
+                    console.error('Error sending quote request:', error);
+                    alert('Failed to send quote request. Please try again.');
+                  }
+                }}
+                disabled={quoteRequested}
+              >
+                {quoteRequested ? 'Request Sent!' : 'Get Quote from our Team'}
+              </button>
+              {quoteRequested && (
+                <p style={{ color: '#4CAF50', marginTop: '10px', fontSize: '0.9rem' }}>
+                  Thank you! Our team will contact you soon with your quote.
+                </p>
+              )}
+            </>
           )}
         </div>
       </form>
@@ -2417,6 +2480,7 @@ const BookingPage = () => {
   const renderStep6 = () => {
     // Use breakdown object for all fare display
     const breakdown = calculateFareBreakdown(form);
+    
 
     if (!breakdown.total || isNaN(breakdown.total)) {
       return (
@@ -2459,7 +2523,12 @@ const BookingPage = () => {
               )}
               <div className="summary-label">Date & Time:</div>
               <div className="summary-value">
-                {form.date && form.time ? `${form.date} at ${form.time}` : "Not specified"}
+                {form.date instanceof Date ? form.date.toLocaleDateString('en-GB') : form.date} at {form.time instanceof Date ? form.time.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : form.time}
+                {form.bookingMethod === 'time' && form.expectedEndTime && (
+                  <div style={{ fontSize: '0.9em', color: '#666', marginTop: '4px' }}>
+                    to {form.expectedEndTime instanceof Date ? form.expectedEndTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : form.expectedEndTime}
+                  </div>
+                )}
               </div>
               <div className="summary-label">Vehicle:</div>
               <div className="summary-value">
@@ -2514,7 +2583,14 @@ const BookingPage = () => {
               {form.flightDetails?.flightNumber && (
                 <>
                   <div className="summary-label">Flight:</div>
-                  <div className="summary-value">{form.flightDetails.flightNumber}</div>
+                  <div className="summary-value">
+                    <div>{form.flightDetails.flightNumber}</div>
+                    {form.flightDetails?.flightTime && (
+                      <div style={{ fontSize: '0.9em', color: '#666', marginTop: '2px' }}>
+                        {form.flightDetails?.flightTime instanceof Date ? form.flightDetails.flightTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : typeof form.flightDetails?.flightTime === 'string' ? form.flightDetails?.flightTime : 'Not specified'}
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
             </div>
@@ -2564,19 +2640,8 @@ const BookingPage = () => {
             </div>
           </div>
 
-          <div className="summary-section-block">
-            <div className="summary-section-title">Payment Info</div>
-            <div className="summary-details-grid">
-              <div className="summary-label">Payment Method:</div>
-              <div className="summary-value">{form.paymentMethod}</div>
-            </div>
-          </div>
 
           <div className="summary-actions">
-            {/* <div className="summary-cost-display">
-              <div className="cost-label">Estimated Total</div>
-              <div className="cost-amount">${breakdown.total}</div>
-            </div> */}
             <div className="summary-buttons">
               <motion.button
                 type="button"
@@ -2606,7 +2671,7 @@ const BookingPage = () => {
   return (
     <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
       <div className="booking-page-root">
-        {showThankYouModal && (
+        {thankYouModal.show && (
           <>
             <style>{`
               .thank-you-modal-overlay {
@@ -2620,12 +2685,12 @@ const BookingPage = () => {
               .thank-you-modal {
                 background: linear-gradient(135deg, #fff 70%, #e0e7ff 100%);
                 border-radius: 18px; box-shadow: 0 6px 32px rgba(50,60,120,0.18);
-                padding: 2.5rem 2.2rem 2rem 2.2rem; max-width: 380px; width: 90vw;
+                padding: 2.5rem 2.2rem 2rem 2.2rem; max-width: 420px; width: 90vw;
                 text-align: center; animation: modalPopUp 0.4s cubic-bezier(.6,-0.28,.74,.05);
               }
               @keyframes modalPopUp { from { transform: scale(0.9) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
               .thank-you-modal h2 { color: #3b2f7f; font-size: 2rem; margin-bottom: 0.5rem; font-weight: 700; letter-spacing: 0.01em; }
-              .thank-you-modal p { color: #444; font-size: 1.1rem; margin-bottom: 1.4rem; margin-top: 0.5rem; }
+              .thank-you-modal p { color: #444; font-size: 1.1rem; margin-bottom: 1.4rem; margin-top: 0.5rem; line-height: 1.5; }
               .thank-you-modal .thank-you-emoji { font-size: 2.5rem; margin-bottom: 0.7rem; animation: pulse 1.5s infinite; }
               @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.13); } 100% { transform: scale(1); } }
               .thank-you-modal button {
@@ -2634,21 +2699,42 @@ const BookingPage = () => {
                 font-size: 1.1rem; font-weight: 600; cursor: pointer;
                 box-shadow: 0 2px 8px rgba(91,103,232,0.08);
                 transition: background 0.2s, transform 0.2s;
+                margin-top: 0.8rem;
               }
               .thank-you-modal button:hover {
                 background: linear-gradient(90deg, #8f6be8 60%, #5b67e8 100%);
                 transform: scale(1.03);
               }
+              .thank-you-modal .special-note {
+                background: rgba(91, 103, 232, 0.1);
+                border-radius: 8px;
+                padding: 12px;
+                margin: 15px 0;
+                font-size: 0.95rem;
+                color: #3b2f7f;
+              }
             `}</style>
             <div className="thank-you-modal-overlay">
               <div className="thank-you-modal">
-                <div className="thank-you-emoji">🎉</div>
+                <div className="thank-you-emoji">
+                  {thankYouModal.isSpecialVehicle ? '🚐' : '🎉'}
+                </div>
                 <h2>Thank You!</h2>
-                <p>We have received your booking.<br />Our team will contact you soon.</p>
+                {thankYouModal.isSpecialVehicle ? (
+                  <>
+                    <p>Your {thankYouModal.vehicleType} booking request has been received.</p>
+                    <div className="special-note">
+                      Our team will review your request and contact you shortly with confirmation and payment details.
+                    </div>
+                    <p>For any urgent inquiries, please contact our customer service.</p>
+                  </>
+                ) : (
+                  <p>We have received your booking.<br />Our team will contact you soon.</p>
+                )}
                 <button
   style={{ marginTop: '0.8rem', background: 'linear-gradient(90deg, #5b67e8 60%, #8f6be8 100%)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.7rem 2.2rem', fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(91,103,232,0.08)', transition: 'background 0.2s, transform 0.2s' }}
   onClick={() => {
-    setShowThankYouModal(false);
+    setThankYouModal({ show: false, isSpecialVehicle: false, vehicleType: '' });
     setStep(1);
     setForm({
       bookingMethod: "distance",

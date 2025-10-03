@@ -1,0 +1,205 @@
+/* Quote Form Popup Styles - Matching Taxi Booking Theme */
+.confirmation-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+}
+
+.confirmation-popup-container {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 400px;
+  width: 90%;
+  max-height: 90vh;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: confirmationPopupSlideIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+.confirmation-popup-container.success {
+  border-top: 4px solid #10b981;
+}
+
+.confirmation-popup-container.error {
+  border-top: 4px solid #ef4444;
+}
+
+.confirmation-popup-container.info {
+  border-top: 4px solid #667eea;
+}
+
+@keyframes confirmationPopupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.confirmation-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 16px 24px;
+  position: relative;
+}
+
+.confirmation-popup-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.confirmation-popup-icon.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.confirmation-popup-icon.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.confirmation-popup-icon.info {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.confirmation-popup-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  line-height: 1;
+}
+
+.confirmation-popup-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.confirmation-popup-content {
+  padding: 0 24px 24px 24px;
+}
+
+.confirmation-popup-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #181818;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+}
+
+.confirmation-popup-message {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+}
+
+.confirmation-popup-actions {
+  padding: 16px 24px 24px 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.confirmation-popup-button {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  min-width: 80px;
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.confirmation-popup-button.success {
+  background: #ffb300;
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.3);
+}
+
+.confirmation-popup-button.success:hover {
+  background: #e6a200;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 179, 0, 0.4);
+}
+
+.confirmation-popup-button.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.confirmation-popup-button.error:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
+.confirmation-popup-button.info {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.confirmation-popup-button.info:hover {
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .confirmation-popup-container {
+    margin: 20px;
+    width: calc(100% - 40px);
+  }
+  
+  .confirmation-popup-header {
+    padding: 20px 20px 12px 20px;
+  }
+  
+  .confirmation-popup-content {
+    padding: 0 20px 20px 20px;
+  }
+  
+  .confirmation-popup-actions {
+    padding: 12px 20px 20px 20px;
+  }
+  
+  .confirmation-popup-button {
+    padding: 10px 24px;
+    font-size: 13px;
+  }
+}

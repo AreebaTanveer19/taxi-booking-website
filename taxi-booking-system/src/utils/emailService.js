@@ -23,6 +23,56 @@ export const sendQuoteEmail = async (formData) => {
   }
 };
 
+// Email service for sending contact form submissions
+export const sendContactEmail = async (formData) => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-contact-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to send contact message');
+    }
+    
+    const result = await response.json();
+    return result;
+    
+  } catch (error) {
+    console.error('Error sending contact email:', error);
+    throw error;
+  }
+};
+
+// Email service for sending booking confirmation emails
+export const sendBookingConfirmationEmail = async (bookingData) => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-booking-confirmation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to send booking confirmation');
+    }
+    
+    const result = await response.json();
+    return result;
+    
+  } catch (error) {
+    console.error('Error sending booking confirmation email:', error);
+    throw error;
+  }
+};
+
 // For development/testing - logs the form data to console
 export const logQuoteData = (formData) => {
   console.log('Quote Form Data:', formData);
