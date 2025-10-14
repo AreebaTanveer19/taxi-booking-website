@@ -3,8 +3,8 @@ const nodemailer = require('nodemailer');
 // Create transporter function
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    service: process.env.EMAIL_SERVICE || 'outlook',
+    host: process.env.EMAIL_HOST || 'smtp.office365.com',
     port: process.env.EMAIL_PORT || 587,
     secure: process.env.EMAIL_SECURE === 'true',
     auth: {

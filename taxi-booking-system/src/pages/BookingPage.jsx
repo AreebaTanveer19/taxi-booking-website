@@ -38,12 +38,6 @@ const BookingPage = () => {
   const timeRef = useRef();
   const expectedEndTimeRef = useRef();
   const vehicleRef = useRef();
-  const nameOnCardRef = useRef();
-  const cardNumberRef = useRef();
-  const expiryMonthRef = useRef();
-  const expiryYearRef = useRef();
-  const cvcRef = useRef();
-  const termsRef = useRef();
   const [distanceLoading, setDistanceLoading] = useState(false);
   const [distanceError, setDistanceError] = useState("");
   const [errors, setErrors] = useState({});
@@ -69,14 +63,6 @@ const BookingPage = () => {
     terminal: "",
     luggage: "",
     specialInstructions: "",
-    paymentMethod: "Card",
-    nameOnCard: "",
-    cardNumber: "",
-    cardType: "Visa",
-    expiryMonth: "",
-    expiryYear: "",
-    cvc: "",
-    termsAccepted: false,
     vehiclePreference: "",
     date: null,
     time: null,
@@ -759,25 +745,6 @@ const BookingPage = () => {
         case "vehiclePreference":
           if (value) delete newErrors.vehiclePreference;
           break;
-        case "nameOnCard":
-          if (value) delete newErrors.nameOnCard;
-          break;
-        case "cardNumber":
-          if (/^\d{12,19}$/.test(value.replace(/\s/g, "")))
-            delete newErrors.cardNumber;
-          break;
-        case "expiryMonth":
-          if (value) delete newErrors.expiryMonth;
-          break;
-        case "expiryYear":
-          if (value) delete newErrors.expiryYear;
-          break;
-        case "cvc":
-          if (/^\d{3,4}$/.test(value)) delete newErrors.cvc;
-          break;
-        case "termsAccepted":
-          if (checked) delete newErrors.termsAccepted;
-          break;
         case "passengers":
         case "adults":
         case "children_0_4":
@@ -932,7 +899,7 @@ const BookingPage = () => {
         try {
           await sendBookingConfirmationEmail({
             ...bookingData,
-            bookingId: data.bookingId || 'N/A',
+            bookingId: result.data?._id || result.bookingId || 'N/A',
             isSpecialVehicle: isSpecialVehicle
           });
         } catch (emailError) {
@@ -967,12 +934,6 @@ const BookingPage = () => {
       date: dateRef,
       time: timeRef,
       vehiclePreference: vehicleRef,
-      nameOnCard: nameOnCardRef,
-      cardNumber: cardNumberRef,
-      expiryMonth: expiryMonthRef,
-      expiryYear: expiryYearRef,
-      cvc: cvcRef,
-      termsAccepted: termsRef,
     };
     for (const key of errorKeys) {
       if (refMap[key] && refMap[key].current) {
@@ -1148,28 +1109,6 @@ const BookingPage = () => {
     return true;
   };
 
-  // Step 5: Payment Details
-  const validateStep5 = () => {
-    const newErrors = {};
-    if (!form.nameOnCard) newErrors.nameOnCard = "Name on card is required";
-    if (
-      !form.cardNumber ||
-      !/^\d{12,19}$/.test(form.cardNumber.replace(/\s/g, ""))
-    )
-      newErrors.cardNumber = "Valid card number is required";
-    if (!form.expiryMonth) newErrors.expiryMonth = "Expiry month is required";
-    if (!form.expiryYear) newErrors.expiryYear = "Expiry year is required";
-    if (!form.cvc || !/^\d{3,4}$/.test(form.cvc))
-      newErrors.cvc = "Valid CVC is required";
-    if (!form.termsAccepted)
-      newErrors.termsAccepted = "You must accept the terms and conditions";
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      scrollToFirstError(Object.keys(newErrors));
-      return false;
-    }
-    return true;
-  };
 
   // Scroll to top on step change
   useEffect(() => {
@@ -1334,18 +1273,7 @@ const BookingPage = () => {
           <button type="button" onClick={() => setStep(3)}>
             Back
           </button>
-          {(['Airport Transfers', 'Point to Point', 'Crew Transfer'].includes(form.serviceType) && form.vehiclePreference !== 'Sprinter') ? (
-            <button
-              type="button"
-              onClick={() => {
-                if (validateStep2()) {
-                  setStep(5);
-                }
-              }}
-            >
-              Continue to Payment Details
-            </button>
-          ) : (
+          {form.vehiclePreference === 'Sprinter' ? (
             <>
               <button
                 type="button"
@@ -1468,6 +1396,17 @@ const BookingPage = () => {
                 </div>
               )}
             </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                if (validateStep2()) {
+                  setStep(5);
+                }
+              }}
+            >
+              Continue to Summary
+            </button>
           )}
         </div>
       </form>
@@ -2392,153 +2331,6 @@ const BookingPage = () => {
     );
   };
 
-  const renderStep5 = () => (
-    <motion.div
-      className="step-container"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <h2 className="step-title">Step 05: Payment Details</h2>
-      {form.paymentMethod === "Card" && (
-        <>
-          <div className="form-group">
-            <label>Name on Card</label>
-            <input
-              type="text"
-              name="nameOnCard"
-              value={form.nameOnCard}
-              onChange={handleInputChange}
-              required
-              ref={nameOnCardRef}
-            />
-            {errors.nameOnCard && (
-              <div className="error-message">{errors.nameOnCard}</div>
-            )}
-          </div>
-          <div className="form-group">
-            <label>Card Type</label>
-            <select
-              name="cardType"
-              value={form.cardType}
-              onChange={handleInputChange}
-            >
-              <option value="Visa">Visa</option>
-              <option value="Mastercard">Mastercard</option>
-              <option value="Amex">American Express</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Card Number</label>
-            <input
-              type="text"
-              name="cardNumber"
-              value={form.cardNumber}
-              onChange={handleInputChange}
-              placeholder="xxxx xxxx xxxx xxxx"
-              className="form-control"
-              ref={cardNumberRef}
-            />
-            {errors.cardNumber && (
-              <div className="error-message">{errors.cardNumber}</div>
-            )}
-          </div>
-          <div className="form-group">
-            <label>Expiry Date</label>
-            <div className="expiry-date-fields">
-              <select
-                name="expiryMonth"
-                value={form.expiryMonth}
-                onChange={handleInputChange}
-                required
-                ref={expiryMonthRef}
-              >
-                <option value="">Month</option>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {String(i + 1).padStart(2, "0")}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="expiryYear"
-                value={form.expiryYear}
-                onChange={handleInputChange}
-                required
-                ref={expiryYearRef}
-              >
-                <option value="">Year</option>
-                {Array.from({ length: 10 }, (_, i) => (
-                  <option key={i} value={new Date().getFullYear() + i}>
-                    {new Date().getFullYear() + i}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {errors.expiryMonth && (
-              <div className="error-message">{errors.expiryMonth}</div>
-            )}
-            {errors.expiryYear && (
-              <div className="error-message">{errors.expiryYear}</div>
-            )}
-          </div>
-          <div className="form-group">
-            <label>CVC</label>
-            <input
-              type="text"
-              name="cvc"
-              value={form.cvc}
-              onChange={handleInputChange}
-              placeholder="123"
-              className="form-control"
-              ref={cvcRef}
-            />
-            {errors.cvc && <div className="error-message">{errors.cvc}</div>}
-          </div>
-          <h3 className="form-section-title">Terms and Conditions</h3>
-          <div className="form-group full-width">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="termsAccepted"
-                checked={form.termsAccepted}
-                onChange={handleInputChange}
-                required
-                ref={termsRef}
-              />
-              I accept the{" "}
-              <a
-                href="/terms-and-conditions"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                terms and conditions
-              </a>
-              .
-            </label>
-            {errors.termsAccepted && (
-              <div className="error-message">{errors.termsAccepted}</div>
-            )}
-          </div>
-        </>
-      )}
-      <div className="form-actions">
-        <button type="button" onClick={() => setStep(4)}>
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            if (validateStep5()) {
-              setStep(6);
-            }
-          }}
-        >
-          Continue to Summary
-        </button>
-      </div>
-    </motion.div>
-  );
 
   const renderStep6 = () => {
     // Use breakdown object for all fare display
@@ -2552,7 +2344,7 @@ const BookingPage = () => {
           <div className="error-message">
             <p>We're having trouble calculating your fare.</p>
             <button className="back-button" onClick={() => setStep(4)}>
-              Back to Payment
+              Back to Passenger Details
             </button>
           </div>
         </motion.div>
@@ -2565,13 +2357,17 @@ const BookingPage = () => {
           <div className="summary-header">
             <FaClipboardCheck className="summary-main-icon" />
             <h2 className="step-title" style={{ marginBottom: 0 }}>
-              Booking Summary
+              Step 05: Booking Summary
             </h2>
           </div>
 
           <div className="summary-section-block">
             <div className="summary-section-title">📋 Trip Overview</div>
             <div className="summary-details-grid">
+              <div className="summary-label">Service Type:</div>
+              <div className="summary-value">
+                {form.serviceType || "Not specified"}
+              </div>
               <div className="summary-label">From:</div>
               <div className="summary-value">
                 {form.pickup || "Not specified"}
@@ -2660,6 +2456,7 @@ const BookingPage = () => {
           </div>
         )}
 
+          {['Airport Transfers', 'Point to Point', 'Crew Transfer'].includes(form.serviceType) && (
           <div className="summary-section-block">
             <div className="summary-section-title">Fare Breakdown</div>
             <div className="fare-breakdown-grid">
@@ -2698,10 +2495,11 @@ const BookingPage = () => {
                 </>
               )}
 
-              <div className="breakdown-label breakdown-total">Grand Total:</div>
+              <div className="breakdown-label breakdown-total"> Estimated Grand Total:</div>
               <div className="breakdown-value breakdown-total">${breakdown.total}</div>
             </div>
           </div>
+          )}
 
 
           <div className="summary-actions">
@@ -2713,7 +2511,7 @@ const BookingPage = () => {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Back
+                Back to Passenger Details
               </motion.button>
               <motion.button
                 type="button"
@@ -2810,14 +2608,6 @@ const BookingPage = () => {
       terminal: "",
       luggage: "",
       specialInstructions: "",
-      paymentMethod: "Card",
-      nameOnCard: "",
-      cardNumber: "",
-      cardType: "Visa",
-      expiryMonth: "",
-      expiryYear: "",
-      cvc: "",
-      termsAccepted: false,
       vehiclePreference: "",
       date: "",
       time: "",
@@ -2876,24 +2666,15 @@ const BookingPage = () => {
               4
             </div>
             <div className="progress-bar"></div>
-            <div
-              className={`progress-step${
-                step === 5 ? " active" : step > 5 ? " completed" : ""
-              }`}
-            >
+            <div className={`progress-step${step === 5 ? " active" : ""}`}>
               5
-            </div>
-            <div className="progress-bar"></div>
-            <div className={`progress-step${step === 6 ? " active" : ""}`}>
-              6
             </div>
           </div>
           {step === 1 && renderStep1()}
           {step === 2 && renderStep3()}
           {step === 3 && renderStep4()}
           {step === 4 && renderStep2()}
-          {step === 5 && renderStep5()}
-          {step === 6 && renderStep6()}
+          {step === 5 && renderStep6()}
         </div>
       </div>
     </LoadScript>
