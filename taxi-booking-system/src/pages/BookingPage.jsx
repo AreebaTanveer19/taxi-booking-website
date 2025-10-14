@@ -866,7 +866,7 @@ const BookingPage = () => {
 
       // Send the booking data to the backend
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/bookings`,
+        `${import.meta.env.VITE_API_URL}/api/bookings/book`,
         {
           method: 'POST',
           headers: {
