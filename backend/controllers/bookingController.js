@@ -21,6 +21,7 @@ exports.createBooking = async (req, res) => {
             date,
             time,
             expectedEndTime,
+            bookingMethod,
             
             // Passenger Information
             totalPassengers,
@@ -38,33 +39,36 @@ exports.createBooking = async (req, res) => {
             
             // Vehicle Information
             vehicleType,
-            
-            // Payment Information
-            paymentMethod,
-            nameOnCard,
-            cardType,
-            expiryMonth,
-            expiryYear,
+            vehiclePreference,
             
             // Additional Information
             specialInstructions,
-            termsAccepted,
             
             // System Information
             distance,
-            estimatedCost
+            estimatedCost,
+            status,
+            createdAt
         } = req.body;
 
-        // Validate required fields
-        if (!name || !email || !phone || !city || !serviceType || !pickup || !dropoff || 
-            !date || !time || !totalPassengers || !adults || !vehicleType || !paymentMethod || 
-            !termsAccepted || estimatedCost === undefined) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        // Validate required fields - relaxed to match frontend
+        if (!name || !email || !phone || !city || !serviceType || !pickup || 
+            !date || !time || !totalPassengers || !adults || estimatedCost === undefined) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Missing required fields',
+                message: 'Please fill in all required fields'
+            });
         }
 
         // Validate passenger counts
-        if (parseInt(adults) + parseInt(children_0_4) + parseInt(children_5_8) !== parseInt(totalPassengers)) {
-            return res.status(400).json({ error: 'Passenger counts do not match' });
+        const totalPax = parseInt(adults || 0) + parseInt(children_0_4 || 0) + parseInt(children_5_8 || 0);
+        if (totalPax !== parseInt(totalPassengers)) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Passenger counts do not match',
+                message: 'Total passengers must equal sum of adults and children'
+            });
         }
 
         // Save or fetch user
@@ -73,6 +77,9 @@ exports.createBooking = async (req, res) => {
             user = new User({ name, email, phone });
             await user.save();
         }
+
+        // Use vehiclePreference if vehicleType is not provided
+        const vehicle = vehiclePreference || vehicleType;
 
         // Create and save booking
         const booking = new Booking({
@@ -85,30 +92,25 @@ exports.createBooking = async (req, res) => {
             terminal: serviceType === 'Airport Transfers' ? terminal : undefined,
             airportDirection: serviceType === 'Airport Transfers' ? airportDirection : undefined,
             pickup,
-            dropoff,
-            additionalStop,
+            dropoff: dropoff || '',
+            additionalStop: additionalStop || '',
             date,
             time,
-            expectedEndTime,
+            expectedEndTime: expectedEndTime || '',
+            bookingMethod: bookingMethod || 'distance',
             totalPassengers: parseInt(totalPassengers),
             adults: parseInt(adults),
             children_0_4: parseInt(children_0_4) || 0,
             children_5_8: parseInt(children_5_8) || 0,
             suitcases: parseInt(suitcases) || 0,
             carryOn: parseInt(carryOn) || 0,
-            flightNumber: serviceType === 'Airport Transfers' ? flightNumber : undefined,
-            flightTime: serviceType === 'Airport Transfers' ? flightTime : undefined,
-            vehicleType,
-            paymentMethod,
-            nameOnCard: paymentMethod === 'card' ? nameOnCard : undefined,
-            cardType: paymentMethod === 'card' ? cardType : undefined,
-            expiryMonth: paymentMethod === 'card' ? expiryMonth : undefined,
-            expiryYear: paymentMethod === 'card' ? expiryYear : undefined,
-            specialInstructions,
-            termsAccepted,
-            distance,
-            estimatedCost: estimatedCost,
-            status: 'pending'
+            flightNumber: serviceType === 'Airport Transfers' ? (flightNumber || '') : undefined,
+            flightTime: serviceType === 'Airport Transfers' ? (flightTime || '') : undefined,
+            vehiclePreference: vehicle,
+            specialInstructions: specialInstructions || '',
+            distance: distance || '',
+            estimatedCost: parseFloat(estimatedCost) || 0,
+            status: status || 'pending'
         });
 
         await booking.save();
@@ -119,12 +121,13 @@ exports.createBooking = async (req, res) => {
             'Name': name,
             'Email': email,
             'Phone': phone,
+            'City': city,
             'Service Type': serviceType,
             'From': pickup,
-            'To': dropoff,
+            'To': dropoff || 'N/A',
             'Date': date,
             'Time': time,
-            'Vehicle Type': vehicleType,
+            'Vehicle Type': vehicle,
             'Total Passengers': totalPassengers,
             'Adults': adults,
             'Children (0-4)': children_0_4 || 0,
@@ -132,15 +135,14 @@ exports.createBooking = async (req, res) => {
             'Suitcases': suitcases || 0,
             'Carry-on': carryOn || 0,
             'Estimated Cost': `$${estimatedCost}`,
-            'Payment Method': paymentMethod,
             'Special Instructions': specialInstructions || 'None'
         };
 
         if (serviceType === 'Airport Transfers') {
-            bookingDetails['Terminal'] = terminal;
+            bookingDetails['Terminal'] = terminal || 'N/A';
             bookingDetails['Direction'] = airportDirection === 'to' ? 'To Airport' : 'From Airport';
-            bookingDetails['Flight Number'] = flightNumber;
-            bookingDetails['Flight Time'] = flightTime;
+            bookingDetails['Flight Number'] = flightNumber || 'N/A';
+            bookingDetails['Flight Time'] = flightTime || 'N/A';
         }
 
         // Notify Admin
@@ -161,6 +163,7 @@ exports.createBooking = async (req, res) => {
             success: true,
             message: 'Booking successful', 
             bookingId: booking._id,
+            data: booking,
             bookingDetails
         });
     } catch (err) {
