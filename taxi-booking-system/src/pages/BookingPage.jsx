@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { LoadScript, Autocomplete, GoogleMap, DirectionsRenderer } from "@react-google-maps/api";
+import {
+  LoadScript,
+  Autocomplete,
+  GoogleMap,
+  DirectionsRenderer,
+} from "@react-google-maps/api";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "../styles/BookingPage.css";
@@ -8,20 +13,25 @@ import { motion } from "framer-motion";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
-import enGB from 'date-fns/locale/en-GB';
-import { sendBookingConfirmationEmail } from '../utils/emailService';
+import enGB from "date-fns/locale/en-GB";
+import {
+  sendAdminBookingNotification,
+  sendBookingConfirmationEmail,
+} from "../utils/emailService";
+import TermsAndConditionsModal from "./TermsAndConditions";
 
 // Register the UK locale for 24-hour time format
-registerLocale('en-GB', enGB);
-
+registerLocale("en-GB", enGB);
 
 const BookingPage = () => {
   // State for thank you modal
   const [thankYouModal, setThankYouModal] = useState({
     show: false,
     isSpecialVehicle: false,
-    vehicleType: ''
+    vehicleType: "",
+    serviceType: "",
   });
+  console.log("Thank You Modal State:", thankYouModal);
   const pickupAutocompleteRef = useRef(null);
   const dropoffAutocompleteRef = useRef(null);
   const phoneInputRef = useRef();
@@ -47,6 +57,8 @@ const BookingPage = () => {
   const [isBookingTooSoon, setIsBookingTooSoon] = useState(false);
   const [quoteRequested, setQuoteRequested] = useState(false);
   const [showQuoteConfirmation, setShowQuoteConfirmation] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [isTermOpen, setIsTermOpen] = useState(false);
 
   const [form, setForm] = useState({
     bookingMethod: "distance",
@@ -78,7 +90,7 @@ const BookingPage = () => {
     suitcases: 0,
     carryOn: 0,
   });
-  
+
   const additionalStopAutocompleteRef = useRef(null);
 
   const fleet = [
@@ -97,7 +109,7 @@ const BookingPage = () => {
         "https://i.pinimg.com/1200x/fa/9e/3d/fa9e3dbc28c719ec1caa58a73dcf261f.jpg",
       idealFor: "Business meetings, airport transfers, and special occasions",
     },
-    
+
     {
       id: 2,
       name: "Premium SUV",
@@ -163,16 +175,23 @@ const BookingPage = () => {
   // Airport terminal addresses for auto-filling pickup/dropoff locations
   const airportTerminalAddresses = {
     Sydney: {
-      "T1 International": "Sydney Airport Terminal 1, International Terminal, Sydney NSW 2020, Australia",
-      "T2 Domestic": "Sydney Airport Terminal 2, Domestic Terminal, Sydney NSW 2020, Australia",
-      "T3 Domestic": "Sydney Airport Terminal 3, Domestic Terminal, Sydney NSW 2020, Australia"
+      "T1 International":
+        "Sydney Airport Terminal 1, International Terminal, Sydney NSW 2020, Australia",
+      "T2 Domestic":
+        "Sydney Airport Terminal 2, Domestic Terminal, Sydney NSW 2020, Australia",
+      "T3 Domestic":
+        "Sydney Airport Terminal 3, Domestic Terminal, Sydney NSW 2020, Australia",
     },
     Melbourne: {
-      "T1 International": "Melbourne Airport Terminal 1, Departure Dr, Melbourne Airport VIC 3045, Australia",
-      "T2 Domestic": "Melbourne Airport Terminal 2, Departure Dr, Melbourne Airport VIC 3045, Australia",
-      "T3 Domestic": "Melbourne Airport Terminal 3, Departure Dr, Melbourne Airport VIC 3045, Australia",
-      "T4 Domestic": "Melbourne Airport Terminal 4, Departure Dr, Melbourne Airport VIC 3045, Australia"
-    }
+      "T1 International":
+        "Melbourne Airport Terminal 1, Departure Dr, Melbourne Airport VIC 3045, Australia",
+      "T2 Domestic":
+        "Melbourne Airport Terminal 2, Departure Dr, Melbourne Airport VIC 3045, Australia",
+      "T3 Domestic":
+        "Melbourne Airport Terminal 3, Departure Dr, Melbourne Airport VIC 3045, Australia",
+      "T4 Domestic":
+        "Melbourne Airport Terminal 4, Departure Dr, Melbourne Airport VIC 3045, Australia",
+    },
   };
 
   const [step, setStep] = useState(1);
@@ -203,7 +222,7 @@ const BookingPage = () => {
   const handleDropoffPlaceChanged = () => {
     const place = dropoffAutocompleteRef.current.getPlace();
     if (place && place.formatted_address) {
-      setForm((prev) => ({ ...prev, dropoff: place.formatted_address }));      // Clear dropoff error when valid location is selected
+      setForm((prev) => ({ ...prev, dropoff: place.formatted_address })); // Clear dropoff error when valid location is selected
       setErrors((prevErrors) => {
         const newErrors = { ...prevErrors };
         delete newErrors.dropoff;
@@ -229,10 +248,11 @@ const BookingPage = () => {
   const handleAirportDirectionChange = (direction) => {
     setForm((prev) => {
       const updatedForm = { ...prev, airportDirection: direction };
-      
+
       // Auto-fill pickup or dropoff based on direction and terminal
       if (direction && prev.terminal && prev.city) {
-        const terminalAddress = airportTerminalAddresses[prev.city]?.[prev.terminal];
+        const terminalAddress =
+          airportTerminalAddresses[prev.city]?.[prev.terminal];
         if (terminalAddress) {
           if (direction === "to") {
             // Going TO airport: dropoff should be the terminal
@@ -243,7 +263,7 @@ const BookingPage = () => {
           }
         }
       }
-      
+
       return updatedForm;
     });
   };
@@ -252,7 +272,7 @@ const BookingPage = () => {
   const handleTerminalChange = (terminal) => {
     setForm((prev) => {
       const updatedForm = { ...prev, terminal };
-      
+
       // Auto-fill pickup or dropoff based on direction and new terminal
       if (terminal && prev.airportDirection && prev.city) {
         const terminalAddress = airportTerminalAddresses[prev.city]?.[terminal];
@@ -266,7 +286,7 @@ const BookingPage = () => {
           }
         }
       }
-      
+
       return updatedForm;
     });
   };
@@ -277,12 +297,12 @@ const BookingPage = () => {
       if (!form.pickup || !form.dropoff || form.bookingMethod !== "distance") {
         return;
       }
-      
+
       setDistanceLoading(true);
       try {
         const service = new window.google.maps.DistanceMatrixService();
         let totalDistance = 0;
-        
+
         // Calculate distance from pickup to additional stop if provided
         if (form.additionalStop) {
           const leg1 = await service.getDistanceMatrix({
@@ -291,7 +311,7 @@ const BookingPage = () => {
             travelMode: "DRIVING",
           });
           totalDistance += leg1.rows[0].elements[0].distance.value;
-          
+
           // Calculate distance from additional stop to dropoff
           const leg2 = await service.getDistanceMatrix({
             origins: [form.additionalStop],
@@ -308,31 +328,34 @@ const BookingPage = () => {
           });
           totalDistance = result.rows[0].elements[0].distance.value;
         }
-        
-        setForm(prev => ({
+
+        setForm((prev) => ({
           ...prev,
-          distance: totalDistance
+          distance: totalDistance,
         }));
-        
+
         // Recalculate fare with new distance
-        setEstimatedFare(calculateFare({
-          ...form,
-          distance: totalDistance
-        }));
-        
+        setEstimatedFare(
+          calculateFare({
+            ...form,
+            distance: totalDistance,
+          })
+        );
       } catch (error) {
         console.error("Error calculating distance:", error);
-        setDistanceError("Failed to calculate distance. Please check the addresses and try again.");
+        setDistanceError(
+          "Failed to calculate distance. Please check the addresses and try again."
+        );
       } finally {
         setDistanceLoading(false);
       }
     };
-    
+
     // Add a small debounce to prevent too many API calls
     const timer = setTimeout(() => {
       calculateDistance();
     }, 500);
-    
+
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.pickup, form.dropoff, form.additionalStop, form.bookingMethod]);
@@ -340,7 +363,7 @@ const BookingPage = () => {
   const calculateDuration = (startTime, endTime) => {
     // Handle both Date objects and string time formats
     let startDate, endDate;
-    
+
     if (startTime instanceof Date) {
       startDate = startTime;
     } else {
@@ -348,7 +371,7 @@ const BookingPage = () => {
       startDate = new Date();
       startDate.setHours(startHours, startMinutes, 0, 0);
     }
-    
+
     if (endTime instanceof Date) {
       endDate = endTime;
     } else {
@@ -356,53 +379,109 @@ const BookingPage = () => {
       endDate = new Date();
       endDate.setHours(endHours, endMinutes, 0, 0);
     }
-    
+
     // Handle overnight bookings (if end time is before start time, it's the next day)
     if (endDate < startDate) {
       endDate.setDate(endDate.getDate() + 1);
     }
-    
+
     // Calculate difference in minutes
     const diffMs = endDate - startDate;
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     return diffMins;
   };
 
-
-
   // State for vehicle prices
-  const [vehiclePrices, setVehiclePrices] = useState({});
+  const [vehiclePrices, setVehiclePrices] = useState({
+    "Executive Sedan": {
+      baseFare: 70,
+      perKmRate: 2.5,
+      hourlyRate: 100,
+      baseDistance: 1,
+    },
+    "Premium Sedan": {
+      baseFare: 125,
+      perKmRate: 5.5,
+      hourlyRate: 120,
+      baseDistance: 5,
+    },
+    "Premium SUV": {
+      baseFare: 80,
+      perKmRate: 3,
+      hourlyRate: 110,
+      baseDistance: 1,
+    },
+    "Luxury Van": {
+      baseFare: 110,
+      perKmRate: 4.5,
+      hourlyRate: 130,
+      baseDistance: 5,
+    },
+    Sprinter: {
+      baseFare: 150,
+      perKmRate: 6,
+      hourlyRate: 200,
+      baseDistance: 10,
+    },
+  });
   const [pricesLoading, setPricesLoading] = useState(true);
 
   // Fetch vehicle prices on component mount
   useEffect(() => {
     const fetchVehiclePrices = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/vehicle-prices`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/admin/vehicle-prices`
+        );
         const data = await response.json();
         if (data.success) {
           // Convert array to object for easier access
           const pricesObj = {};
-          data.data.forEach(price => {
+          data.data.forEach((price) => {
             pricesObj[price.vehicleType] = {
               baseFare: price.baseFare,
               perKmRate: price.perKmRate,
               hourlyRate: price.hourlyRate,
-              baseDistance: price.baseDistance
+              baseDistance: price.baseDistance,
             };
           });
           setVehiclePrices(pricesObj);
         }
       } catch (error) {
-        console.error('Error fetching vehicle prices:', error);
+        console.error("Error fetching vehicle prices:", error);
         // Fallback to default prices if API fails
         setVehiclePrices({
-          "Executive Sedan": { baseFare: 70, perKmRate: 2.5, hourlyRate: 100, baseDistance: 1 },
-          "Premium Sedan": { baseFare: 125, perKmRate: 5.5, hourlyRate: 120, baseDistance: 5 },
-          "Premium SUV": { baseFare: 80, perKmRate: 3, hourlyRate: 110, baseDistance: 1 },
-          "Luxury Van": { baseFare: 110, perKmRate: 4.5, hourlyRate: 130, baseDistance: 5 },
-          "Sprinter": { baseFare: 150, perKmRate: 6, hourlyRate: 200, baseDistance: 10 }
+          "Executive Sedan": {
+            baseFare: 70,
+            perKmRate: 2.5,
+            hourlyRate: 100,
+            baseDistance: 1,
+          },
+          "Premium Sedan": {
+            baseFare: 125,
+            perKmRate: 5.5,
+            hourlyRate: 120,
+            baseDistance: 5,
+          },
+          "Premium SUV": {
+            baseFare: 80,
+            perKmRate: 3,
+            hourlyRate: 110,
+            baseDistance: 1,
+          },
+          "Luxury Van": {
+            baseFare: 110,
+            perKmRate: 4.5,
+            hourlyRate: 130,
+            baseDistance: 5,
+          },
+          Sprinter: {
+            baseFare: 150,
+            perKmRate: 6,
+            hourlyRate: 200,
+            baseDistance: 10,
+          },
         });
       } finally {
         setPricesLoading(false);
@@ -422,7 +501,7 @@ const BookingPage = () => {
     let boosterSeatTotal = 0;
     let total = 0;
     const distanceInKm = (formData.distance || 0) / 1000;
-    
+
     if (pricesLoading) {
       // Return a loading state with all zeros if prices are still loading
       return {
@@ -434,14 +513,18 @@ const BookingPage = () => {
         boosterSeatTotal: 0,
         additionalStopCharge: 0,
         total: 0,
-        loading: true
+        loading: true,
       };
     }
-    
+
     if (formData.bookingMethod === "distance") {
-      const rates = vehiclePrices[formData.vehiclePreference] || vehiclePrices["Executive Sedan"] || 
-        { baseFare: 70, perKmRate: 2.5, baseDistance: 1 };
-      
+      const rates = vehiclePrices[formData.vehiclePreference] ||
+        vehiclePrices["Executive Sedan"] || {
+          baseFare: 70,
+          perKmRate: 2.5,
+          baseDistance: 1,
+        };
+
       baseFare = rates.baseFare;
       if (distanceInKm > rates.baseDistance) {
         distanceCharge = (distanceInKm - rates.baseDistance) * rates.perKmRate;
@@ -449,9 +532,10 @@ const BookingPage = () => {
       total = baseFare + distanceCharge;
     } else {
       // Time-based
-      const rates = vehiclePrices[formData.vehiclePreference] || vehiclePrices["Executive Sedan"] || 
-        { hourlyRate: 100 };
-      const hours = calculateDuration(formData.time, formData.expectedEndTime) / 60;
+      const rates = vehiclePrices[formData.vehiclePreference] ||
+        vehiclePrices["Executive Sedan"] || { hourlyRate: 100 };
+      const hours =
+        calculateDuration(formData.time, formData.expectedEndTime) / 60;
       timeCharge = hours * rates.hourlyRate;
       total = timeCharge;
     }
@@ -486,25 +570,24 @@ const BookingPage = () => {
       babySeatTotal: Math.round(babySeatTotal),
       boosterSeatTotal: Math.round(boosterSeatTotal),
       additionalStopCharge: Math.round(additionalStopCharge),
-      total: Math.round(total)
+      total: Math.round(total),
     };
   };
 
   // Legacy: used in vehicle cards
   const calculateFare = (formData) => calculateFareBreakdown(formData).total;
 
-
   const calculateRoute = async () => {
     if (form.pickup && form.dropoff && window.google) {
       try {
         const directionsService = new window.google.maps.DirectionsService();
         const waypoints = [];
-        
+
         // Add additional stop as a waypoint if provided
         if (form.additionalStop) {
           waypoints.push({
             location: form.additionalStop,
-            stopover: true
+            stopover: true,
           });
         }
 
@@ -532,7 +615,9 @@ const BookingPage = () => {
       } catch (error) {
         console.error("Error calculating route:", error);
         // Optionally set an error state to show to the user
-        setDistanceError("Unable to calculate route. Please check the addresses and try again.");
+        setDistanceError(
+          "Unable to calculate route. Please check the addresses and try again."
+        );
       }
     }
   };
@@ -568,71 +653,76 @@ const BookingPage = () => {
 
   const checkBookingTime = (date, time) => {
     if (!date || !time) return false;
-    
+
     // Create a new date object for the booking time
     const bookingDateTime = new Date(date);
-    
+
     // If time is a string (HH:MM), parse it
-    if (typeof time === 'string') {
-      const [hours, minutes] = time.split(':');
-      bookingDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+    if (typeof time === "string") {
+      const [hours, minutes] = time.split(":");
+      bookingDateTime.setHours(
+        parseInt(hours, 10),
+        parseInt(minutes, 10),
+        0,
+        0
+      );
     } else if (time instanceof Date) {
       // If time is a Date object, use it directly
       bookingDateTime.setHours(time.getHours(), time.getMinutes(), 0, 0);
     } else {
       return false;
     }
-    
+
     const now = new Date();
     const eightHoursFromNow = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-    
+
     return bookingDateTime < eightHoursFromNow;
   };
 
   // Handler for date and time changes
   const handleDateTimeChange = (date, field) => {
     if (!date) return;
-    
-    setForm(prev => {
+
+    setForm((prev) => {
       const newForm = { ...prev };
       let isTooSoon = false;
-      
-      if (field === 'date') {
+
+      if (field === "date") {
         newForm.date = date;
         // Check if the selected time with the new date is too soon
         if (newForm.time) {
           isTooSoon = checkBookingTime(date, newForm.time);
         }
-      } else if (field === 'time') {
+      } else if (field === "time") {
         // Store the time as a Date object
         newForm.time = date;
-        
+
         // Check if the selected time is too soon
         if (newForm.date) {
           isTooSoon = checkBookingTime(newForm.date, date);
         }
-        
+
         // Clear the expectedEndTime error when start time is changed
-        setErrors(prevErrors => ({
+        setErrors((prevErrors) => ({
           ...prevErrors,
-          expectedEndTime: undefined
+          expectedEndTime: undefined,
         }));
-      } else if (field === 'expectedEndTime') {
+      } else if (field === "expectedEndTime") {
         // Store the end time as a Date object
         newForm.expectedEndTime = date;
-        
+
         // Clear the expectedEndTime error when end time is changed
-        setErrors(prevErrors => ({
+        setErrors((prevErrors) => ({
           ...prevErrors,
-          expectedEndTime: undefined
+          expectedEndTime: undefined,
         }));
       }
-      
+
       // Update the isBookingTooSoon state
       setIsBookingTooSoon(isTooSoon);
-      
+
       return newForm;
-    })
+    });
   };
 
   const handleInputChange = (e) => {
@@ -640,33 +730,33 @@ const BookingPage = () => {
       return; // Skip if no event or target
     }
     const { name, value, type, checked } = e.target;
-    
+
     // Create updated form data
     const updatedForm = {
       ...form,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     };
-    
+
     // Check if the booking is too soon when date or time changes
-    if (name === 'date' || name === 'time') {
+    if (name === "date" || name === "time") {
       const isTooSoon = checkBookingTime(
-        name === 'date' ? value : updatedForm.date,
-        name === 'time' ? value : updatedForm.time
+        name === "date" ? value : updatedForm.date,
+        name === "time" ? value : updatedForm.time
       );
       setIsBookingTooSoon(isTooSoon);
     }
-    
+
     // Handle airport direction and terminal changes with auto-fill logic
-    if (name === 'airportDirection') {
+    if (name === "airportDirection") {
       handleAirportDirectionChange(value);
       return;
     }
-    
-    if (name === 'terminal') {
+
+    if (name === "terminal") {
       handleTerminalChange(value);
       return;
     }
-    
+
     setForm(updatedForm);
 
     // Clear pickup and dropoff when city changes
@@ -678,7 +768,7 @@ const BookingPage = () => {
         dropoff: "",
         // Also clear terminal and direction when city changes
         terminal: "",
-        airportDirection: ""
+        airportDirection: "",
       }));
     }
 
@@ -688,7 +778,7 @@ const BookingPage = () => {
         ...prev,
         [name]: value,
         terminal: "",
-        airportDirection: ""
+        airportDirection: "",
       }));
     }
 
@@ -750,17 +840,26 @@ const BookingPage = () => {
         case "children_0_4":
         case "children_5_8":
           // Validate that total passengers equals sum of age groups
-          const currentForm = name === "passengers" ? { ...form, passengers: parseInt(value) || 0 } :
-                             name === "adults" ? { ...form, adults: parseInt(value) || 0 } :
-                             name === "children_0_4" ? { ...form, children_0_4: parseInt(value) || 0 } :
-                             { ...form, children_5_8: parseInt(value) || 0 };
-          
+          const currentForm =
+            name === "passengers"
+              ? { ...form, passengers: parseInt(value) || 0 }
+              : name === "adults"
+              ? { ...form, adults: parseInt(value) || 0 }
+              : name === "children_0_4"
+              ? { ...form, children_0_4: parseInt(value) || 0 }
+              : { ...form, children_5_8: parseInt(value) || 0 };
+
           const totalPassengers = parseInt(currentForm.passengers) || 0;
-          const sumAgeGroups = (parseInt(currentForm.adults) || 0) + 
-                              (parseInt(currentForm.children_0_4) || 0) + 
-                              (parseInt(currentForm.children_5_8) || 0);
-          
-          if (totalPassengers !== sumAgeGroups && totalPassengers > 0 && sumAgeGroups > 0) {
+          const sumAgeGroups =
+            (parseInt(currentForm.adults) || 0) +
+            (parseInt(currentForm.children_0_4) || 0) +
+            (parseInt(currentForm.children_5_8) || 0);
+
+          if (
+            totalPassengers !== sumAgeGroups &&
+            totalPassengers > 0 &&
+            sumAgeGroups > 0
+          ) {
             newErrors.passengers = `Total passengers (${totalPassengers}) must equal sum of all age groups (${sumAgeGroups})`;
           } else {
             delete newErrors.passengers;
@@ -787,29 +886,47 @@ const BookingPage = () => {
 
     try {
       // Validate all required fields
-      if (!form.name || !form.email || !form.phone || !form.city || !form.serviceType || 
-          !form.pickup || !form.date || !form.time || !form.vehiclePreference) {
-        alert('Please fill in all required fields');
+      if (
+        !form.name ||
+        !form.email ||
+        !form.phone ||
+        !form.city ||
+        !form.serviceType ||
+        !form.pickup ||
+        !form.date ||
+        !form.time ||
+        !form.vehiclePreference
+      ) {
+        alert("Please fill in all required fields");
+        return;
+      }
+
+      if (termsAccepted === false) {
+        alert(
+          "You must accept the terms and conditions to proceed with the booking."
+        );
         return;
       }
 
       // Check if booking is too soon
-      if (checkBookingTime(form.date, form.time)) {
-        setIsBookingTooSoon(true);
-        alert('Bookings must be made at least 8 hours in advance. Please select a later time.');
-        return;
-      }
+      // if (checkBookingTime(form.date, form.time)) {
+      //   setIsBookingTooSoon(true);
+      //   alert(
+      //     "Bookings must be made at least 8 hours in advance. Please select a later time."
+      //   );
+      //   return;
+      // }
 
       // Format dates for submission
       const formatDate = (date) => {
-        if (!date) return '';
+        if (!date) return "";
         const d = new Date(date);
-        return d.toISOString().split('T')[0];
+        return d.toISOString().split("T")[0];
       };
 
       const formatTime = (date) => {
-        if (!date) return '';
-        if (typeof date === 'string') return date; // Already in HH:MM format
+        if (!date) return "";
+        if (typeof date === "string") return date; // Already in HH:MM format
         const d = new Date(date);
         return d.toTimeString().slice(0, 5); // Returns HH:MM
       };
@@ -825,52 +942,57 @@ const BookingPage = () => {
         phone: form.phone,
         city: form.city,
         serviceType: form.serviceType,
-        
+
         // Location info
         pickup: form.pickup,
-        dropoff: form.dropoff || '',
-        additionalStop: form.additionalStop || '',
-        terminal: form.terminal || '',
-        airportDirection: form.airportDirection || '',
-        
+        dropoff: form.dropoff || "",
+        additionalStop: form.additionalStop || "",
+        terminal: form.terminal || "",
+        airportDirection: form.airportDirection || "",
+
         // Date and time
         date: formatDate(form.date),
         time: formatTime(form.time),
-        expectedEndTime: form.expectedEndTime ? formatTime(form.expectedEndTime) : '',
-        bookingMethod: form.bookingMethod || 'distance',
-        
+        expectedEndTime: form.expectedEndTime
+          ? formatTime(form.expectedEndTime)
+          : "",
+        bookingMethod: form.bookingMethod || "distance",
+
         // Passenger and luggage info
-        totalPassengers: parseInt(form.adults || 0) + parseInt(form.children_0_4 || 0) + parseInt(form.children_5_8 || 0),
+        totalPassengers:
+          parseInt(form.adults || 0) +
+          parseInt(form.children_0_4 || 0) +
+          parseInt(form.children_5_8 || 0),
         adults: parseInt(form.adults || 0),
         children_0_4: parseInt(form.children_0_4 || 0),
         children_5_8: parseInt(form.children_5_8 || 0),
         suitcases: parseInt(form.suitcases || 0),
         carryOn: parseInt(form.carryOn || 0),
-        
+
         // Vehicle and pricing
         vehiclePreference: form.vehiclePreference,
         estimatedCost: Math.round(finalCost),
-        
+
         // System fields
-        status: 'pending',
+        status: "pending",
         createdAt: new Date().toISOString(),
-        
+
         // Optional fields
-        specialInstructions: form.specialInstructions || '',
-        flightNumber: form.flightNumber || '',
-        flightTime: form.flightTime || ''
+        specialInstructions: form.specialInstructions || "",
+        flightNumber: form.flightNumber || "",
+        flightTime: form.flightTime || "",
       };
 
       // Log the data being sent for debugging
-      console.log('Submitting booking:', bookingData);
+      console.log("Submitting booking:", bookingData);
 
       // Send the booking data to the backend
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/bookings/book`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(bookingData),
         }
@@ -878,46 +1000,55 @@ const BookingPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Server error:', errorData);
-        throw new Error(errorData.message || 'Failed to submit booking');
+        console.error("Server error:", errorData);
+        throw new Error(errorData.message || "Failed to submit booking");
       }
 
       const result = await response.json();
+      console.log("Booking response:", result);
 
       if (result.success) {
         // Add the booking ID from the response to the booking data
         const bookingDataWithId = {
           ...bookingData,
-          _id: result.data?._id || result.bookingId || 'Pending'
+          _id: result.data?._id || result.bookingId || "Pending",
         };
-        
+
         // Check if this is a Sprinter or non-standard vehicle booking
-        const isSpecialVehicle = form.vehiclePreference === 'Sprinter' || 
-                             !['Airport Transfers', 'Point to Point', 'Crew Transfer'].includes(form.serviceType);
-        
+        const isSpecialVehicle =
+          form.vehiclePreference === "Sprinter" ||
+          !["Airport Transfers", "Point to Point", "Crew Transfer"].includes(
+            form.serviceType
+          );
+
         // Send booking confirmation email with special flag for Sprinter/non-standard bookings
         try {
-          await sendBookingConfirmationEmail({
+          await sendAdminBookingNotification({
             ...bookingData,
-            bookingId: result.data?._id || result.bookingId || 'N/A',
-            isSpecialVehicle: isSpecialVehicle
+            bookingId: result.data?._id || result.bookingId || "N/A",
+            isSpecialVehicle: isSpecialVehicle,
           });
         } catch (emailError) {
-          console.error('Error sending confirmation email:', emailError);
+          console.error("Error sending confirmation email:", emailError);
           // Don't fail the booking if email fails
         }
 
         setThankYouModal({
           show: true,
           isSpecialVehicle: isSpecialVehicle,
-          vehicleType: form.vehiclePreference
+          vehicleType: form.vehiclePreference,
+          serviceType: form.serviceType,
         });
       } else {
-        throw new Error(result.message || 'Booking failed');
+        throw new Error(result.message || "Booking failed");
       }
     } catch (error) {
       console.error("Booking error:", error);
-      alert(`Booking failed: ${error.message || 'Please check your details and try again'}`);
+      alert(
+        `Booking failed: ${
+          error.message || "Please check your details and try again"
+        }`
+      );
     }
   };
 
@@ -983,96 +1114,121 @@ const BookingPage = () => {
   const validateStep3 = () => {
     const newErrors = {};
     let isValid = true;
-    
+
     // Check if pickup location is set
     if (!form.pickup) {
       newErrors.pickup = "Pickup location is required";
       isValid = false;
     }
-    
+
     // Check if dropoff location is set
     if (!form.dropoff) {
       newErrors.dropoff = "Dropoff location is required";
       isValid = false;
     }
-    
+
     // Check if date is set
     if (!form.date) {
       newErrors.date = "Date is required";
       isValid = false;
     }
-    
+
     // Check if time is set
     if (!form.time) {
       newErrors.time = "Time is required";
       isValid = false;
     }
-    
+
     // Check if booking method is selected
     if (!form.bookingMethod) {
       newErrors.bookingMethod = "Please select a booking method";
       isValid = false;
     }
-    
+
     // For airport transfers, check if direction is selected
     if (form.serviceType === "Airport Transfers" && !form.airportDirection) {
       newErrors.airportDirection = "Please select airport direction";
       isValid = false;
     }
-    
+
     // For distance-based bookings, ensure distance is calculated
-    if (form.bookingMethod === 'distance' && (!form.distance || form.distance <= 0)) {
+    if (
+      form.bookingMethod === "distance" &&
+      (!form.distance || form.distance <= 0)
+    ) {
       newErrors.distance = "Please calculate the distance first";
       isValid = false;
     }
-    
+
     // For time-based bookings, ensure end time is set
-    if (form.bookingMethod === 'time' && !form.expectedEndTime) {
+    if (form.bookingMethod === "time" && !form.expectedEndTime) {
       newErrors.expectedEndTime = "End time is required for time-based booking";
       isValid = false;
     }
-    
+
     // For time-based bookings, ensure minimum 2-hour duration
-    if (form.bookingMethod === 'time' && form.time && form.expectedEndTime) {
+    if (form.bookingMethod === "time" && form.time && form.expectedEndTime) {
       // Create Date objects for today with the selected times
       const today = new Date();
-      const startTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
-                               form.time.getHours(), form.time.getMinutes());
-      const endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
-                             form.expectedEndTime.getHours(), form.expectedEndTime.getMinutes());
-      
+      const startTime = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        form.time.getHours(),
+        form.time.getMinutes()
+      );
+      const endTime = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        form.expectedEndTime.getHours(),
+        form.expectedEndTime.getMinutes()
+      );
+
       // Handle case where end time is on the next day
       if (endTime <= startTime) {
         endTime.setDate(endTime.getDate() + 1);
       }
-      
+
       const durationHours = (endTime - startTime) / (1000 * 60 * 60);
-      
+
       if (durationHours < 2) {
         newErrors.expectedEndTime = "Minimum booking duration is 2 hours";
         isValid = false;
       }
     }
-    
+
     // Update errors state
-    setErrors(prev => ({ ...prev, ...newErrors }));
-    
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+
     // Scroll to first error if any
     if (!isValid) {
       const firstErrorKey = Object.keys(newErrors)[0];
-      const errorRef = firstErrorKey === 'pickup' ? pickupRef :
-                     firstErrorKey === 'dropoff' ? dropoffRef :
-                     firstErrorKey === 'date' ? dateRef :
-                     firstErrorKey === 'time' ? timeRef :
-                     firstErrorKey === 'bookingMethod' ? bookingMethodRef :
-                     firstErrorKey === 'airportDirection' ? serviceTypeRef :
-                     firstErrorKey === 'expectedEndTime' ? expectedEndTimeRef : null;
-      
+      const errorRef =
+        firstErrorKey === "pickup"
+          ? pickupRef
+          : firstErrorKey === "dropoff"
+          ? dropoffRef
+          : firstErrorKey === "date"
+          ? dateRef
+          : firstErrorKey === "time"
+          ? timeRef
+          : firstErrorKey === "bookingMethod"
+          ? bookingMethodRef
+          : firstErrorKey === "airportDirection"
+          ? serviceTypeRef
+          : firstErrorKey === "expectedEndTime"
+          ? expectedEndTimeRef
+          : null;
+
       if (errorRef && errorRef.current) {
-        errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        errorRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
       }
     }
-    
+
     return isValid;
   };
 
@@ -1109,7 +1265,6 @@ const BookingPage = () => {
     return true;
   };
 
-
   // Scroll to top on step change
   useEffect(() => {
     if (formContainerRef.current) {
@@ -1132,71 +1287,71 @@ const BookingPage = () => {
   }, [step]);
 
   const renderStep1 = () => (
-  <motion.div
-    className="step-container step-1-simple"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.5 }}
-  >
-    <div className="step-header">
-      <h2 className="step-title">Select Booking Type</h2>
-    </div>
+    <motion.div
+      className="step-container step-1-simple"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="step-header">
+        <h2 className="step-title">Select Booking Type</h2>
+      </div>
 
-    <div className="booking-type-cards">
-      <motion.div
-        className={`booking-type-card distance-based ${
-          selectedOption === "distance" ? "selected" : ""
-        }`}
-        onClick={() => {
-          setForm({ ...form, bookingMethod: "distance" });
-          setSelectedOption("distance");
-          setStep(2);
-        }}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <h3 className="card-title">Distance Based</h3>
-        <p className="card-subtitle">Calculate cost by distance travelled</p>
-        <div className="card-icon">
-          <FaMapMarkerAlt />
-        </div>
-      </motion.div>
-
-      <motion.div
-        className={`booking-type-card time-based ${
-          selectedOption === "time" ? "selected" : ""
-        }`}
-        onClick={() => {
-          setForm({ ...form, bookingMethod: "time" });
-          setSelectedOption("time");
-          setStep(2);
-        }}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <h3 className="card-title">Time Based</h3>
-        <p className="card-subtitle">Calculate cost by duration of booking</p>
-        <div className="card-icon">
-          <FaRegClock />
-        </div>
-      </motion.div>
-    </div>
-
-    <div className="step-actions">
-      <button 
-        className="next-button"
-        onClick={() => {
-          if (selectedOption) {
+      <div className="booking-type-cards">
+        <motion.div
+          className={`booking-type-card distance-based ${
+            selectedOption === "distance" ? "selected" : ""
+          }`}
+          onClick={() => {
+            setForm({ ...form, bookingMethod: "distance" });
+            setSelectedOption("distance");
             setStep(2);
-          }
-        }}
-        disabled={!selectedOption}
-      >
-        Next
-      </button>
-    </div>
-  </motion.div>
-);  
+          }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <h3 className="card-title">Distance Based</h3>
+          <p className="card-subtitle">Calculate cost by distance travelled</p>
+          <div className="card-icon">
+            <FaMapMarkerAlt />
+          </div>
+        </motion.div>
+
+        <motion.div
+          className={`booking-type-card time-based ${
+            selectedOption === "time" ? "selected" : ""
+          }`}
+          onClick={() => {
+            setForm({ ...form, bookingMethod: "time" });
+            setSelectedOption("time");
+            setStep(2);
+          }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <h3 className="card-title">Time Based</h3>
+          <p className="card-subtitle">Calculate cost by duration of booking</p>
+          <div className="card-icon">
+            <FaRegClock />
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="step-actions">
+        <button
+          className="next-button"
+          onClick={() => {
+            if (selectedOption) {
+              setStep(2);
+            }
+          }}
+          disabled={!selectedOption}
+        >
+          Next
+        </button>
+      </div>
+    </motion.div>
+  );
 
   const renderStep2 = () => (
     <motion.div
@@ -1207,114 +1362,132 @@ const BookingPage = () => {
     >
       <h2 className="step-title">Step 04: Your Details</h2>
       <form className="booking-form">
-      <div className="form-container">
-        {/* Name and Email Row */}
-        <div className="form-row">
-          <div className="form-group">
-            <label>Name</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleInputChange}
-              required
-              ref={nameRef}
-            />
-            {errors.name && (
-              <div className="error-message">{errors.name}</div>
-            )}
+        <div className="form-container">
+          {/* Name and Email Row */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Name</label>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleInputChange}
+                required
+                ref={nameRef}
+              />
+              {errors.name && (
+                <div className="error-message">{errors.name}</div>
+              )}
+            </div>
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleInputChange}
+                required
+                ref={emailRef}
+              />
+              {errors.email && (
+                <div className="error-message">{errors.email}</div>
+              )}
+            </div>
           </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleInputChange}
-              required
-              ref={emailRef}
-            />
-            {errors.email && (
-              <div className="error-message">{errors.email}</div>
-            )}
+
+          {/* Phone Row */}
+          <div className="form-row">
+            <div className="form-group full-width">
+              <label>Phone</label>
+              <PhoneInput
+                country={"au"}
+                value={form.phone}
+                onChange={handlePhoneChange}
+              />
+              {errors.phone && (
+                <div className="error-message">{errors.phone}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Special Instructions Row */}
+          <div className="form-row">
+            <div className="form-group full-width">
+              <label>Special Instructions (Optional)</label>
+              <textarea
+                name="specialInstructions"
+                value={form.specialInstructions}
+                onChange={handleInputChange}
+                rows="6"
+                placeholder="Any special requests?"
+              ></textarea>
+            </div>
           </div>
         </div>
-        
-        {/* Phone Row */}
-        <div className="form-row">
-          <div className="form-group full-width">
-            <label>Phone</label>
-            <PhoneInput
-              country={"au"}
-              value={form.phone}
-              onChange={handlePhoneChange}
-            />
-            {errors.phone && (
-              <div className="error-message">{errors.phone}</div>
-            )}
-          </div>
-        </div>
-        
-        {/* Special Instructions Row */}
-        <div className="form-row">
-          <div className="form-group full-width">
-            <label>Special Instructions (Optional)</label>
-            <textarea
-              name="specialInstructions"
-              value={form.specialInstructions}
-              onChange={handleInputChange}
-              rows="6"
-              placeholder="Any special requests?"
-            ></textarea>
-          </div>
-        </div>
-      </div>
         <div className="form-actions">
           <button type="button" onClick={() => setStep(3)}>
             Back
           </button>
-          {form.vehiclePreference === 'Sprinter' ? (
+          {form.vehiclePreference === "Sprinter" ? (
             <>
               <button
                 type="button"
-                style={{ background: '#8b5a2b', color: '#fff', fontWeight: 600 }}
+                style={{
+                  background: "#8b5a2b",
+                  color: "#fff",
+                  fontWeight: 600,
+                }}
                 onClick={() => setShowQuoteConfirmation(true)}
                 disabled={quoteRequested}
               >
-                {quoteRequested ? 'Request Sent!' : 'Get Quote from our Team'}
+                {quoteRequested ? "Request Sent!" : "Get Quote from our Team"}
               </button>
               {quoteRequested && (
-                <p style={{ color: '#4CAF50', marginTop: '10px', fontSize: '0.9rem' }}>
+                <p
+                  style={{
+                    color: "#4CAF50",
+                    marginTop: "10px",
+                    fontSize: "0.9rem",
+                  }}
+                >
                   Thank you! Our team will contact you soon with your quote.
                 </p>
               )}
-              
+
               {/* Quote Confirmation Modal */}
               {showQuoteConfirmation && (
-                <div style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 1000,
-                }}>
-                  <div style={{
-                    backgroundColor: 'white',
-                    padding: '2rem',
-                    borderRadius: '8px',
-                    maxWidth: '500px',
-                    width: '90%',
-                    textAlign: 'center',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}>
-                    <h3 style={{ marginTop: 0, color: '#333' }}>Confirm Quote Request</h3>
-                    <p>Are you sure you want to request a quote for your trip?</p>
-                    <div style={{ marginTop: '1.5rem' }}>
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000,
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: "white",
+                      padding: "2rem",
+                      borderRadius: "8px",
+                      maxWidth: "500px",
+                      width: "90%",
+                      textAlign: "center",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    <h3 style={{ marginTop: 0, color: "#333" }}>
+                      Confirm Quote Request
+                    </h3>
+                    <p>
+                      Are you sure you want to request a quote for your trip?
+                    </p>
+                    <div style={{ marginTop: "1.5rem" }}>
                       <button
                         onClick={async () => {
                           setShowQuoteConfirmation(false);
@@ -1333,45 +1506,57 @@ const BookingPage = () => {
                               adults: form.adults,
                               children_0_4: form.children_0_4,
                               children_5_8: form.children_5_8,
-                              vehiclePreference: form.vehiclePreference || 'Not selected',
-                              specialInstructions: form.specialInstructions || '',
-                              type: 'quote_request'
+                              vehiclePreference:
+                                form.vehiclePreference || "Not selected",
+                              specialInstructions:
+                                form.specialInstructions || "",
+                              type: "quote_request",
                             };
 
                             // Send quote request to the server
-                            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-quote-request`, {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify(quoteData),
-                            });
+                            const response = await fetch(
+                              `${
+                                import.meta.env.VITE_API_URL
+                              }/api/email/send-quote-request`,
+                              {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify(quoteData),
+                              }
+                            );
 
                             if (!response.ok) {
-                              throw new Error('Failed to send quote request');
+                              throw new Error("Failed to send quote request");
                             }
 
                             // Show success message
                             setQuoteRequested(true);
-                            
+
                             // Reset the message after 5 seconds
                             setTimeout(() => {
                               setQuoteRequested(false);
                             }, 5000);
                           } catch (error) {
-                            console.error('Error sending quote request:', error);
-                            alert('Failed to send quote request. Please try again.');
+                            console.error(
+                              "Error sending quote request:",
+                              error
+                            );
+                            alert(
+                              "Failed to send quote request. Please try again."
+                            );
                           }
                         }}
                         style={{
-                          backgroundColor: '#8b5a2b',
-                          color: 'white',
-                          border: 'none',
-                          padding: '0.6rem 1.5rem',
-                          borderRadius: '4px',
-                          margin: '0 0.5rem',
-                          cursor: 'pointer',
-                          fontWeight: 600
+                          backgroundColor: "#8b5a2b",
+                          color: "white",
+                          border: "none",
+                          padding: "0.6rem 1.5rem",
+                          borderRadius: "4px",
+                          margin: "0 0.5rem",
+                          cursor: "pointer",
+                          fontWeight: 600,
                         }}
                       >
                         Yes, Get Quote
@@ -1379,14 +1564,14 @@ const BookingPage = () => {
                       <button
                         onClick={() => setShowQuoteConfirmation(false)}
                         style={{
-                          backgroundColor: '#f0f0f0',
-                          color: '#333',
-                          border: '1px solid #ddd',
-                          padding: '0.6rem 1.5rem',
-                          borderRadius: '4px',
-                          margin: '0 0.5rem',
-                          cursor: 'pointer',
-                          fontWeight: 500
+                          backgroundColor: "#f0f0f0",
+                          color: "#333",
+                          border: "1px solid #ddd",
+                          padding: "0.6rem 1.5rem",
+                          borderRadius: "4px",
+                          margin: "0 0.5rem",
+                          cursor: "pointer",
+                          fontWeight: 500,
                         }}
                       >
                         Cancel
@@ -1437,7 +1622,9 @@ const BookingPage = () => {
                 <option value="Sydney">Sydney</option>
                 <option value="Melbourne">Melbourne</option>
               </select>
-              {errors.city && <div className="error-message">{errors.city}</div>}
+              {errors.city && (
+                <div className="error-message">{errors.city}</div>
+              )}
             </div>
             <div className="form-group">
               <label>Type of Service</label>
@@ -1455,7 +1642,6 @@ const BookingPage = () => {
                 <option value="Wedding Car">Wedding Car</option>
                 <option value="Crew Transfer">Crew Transfer</option>
                 <option value="Special Events">Special Events</option>
-                
               </select>
               {errors.serviceType && (
                 <div className="error-message">{errors.serviceType}</div>
@@ -1496,7 +1682,9 @@ const BookingPage = () => {
                     {form.city === "Sydney" && (
                       <>
                         <optgroup label="Sydney Airport Terminals">
-                          <option value="T1 International">T1 International</option>
+                          <option value="T1 International">
+                            T1 International
+                          </option>
                           <option value="T2 Domestic">T2 Domestic</option>
                           <option value="T3 Domestic">T3 Domestic</option>
                         </optgroup>
@@ -1506,7 +1694,9 @@ const BookingPage = () => {
                     {form.city === "Melbourne" && (
                       <>
                         <optgroup label="Melbourne Airport Terminals">
-                          <option value="T1 International">T1 International</option>
+                          <option value="T1 International">
+                            T1 International
+                          </option>
                           <option value="T2 Domestic">T2 Domestic</option>
                           <option value="T3 Domestic">T3 Domestic</option>
                           <option value="T4 Domestic">T4 Domestic</option>
@@ -1544,11 +1734,11 @@ const BookingPage = () => {
                           ...prev.flightDetails,
                           flightTime: date,
                         },
-                      }))
+                      }));
                     }}
                     showTimeSelect
                     showTimeSelectOnly
-                    timeIntervals={1}
+                    timeIntervals={5}
                     timeCaption="Time"
                     dateFormat="HH:mm"
                     timeFormat="HH:mm"
@@ -1898,16 +2088,19 @@ const BookingPage = () => {
                 value={form.adults}
                 onChange={(e) => {
                   const newAdults = parseInt(e.target.value) || 0;
-                  setForm(prev => ({
+                  setForm((prev) => ({
                     ...prev,
                     adults: newAdults,
-                    passengers: newAdults + (parseInt(prev.children_0_4) || 0) + (parseInt(prev.children_5_8) || 0)
+                    passengers:
+                      newAdults +
+                      (parseInt(prev.children_0_4) || 0) +
+                      (parseInt(prev.children_5_8) || 0),
                   }));
                 }}
               />
             </div>
             <div className="form-group">
-              <label>Kids {'<'} 4 age</label>
+              <label>Kids {"<"} 4 age</label>
               <input
                 type="number"
                 name="children_0_4"
@@ -1916,10 +2109,13 @@ const BookingPage = () => {
                 value={form.children_0_4}
                 onChange={(e) => {
                   const newKids04 = parseInt(e.target.value) || 0;
-                  setForm(prev => ({
+                  setForm((prev) => ({
                     ...prev,
                     children_0_4: newKids04,
-                    passengers: (parseInt(prev.adults) || 0) + newKids04 + (parseInt(prev.children_5_8) || 0)
+                    passengers:
+                      (parseInt(prev.adults) || 0) +
+                      newKids04 +
+                      (parseInt(prev.children_5_8) || 0),
                   }));
                 }}
               />
@@ -1934,10 +2130,13 @@ const BookingPage = () => {
                 value={form.children_5_8}
                 onChange={(e) => {
                   const newKids58 = parseInt(e.target.value) || 0;
-                  setForm(prev => ({
+                  setForm((prev) => ({
                     ...prev,
                     children_5_8: newKids58,
-                    passengers: (parseInt(prev.adults) || 0) + (parseInt(prev.children_0_4) || 0) + newKids58
+                    passengers:
+                      (parseInt(prev.adults) || 0) +
+                      (parseInt(prev.children_0_4) || 0) +
+                      newKids58,
                   }));
                 }}
               />
@@ -1988,35 +2187,40 @@ const BookingPage = () => {
           </div>
 
           {/* Booking Time Restriction Notice */}
-          {isBookingTooSoon && (
+          {/* {isBookingTooSoon && (
             <div className="booking-notice error">
-              <p>⚠️ Bookings must be made at least 8 hours in advance. Please select a later time.</p>
+              <p>
+                ⚠️ Bookings must be made at least 8 hours in advance. Please
+                select a later time.
+              </p>
             </div>
-          )}
-          
+          )} */}
+
           {/* Date, Time and Expected End Time Row */}
           <div className="form-row">
             <div className="form-group">
               <label>Date</label>
               <DatePicker
                 selected={form.date}
-                onChange={(date) => handleDateTimeChange(date, 'date')}
+                onChange={(date) => handleDateTimeChange(date, "date")}
                 minDate={new Date()}
                 dateFormat="dd-MM-yyyy"
                 placeholderText="dd-mm-yyyy"
                 className="form-control date-picker"
                 required
               />
-              {errors.date && <div className="error-message">{errors.date}</div>}
+              {errors.date && (
+                <div className="error-message">{errors.date}</div>
+              )}
             </div>
             <div className="form-group">
               <label>PICKUP Time</label>
               <DatePicker
                 selected={form.time}
-                onChange={(date) => handleDateTimeChange(date, 'time')}
+                onChange={(date) => handleDateTimeChange(date, "time")}
                 showTimeSelect
                 showTimeSelectOnly
-                timeIntervals={1}
+                timeIntervals={5}
                 timeCaption="Time"
                 dateFormat="HH:mm"
                 timeFormat="HH:mm"
@@ -2025,17 +2229,21 @@ const BookingPage = () => {
                 locale="en-GB"
                 required
               />
-              {errors.time && <div className="error-message">{errors.time}</div>}
+              {errors.time && (
+                <div className="error-message">{errors.time}</div>
+              )}
             </div>
             {form.bookingMethod === "time" && (
               <div className="form-group">
                 <label>End Time</label>
                 <DatePicker
                   selected={form.expectedEndTime}
-                  onChange={(date) => handleDateTimeChange(date, 'expectedEndTime')}
+                  onChange={(date) =>
+                    handleDateTimeChange(date, "expectedEndTime")
+                  }
                   showTimeSelect
                   showTimeSelectOnly
-                  timeIntervals={1}
+                  timeIntervals={5}
                   timeCaption="Time"
                   dateFormat="HH:mm"
                   timeFormat="HH:mm"
@@ -2048,7 +2256,7 @@ const BookingPage = () => {
               </div>
             )}
           </div>
-          
+
           {/* Full row error message for expected end time */}
           {form.bookingMethod === "time" && errors.expectedEndTime && (
             <div className="form-row">
@@ -2118,9 +2326,11 @@ const BookingPage = () => {
               }
             }}
             disabled={isBookingTooSoon}
-            className={isBookingTooSoon ? 'disabled-button' : 'primary-button'}
+            className={isBookingTooSoon ? "disabled-button" : "primary-button"}
           >
-            {isBookingTooSoon ? 'Please select a later time (min 8 hours ahead)' : 'Continue to Vehicle Selection'}
+            {isBookingTooSoon
+              ? "Please select a later time (min 8 hours ahead)"
+              : "Continue to Vehicle Selection"}
           </button>
         </div>
       </form>
@@ -2136,19 +2346,23 @@ const BookingPage = () => {
         transition={{ duration: 0.5 }}
       >
         <h2 className="step-title">Step 03: Select Your Vehicle</h2>
-        {(form.vehiclePreference &&
-        ((form.bookingMethod === "distance" && form.distance) ||
-          (form.bookingMethod === "time" && form.expectedEndTime))) && (
-        (["Airport Transfers", "Point to Point", "Crew Transfer"].includes(form.serviceType) && form.vehiclePreference !== 'Sprinter') ? (
-          <p className="fare-estimate">
-            Estimated Price: AUD ${calculateFare(form)}
-          </p>
-        ) : (
-          <p className="fare-estimate" style={{ color: '#1976d2', fontWeight: 500 }}>
-            Our team will contact you once you fill your details.
-          </p>
-        )
-      )}
+        {form.vehiclePreference &&
+          ((form.bookingMethod === "distance" && form.distance) ||
+            (form.bookingMethod === "time" && form.expectedEndTime)) &&
+          (["Airport Transfers", "Point to Point", "Crew Transfer"].includes(
+            form.serviceType
+          ) && form.vehiclePreference !== "Sprinter" ? (
+            <p className="fare-estimate">
+              Estimated Price: AUD ${calculateFare(form)}
+            </p>
+          ) : (
+            <p
+              className="fare-estimate"
+              style={{ color: "#1976d2", fontWeight: 500 }}
+            >
+              Our team will contact you once you fill your details.
+            </p>
+          ))}
         <div className="form-row">
           <div className="form-group">
             <label>Total Pax: {form.passengers}</label>
@@ -2193,7 +2407,8 @@ const BookingPage = () => {
         <div className="vehicle-selection-grid">
           {fleet.map((vehicle) => {
             const capacity = getVehicleCapacity(vehicle.name);
-            const isPassengerCompatible = form.passengers <= capacity.passengers;
+            const isPassengerCompatible =
+              form.passengers <= capacity.passengers;
             // Calculate effective luggage: 2 carry-on = 1 suitcase
             const suitcases = parseInt(form.suitcases) || 0;
             const carryOn = parseInt(form.carryOn) || 0;
@@ -2263,21 +2478,42 @@ const BookingPage = () => {
                   <div className="vehicle-card-capacity">
                     {vehicle.capacity}
                   </div>
-                  {isCompatible && ((form.bookingMethod === "distance" && form.distance) ||
-                    (form.bookingMethod === "time" && form.expectedEndTime)) && (
-                    (["Airport Transfers", "Point to Point", "Crew Transfer"].includes(form.serviceType) && vehicle.name !== 'Sprinter') ? (
+                  {isCompatible &&
+                    ((form.bookingMethod === "distance" && form.distance) ||
+                      (form.bookingMethod === "time" &&
+                        form.expectedEndTime)) &&
+                    ([
+                      "Airport Transfers",
+                      "Point to Point",
+                      "Crew Transfer",
+                    ].includes(form.serviceType) &&
+                    vehicle.name !== "Sprinter" ? (
                       <div className="vehicle-card-price">
-                        AUD ${calculateFare({ ...form, vehiclePreference: vehicle.name })}
-                        <div className="gst-note" style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+                        AUD $
+                        {calculateFare({
+                          ...form,
+                          vehiclePreference: vehicle.name,
+                        })}
+                        <div
+                          className="gst-note"
+                          style={{
+                            fontSize: "0.8rem",
+                            color: "#666",
+                            marginTop: "4px",
+                          }}
+                        >
                           *Prices include GST
                         </div>
                       </div>
                     ) : (
-                      <div className="vehicle-card-price" style={{ color: '#1976d2', fontWeight: 500 }}>
-                        Our team will contact you for fare once you fill your details.
+                      <div
+                        className="vehicle-card-price"
+                        style={{ color: "#1976d2", fontWeight: 500 }}
+                      >
+                        Our team will contact you for fare once you fill your
+                        details.
                       </div>
-                    )
-                  )}
+                    ))}
                   {!isCompatible && (
                     <div
                       className="vehicle-card-error"
@@ -2331,11 +2567,9 @@ const BookingPage = () => {
     );
   };
 
-
   const renderStep6 = () => {
     // Use breakdown object for all fare display
     const breakdown = calculateFareBreakdown(form);
-    
 
     if (!breakdown.total || isNaN(breakdown.total)) {
       return (
@@ -2377,15 +2611,38 @@ const BookingPage = () => {
                   <div className="summary-label">To:</div>
                   <div className="summary-value">{form.dropoff}</div>
                   <div className="summary-label">Additional Stop:</div>
-                  <div className="summary-value">{form.additionalStop || "Not specified"}</div>
+                  <div className="summary-value">
+                    {form.additionalStop || "Not specified"}
+                  </div>
                 </>
               )}
               <div className="summary-label">Date & Time:</div>
               <div className="summary-value">
-                {form.date instanceof Date ? form.date.toLocaleDateString('en-GB') : form.date} at {form.time instanceof Date ? form.time.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : form.time}
-                {form.bookingMethod === 'time' && form.expectedEndTime && (
-                  <div style={{ fontSize: '0.9em', color: '#666', marginTop: '4px' }}>
-                    to {form.expectedEndTime instanceof Date ? form.expectedEndTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : form.expectedEndTime}
+                {form.date instanceof Date
+                  ? form.date.toLocaleDateString("en-GB")
+                  : form.date}{" "}
+                at{" "}
+                {form.time instanceof Date
+                  ? form.time.toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : form.time}
+                {form.bookingMethod === "time" && form.expectedEndTime && (
+                  <div
+                    style={{
+                      fontSize: "0.9em",
+                      color: "#666",
+                      marginTop: "4px",
+                    }}
+                  >
+                    to{" "}
+                    {form.expectedEndTime instanceof Date
+                      ? form.expectedEndTime.toLocaleTimeString("en-GB", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : form.expectedEndTime}
                   </div>
                 )}
               </div>
@@ -2409,100 +2666,191 @@ const BookingPage = () => {
               </div>
               <div className="summary-label">Passengers:</div>
               <div className="summary-value">
-                {form.adults || 0} {form.adults === 1 ? 'adult' : 'adults'}
+                {form.adults || 0} {form.adults === 1 ? "adult" : "adults"}
                 {(form.children_0_4 > 0 || form.children_5_8 > 0) && (
-                  <>, {form.children_0_4 + form.children_5_8} {form.children_0_4 + form.children_5_8 === 1 ? 'child' : 'children'}</>
+                  <>
+                    , {form.children_0_4 + form.children_5_8}{" "}
+                    {form.children_0_4 + form.children_5_8 === 1
+                      ? "child"
+                      : "children"}
+                  </>
                 )}
               </div>
               {(form.children_0_4 > 0 || form.children_5_8 > 0) && (
                 <>
                   <div className="summary-label">Child Seats:</div>
                   <div className="summary-value">
-                    {form.children_0_4 > 0 && `${form.children_0_4} baby seat${form.children_0_4 > 1 ? 's' : ''} (0-4 years)`}
-                    {form.children_0_4 > 0 && form.children_5_8 > 0 && ', '}
-                    {form.children_5_8 > 0 && `${form.children_5_8} booster seat${form.children_5_8 > 1 ? 's' : ''} (5-8 years)`}
+                    {form.children_0_4 > 0 &&
+                      `${form.children_0_4} baby seat${
+                        form.children_0_4 > 1 ? "s" : ""
+                      } (0-4 years)`}
+                    {form.children_0_4 > 0 && form.children_5_8 > 0 && ", "}
+                    {form.children_5_8 > 0 &&
+                      `${form.children_5_8} booster seat${
+                        form.children_5_8 > 1 ? "s" : ""
+                      } (5-8 years)`}
                   </div>
                 </>
               )}
               <div className="summary-label">Luggage:</div>
               <div className="summary-value">
-                {form.suitcases || 0} suitcase{form.suitcases !== 1 ? 's' : ''}, {form.carryOn || 0} carry-on
+                {form.suitcases || 0} suitcase{form.suitcases !== 1 ? "s" : ""},{" "}
+                {form.carryOn || 0} carry-on
               </div>
             </div>
           </div>
 
           {form.serviceType === "Airport Transfers" && form.terminal && (
-          <div className="summary-section-block">
-            <div className="summary-section-title">✈️ Airport Details</div>
-            <div className="summary-details-grid">
-              <div className="summary-label">Service:</div>
-              <div className="summary-value">{form.serviceType}</div>
-              <div className="summary-label">Terminal:</div>
-              <div className="summary-value">{form.terminal}</div>
-              {form.flightDetails?.flightNumber && (
-                <>
-                  <div className="summary-label">Flight:</div>
-                  <div className="summary-value">
-                    <div>{form.flightDetails.flightNumber}</div>
-                    {form.flightDetails?.flightTime && (
-                      <div style={{ fontSize: '0.9em', color: '#666', marginTop: '2px' }}>
-                        {form.flightDetails?.flightTime instanceof Date ? form.flightDetails.flightTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : typeof form.flightDetails?.flightTime === 'string' ? form.flightDetails?.flightTime : 'Not specified'}
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-          {['Airport Transfers', 'Point to Point', 'Crew Transfer'].includes(form.serviceType) && (
-          <div className="summary-section-block">
-            <div className="summary-section-title">Fare Breakdown</div>
-            <div className="fare-breakdown-grid">
-              <div className="breakdown-label">Fare (no extras):</div>
-              <div className="breakdown-value">
-                ${breakdown.baseFare + (breakdown.distanceCharge || breakdown.timeCharge || 0)}
+            <div className="summary-section-block">
+              <div className="summary-section-title">✈️ Airport Details</div>
+              <div className="summary-details-grid">
+                <div className="summary-label">Service:</div>
+                <div className="summary-value">{form.serviceType}</div>
+                <div className="summary-label">Terminal:</div>
+                <div className="summary-value">{form.terminal}</div>
+                {form.flightDetails?.flightNumber && (
+                  <>
+                    <div className="summary-label">Flight:</div>
+                    <div className="summary-value">
+                      <div>{form.flightDetails.flightNumber}</div>
+                      {form.flightDetails?.flightTime && (
+                        <div
+                          style={{
+                            fontSize: "0.9em",
+                            color: "#666",
+                            marginTop: "2px",
+                          }}
+                        >
+                          {form.flightDetails?.flightTime instanceof Date
+                            ? form.flightDetails.flightTime.toLocaleTimeString(
+                                "en-GB",
+                                { hour: "2-digit", minute: "2-digit" }
+                              )
+                            : typeof form.flightDetails?.flightTime === "string"
+                            ? form.flightDetails?.flightTime
+                            : "Not specified"}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
-
-              {(breakdown.terminalToll > 0 || breakdown.babySeatTotal > 0 || breakdown.boosterSeatTotal > 0 || breakdown.additionalStopCharge > 0) && (
-                <>
-                  <div className="breakdown-label" style={{ gridColumn: '1 / -1', fontWeight: 500, color: '#444', marginTop: 8 }}>Extra Charges</div>
-                  {breakdown.terminalToll > 0 && (
-                    <>
-                      <div className="breakdown-label">Airport Terminal Toll:</div>
-                      <div className="breakdown-value">${breakdown.terminalToll}</div>
-                    </>
-                  )}
-                  {breakdown.additionalStopCharge > 0 && (
-                    <>
-                      <div className="breakdown-label">Additional Stop:</div>
-                      <div className="breakdown-value">${breakdown.additionalStopCharge}</div>
-                    </>
-                  )}
-                  {breakdown.babySeatTotal > 0 && (
-                    <>
-                      <div className="breakdown-label">Baby Seat(s) Fee:</div>
-                      <div className="breakdown-value">${breakdown.babySeatTotal}</div>
-                    </>
-                  )}
-                  {breakdown.boosterSeatTotal > 0 && (
-                    <>
-                      <div className="breakdown-label">Booster Seat(s) Fee:</div>
-                      <div className="breakdown-value">${breakdown.boosterSeatTotal}</div>
-                    </>
-                  )}
-                </>
-              )}
-
-              <div className="breakdown-label breakdown-total"> Estimated Grand Total:</div>
-              <div className="breakdown-value breakdown-total">${breakdown.total}</div>
             </div>
-          </div>
           )}
 
+          {["Airport Transfers", "Point to Point", "Crew Transfer"].includes(
+            form.serviceType
+          ) && (
+            <div className="summary-section-block">
+              <div className="summary-section-title">Fare Breakdown</div>
+              <div className="fare-breakdown-grid">
+                <div className="breakdown-label">Fare (no extras):</div>
+                <div className="breakdown-value">
+                  $
+                  {breakdown.baseFare +
+                    (breakdown.distanceCharge || breakdown.timeCharge || 0)}
+                </div>
+
+                {(breakdown.terminalToll > 0 ||
+                  breakdown.babySeatTotal > 0 ||
+                  breakdown.boosterSeatTotal > 0 ||
+                  breakdown.additionalStopCharge > 0) && (
+                  <>
+                    <div
+                      className="breakdown-label"
+                      style={{
+                        gridColumn: "1 / -1",
+                        fontWeight: 500,
+                        color: "#444",
+                        marginTop: 8,
+                      }}
+                    >
+                      Extra Charges
+                    </div>
+                    {breakdown.terminalToll > 0 && (
+                      <>
+                        <div className="breakdown-label">
+                          Airport Terminal Toll:
+                        </div>
+                        <div className="breakdown-value">
+                          ${breakdown.terminalToll}
+                        </div>
+                      </>
+                    )}
+                    {breakdown.additionalStopCharge > 0 && (
+                      <>
+                        <div className="breakdown-label">Additional Stop:</div>
+                        <div className="breakdown-value">
+                          ${breakdown.additionalStopCharge}
+                        </div>
+                      </>
+                    )}
+                    {breakdown.babySeatTotal > 0 && (
+                      <>
+                        <div className="breakdown-label">Baby Seat(s) Fee:</div>
+                        <div className="breakdown-value">
+                          ${breakdown.babySeatTotal}
+                        </div>
+                      </>
+                    )}
+                    {breakdown.boosterSeatTotal > 0 && (
+                      <>
+                        <div className="breakdown-label">
+                          Booster Seat(s) Fee:
+                        </div>
+                        <div className="breakdown-value">
+                          ${breakdown.boosterSeatTotal}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+
+                <div className="breakdown-label breakdown-total">
+                  {" "}
+                  Estimated Grand Total:
+                </div>
+                <div className="breakdown-value breakdown-total">
+                  ${breakdown.total}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="summary-actions">
+            {/* Terms & Conditions Section */}
+            <div className="summary-section-block">
+              <div className="summary-section-title">📄 Terms & Conditions</div>
+              <div className="summary-terms">
+                <label
+                  className="terms-checkbox-label"
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={() => setTermsAccepted(!termsAccepted)}
+                    style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                  />
+                  <span>
+                    I agree to the{" "}
+                    <a
+                      onClick={() => setIsTermOpen(!isTermOpen)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: "#007bff",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Terms and Conditions
+                    </a>
+                  </span>
+                </label>
+              </div>
+            </div>
+
             <div className="summary-buttons">
               <motion.button
                 type="button"
@@ -2525,6 +2873,10 @@ const BookingPage = () => {
             </div>
           </div>
         </div>
+        <TermsAndConditionsModal
+          setIsOpen={setIsTermOpen}
+          isOpen={isTermOpen}
+        />
       </motion.div>
     );
   };
@@ -2578,55 +2930,96 @@ const BookingPage = () => {
             <div className="thank-you-modal-overlay">
               <div className="thank-you-modal">
                 <div className="thank-you-emoji">
-                  {thankYouModal.isSpecialVehicle ? '🚐' : '🎉'}
+                  {thankYouModal.isSpecialVehicle ? "🚐" : "🎉"}
                 </div>
-                <h2>Thank You!</h2>
+                <h2>{thankYouModal.serviceType === "Point to Pont" || thankYouModal.serviceType === "Airport Transfers" ? " Thanks for your booking." : "Thank You!"} </h2>
                 {thankYouModal.isSpecialVehicle ? (
                   <>
-                    <p>Your {thankYouModal.vehicleType} booking request has been received.</p>
+                    <p>
+                      Your {thankYouModal.vehicleType} booking request has been
+                      received.
+                    </p>
                     <div className="special-note">
-                      Our team will review your request and contact you shortly with confirmation and payment details.
+                      Our team will review your request and contact you shortly
+                      with confirmation and payment details.
                     </div>
-                    <p>For any urgent inquiries, please contact our customer service.</p>
+                    <p>
+                      For any urgent inquiries, please contact our customer
+                      service.
+                    </p>
+                  </>
+                ) : thankYouModal.serviceType === "Point to Point" ||
+                  thankYouModal.serviceType === "Airport Transfers" ? (
+                  <>
+                    <p>
+                    
+                      Payment link will be sent to you shortly.
+                    </p>  
+                    <div className="special-note">
+                      Please note, booking will only be confirmed after full
+                      payment in advance.
+                    </div>
                   </>
                 ) : (
-                  <p>We have received your booking.<br />Our team will contact you soon.</p>
+                  <p>
+                    We have received your booking.
+                    <br />
+                    Our team will contact you soon.
+                  </p>
                 )}
+
                 <button
-  style={{ marginTop: '0.8rem', background: 'linear-gradient(90deg, #5b67e8 60%, #8f6be8 100%)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.7rem 2.2rem', fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(91,103,232,0.08)', transition: 'background 0.2s, transform 0.2s' }}
-  onClick={() => {
-    setThankYouModal({ show: false, isSpecialVehicle: false, vehicleType: '' });
-    setStep(1);
-    setForm({
-      bookingMethod: "distance",
-      name: "",
-      email: "",
-      phone: "",
-      city: "",
-      serviceType: "",
-      flightDetails: { flightNumber: "", flightTime: "" },
-      terminal: "",
-      luggage: "",
-      specialInstructions: "",
-      vehiclePreference: "",
-      date: "",
-      time: "",
-      expectedEndTime: "",
-      passengers: 1,
-      pickup: "",
-      dropoff: "",
-      distance: "",
-      adults: 1,
-      children_0_4: 0,
-      children_5_8: 0,
-      suitcases: 0,
-      carryOn: 0,
-    });
-    setErrors({});
-  }}
->
-  Close
-</button>
+                  style={{
+                    marginTop: "0.8rem",
+                    background:
+                      "linear-gradient(90deg, #5b67e8 60%, #8f6be8 100%)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "0.7rem 2.2rem",
+                    fontSize: "1.1rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    boxShadow: "0 2px 8px rgba(91,103,232,0.08)",
+                    transition: "background 0.2s, transform 0.2s",
+                  }}
+                  onClick={() => {
+                    setThankYouModal({
+                      show: false,
+                      isSpecialVehicle: false,
+                      vehicleType: "",
+                    });
+                    setStep(1);
+                    setForm({
+                      bookingMethod: "distance",
+                      name: "",
+                      email: "",
+                      phone: "",
+                      city: "",
+                      serviceType: "",
+                      flightDetails: { flightNumber: "", flightTime: "" },
+                      terminal: "",
+                      luggage: "",
+                      specialInstructions: "",
+                      vehiclePreference: "",
+                      date: "",
+                      time: "",
+                      expectedEndTime: "",
+                      passengers: 1,
+                      pickup: "",
+                      dropoff: "",
+                      distance: "",
+                      adults: 1,
+                      children_0_4: 0,
+                      children_5_8: 0,
+                      suitcases: 0,
+                      carryOn: 0,
+                    });
+                    setErrors({});
+                  }}
+                >
+                  Close
+                </button>
               </div>
             </div>
           </>
@@ -2681,4 +3074,4 @@ const BookingPage = () => {
   );
 };
 
-export default BookingPage;
+export default BookingPage; 

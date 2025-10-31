@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { sendQuoteEmail, sendBookingConfirmation, sendContactEmail, sendQuoteRequest } = require('../utils/email');
+const { sendAdminBookingNotification } = require('../utils/sendAdminBookingNotification.js');
 
 // Send quote email to admin
 router.post('/send-quote-email', async (req, res) => {
@@ -141,5 +142,44 @@ router.post('/send-quote-request', async (req, res) => {
     });
   }
 });
+
+
+// NEW: Send booking notification to admin with customer details
+router.post('/send-admin-booking-notification', async (req, res) => {
+  try {
+    const bookingData = req.body;
+    
+    // Validate required fields
+    const requiredFields = ['name', 'email', 'phone'];
+    const missingFields = requiredFields.filter(field => !bookingData[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(', ')}`
+      });
+    }
+
+    // Send notification email to admin
+    const result = await sendAdminBookingNotification(bookingData);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Admin notification sent successfully',
+      data: result
+    });
+    
+  } catch (error) {
+    console.error('Error in send-admin-booking-notification route:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send admin notification',
+      error: error.message
+    });
+  }
+});
+
+
+
 
 module.exports = router;

@@ -59,6 +59,7 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
       body: JSON.stringify(bookingData),
     });
     
+    console.log('Booking confirmation response status:', response.status);
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to send booking confirmation');
@@ -72,6 +73,34 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
     throw error;
   }
 };
+
+
+// NEW: Email service for sending admin booking notification
+export const sendAdminBookingNotification = async (bookingData) => {
+  try {
+    const response = await fetch(`http://localhost:5000/api/email/send-admin-booking-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingData),
+    });
+    console.log('Admin booking notification response status:', response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to send admin notification');
+    }
+    
+    const result = await response.json();
+    return result;
+    
+  } catch (error) {
+    console.error('Error sending admin notification:', error);
+    throw error;
+  }
+};
+
 
 // For development/testing - logs the form data to console
 export const logQuoteData = (formData) => {
